@@ -1,0 +1,285 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		11076F8B194C70A200358DB3 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11076F8A194C70A200358DB3 /* main.swift */; };
+		11076F92194C70B100358DB3 /* test1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11076F91194C70B100358DB3 /* test1.swift */; };
+		11076F94194C729D00358DB3 /* lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11076F93194C729D00358DB3 /* lexer.swift */; };
+		11076F96194C72D300358DB3 /* regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11076F95194C72D300358DB3 /* regex.swift */; };
+		11CA4D7A194DB15600E6B439 /* ast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11CA4D79194DB15600E6B439 /* ast.swift */; };
+		11CFDAF6194F6C6A0076EE9A /* grammar.mm in Sources */ = {isa = PBXBuildFile; fileRef = 11CFDAF5194F6C6A0076EE9A /* grammar.mm */; };
+		11F31A4F19537B9F00D4B99F /* test1.swift in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11076F91194C70B100358DB3 /* test1.swift */; };
+		11F31A5019537B9F00D4B99F /* test2.swift in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11CFDAF3194F6A930076EE9A /* test2.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		11076F85194C70A200358DB3 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = /tmp;
+			dstSubfolderSpec = 0;
+			files = (
+				11F31A4F19537B9F00D4B99F /* test1.swift in CopyFiles */,
+				11F31A5019537B9F00D4B99F /* test2.swift in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		11076F87194C70A200358DB3 /* swift2js */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = swift2js; sourceTree = BUILT_PRODUCTS_DIR; };
+		11076F8A194C70A200358DB3 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		11076F91194C70B100358DB3 /* test1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test1.swift; sourceTree = "<group>"; };
+		11076F93194C729D00358DB3 /* lexer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = lexer.swift; sourceTree = "<group>"; };
+		11076F95194C72D300358DB3 /* regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = regex.swift; sourceTree = "<group>"; };
+		11CA4D79194DB15600E6B439 /* ast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ast.swift; sourceTree = "<group>"; };
+		11CFDAEF194F63F30076EE9A /* bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = "<group>"; };
+		11CFDAF2194F66DE0076EE9A /* grammar.y */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.yacc; path = grammar.y; sourceTree = "<group>"; };
+		11CFDAF3194F6A930076EE9A /* test2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test2.swift; sourceTree = "<group>"; };
+		11CFDAF5194F6C6A0076EE9A /* grammar.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = grammar.mm; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		11076F84194C70A200358DB3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		11076F7E194C70A200358DB3 = {
+			isa = PBXGroup;
+			children = (
+				11076F89194C70A200358DB3 /* swift2js */,
+				11076F88194C70A200358DB3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		11076F88194C70A200358DB3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				11076F87194C70A200358DB3 /* swift2js */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		11076F89194C70A200358DB3 /* swift2js */ = {
+			isa = PBXGroup;
+			children = (
+				11CFDAF7194F84170076EE9A /* grammar */,
+				11076F8A194C70A200358DB3 /* main.swift */,
+				11076F91194C70B100358DB3 /* test1.swift */,
+				11CFDAF3194F6A930076EE9A /* test2.swift */,
+				11076F93194C729D00358DB3 /* lexer.swift */,
+				11076F95194C72D300358DB3 /* regex.swift */,
+				11CA4D79194DB15600E6B439 /* ast.swift */,
+			);
+			path = swift2js;
+			sourceTree = "<group>";
+		};
+		11CFDAF7194F84170076EE9A /* grammar */ = {
+			isa = PBXGroup;
+			children = (
+				11CFDAF5194F6C6A0076EE9A /* grammar.mm */,
+				11CFDAF2194F66DE0076EE9A /* grammar.y */,
+				11CFDAEF194F63F30076EE9A /* bridge.h */,
+			);
+			name = grammar;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		11076F86194C70A200358DB3 /* swift2js */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11076F8E194C70A200358DB3 /* Build configuration list for PBXNativeTarget "swift2js" */;
+			buildPhases = (
+				11076F83194C70A200358DB3 /* Sources */,
+				11076F84194C70A200358DB3 /* Frameworks */,
+				11076F85194C70A200358DB3 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = swift2js;
+			productName = swift2js;
+			productReference = 11076F87194C70A200358DB3 /* swift2js */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		11076F7F194C70A200358DB3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0600;
+				ORGANIZATIONNAME = swiftjs;
+				TargetAttributes = {
+					11076F86194C70A200358DB3 = {
+						CreatedOnToolsVersion = 6.0;
+					};
+				};
+			};
+			buildConfigurationList = 11076F82194C70A200358DB3 /* Build configuration list for PBXProject "swift2js" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 11076F7E194C70A200358DB3;
+			productRefGroup = 11076F88194C70A200358DB3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				11076F86194C70A200358DB3 /* swift2js */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		11076F83194C70A200358DB3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11CA4D7A194DB15600E6B439 /* ast.swift in Sources */,
+				11CFDAF6194F6C6A0076EE9A /* grammar.mm in Sources */,
+				11076F8B194C70A200358DB3 /* main.swift in Sources */,
+				11076F96194C72D300358DB3 /* regex.swift in Sources */,
+				11076F94194C729D00358DB3 /* lexer.swift in Sources */,
+				11076F92194C70B100358DB3 /* test1.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		11076F8C194C70A200358DB3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				METAL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		11076F8D194C70A200358DB3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				METAL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		11076F8F194C70A200358DB3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				PRODUCT_MODULE_NAME = swift2js;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = swift2js/bridge.h;
+			};
+			name = Debug;
+		};
+		11076F90194C70A200358DB3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				PRODUCT_MODULE_NAME = swift2js;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = swift2js/bridge.h;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		11076F82194C70A200358DB3 /* Build configuration list for PBXProject "swift2js" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11076F8C194C70A200358DB3 /* Debug */,
+				11076F8D194C70A200358DB3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		11076F8E194C70A200358DB3 /* Build configuration list for PBXNativeTarget "swift2js" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11076F8F194C70A200358DB3 /* Debug */,
+				11076F90194C70A200358DB3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 11076F7F194C70A200358DB3 /* Project object */;
+}
