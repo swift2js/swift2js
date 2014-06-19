@@ -1,4 +1,3 @@
-
 %{
     #include <iostream>
     #import "swift2js-Swift.h"
@@ -173,8 +172,8 @@ switch_case :  case_label ";"		 { }
 | default_label ";"		 { }
 case_label :  "case" case_item_list ":"		 { }
 case_item_list :  pattern guard_clause_opt		 { }
-guard_clause_opt:  | guard_clause		 { }
 | pattern guard_clause_opt "," case_item_list		 { }
+guard_clause_opt:  | guard_clause		 { }
 default_label :  "default" ":"		 { }
 guard_clause :  "where" guard_expression		 { }
 guard_expression :  expression		 { }
@@ -622,8 +621,8 @@ literal_expression :  "__FILE__"		 { }
 array_literal :  "[" array_literal_items_opt "]"		 { }
 array_literal_items_opt:  | array_literal_items		 { }
 array_literal_items :  array_literal_item comma_opt		 { }
-comma_opt :  | ","		 { }
 | array_literal_item "," array_literal_items		 { }
+comma_opt:  | ","		 { }
 array_literal_item :  expression		 { }
 dictionary_literal :  "[" dictionary_literal_items "]"		 { }
 | "[" ":" "]"		 { }
@@ -728,17 +727,19 @@ forced_value_expression :  postfix_expression "!"		 { }
 
 optional_chaining_expression :  postfix_expression "?"		 { }
 
-
 /******* LEXICAL STRUCTURE *******/
 
 
 // GRAMMAR OF AN IDENTIFIER
-
 identifier_list :  identifier		 { }
 | identifier "," identifier_list		 { }
-literal: NUMBER_LITERAL     {}
-| STRING_LITERAL        {}
-| BOOLEAN_LITERAL       {}
+
+// GRAMMAR OF A LITERAL
+
+literal :  NUMBER_LITERAL		 { }
+| BOOLEAN_LITERAL		 { }
+| STRING_LITERAL		 { }
+
 
 // GRAMMAR OF OPERATORS
 

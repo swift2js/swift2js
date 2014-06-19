@@ -118,13 +118,13 @@ var expandedOptionals = {};
 function ruleToBison(rule) {
 	var code = "";
 	code+= rule.left + ": ";
+	var optionalTokensToExpand = [];
+
 	for (var i = 0; i < rule.alternatives.length; ++i) {
 
 		if (i > 0) {
 			code+= "\n|";
 		}
-
-		var optionalTokensToExpand = [];
 
 		var tokens = rule.alternatives[i];
 		for (var j = 0; j < tokens.length; ++j) {
@@ -142,25 +142,27 @@ function ruleToBison(rule) {
 			code+= title;
 		}
 
-		//Expand optional tokens once
-		for (var j = 0; j < optionalTokensToExpand.length; ++j) {
-			var token = optionalTokensToExpand[j];
-			if (!expandedOptionals[token.title]) {
-				code+= "\t\t { }\n";
-				code+= token.title + "-opt: ";
-				var title = token.title;
-				if (token.literal) {
-					title = "\"" + title + "\"";
-				}
-				code+=  " | " + title;
-
-				expandedOptionals[token.title] = token;
-			}
-		}
-
 		code+= "\t\t { }";
 
 	}
+
+	//Expand optional tokens once
+	for (var j = 0; j < optionalTokensToExpand.length; ++j) {
+		var token = optionalTokensToExpand[j];
+		if (!expandedOptionals[token.title]) {
+			code+= "\n" + token.title + "-opt: ";
+			var title = token.title;
+			if (token.literal) {
+				title = "\"" + title + "\"";
+			}
+			code+=  " | " + title;
+			code+= "\t\t { }";
+
+			expandedOptionals[token.title] = token;
+		}
+	}
+
+
 	return code;
 }
 
