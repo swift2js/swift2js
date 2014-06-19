@@ -5,6 +5,8 @@
     int  yylex ();
 %}
 
+%error-verbose
+
 %union {
     int       val;  /* For the lexical analyser. NUMBER tokens */
     char *    str;  /* For the lexical analyser. IDENT tokens */
