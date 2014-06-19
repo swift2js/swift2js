@@ -104,6 +104,7 @@
 
 /******* STATEMENTS *******/
 
+program: statements
 
 // GRAMMAR OF A STATEMENT
 
