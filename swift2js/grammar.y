@@ -11,9 +11,95 @@
     char *    str;  /* For the lexical analyser. IDENT tokens */
 }
 
-%token <str> IDENT 1
-%token <val> NUMBER 59
-%token <val> PLUS 65 "federer"
+%token <val> identifier 1 "ID"
+%token <val> CLASS 2 "class"
+%token <val> DEINIT 3 "deinit"
+%token <val> ENUM 4 "enum"
+%token <val> EXTENSION 5 "extension"
+%token <val> FUNC 6 "func"
+%token <val> IMPORT 7 "import"
+%token <val> INIT 8 "init"
+%token <val> LET 9 "let"
+%token <val> PROTOCOL 10 "protocol"
+%token <val> STATIC 11 "static"
+%token <val> STRUCT 12 "struct"
+%token <val> SUBSCRIPT 13 "subscript"
+%token <val> TYPEALIAS 14 "typealias"
+%token <val> VAR 15 "var"
+%token <val> BREAK 16 "break"
+%token <val> CASE 17 "case"
+%token <val> CONTINUE 18 "continue"
+%token <val> DEFAULT 19 "default"
+%token <val> DO 20 "do"
+%token <val> ELSE 21 "else"
+%token <val> FALLTHROUGH 22 "fallthrough"
+%token <val> IF 23 "if"
+%token <val> IN 24 "in"
+%token <val> FOR 25 "for"
+%token <val> RETURN 26 "return"
+%token <val> SWITCH 27 "switch"
+%token <val> WHERE 28 "where"
+%token <val> WHILE 29 "while"
+%token <val> AS 30 "as"
+%token <val> DYNAMICTYPE 31 "dynamictype"
+%token <val> IS 32 "is"
+%token <val> NEW 33 "new"
+%token <val> SUPER 34 "super"
+%token <val> SELF 35 "self"
+%token <val> SELF_CLASS 36 "Self"
+%token <val> TYPE 37 "Type"
+%token <val> ASSOCIATIVITY 38 "associativity"
+%token <val> DIDSET 39 "didSet"
+%token <val> GET 40 "get"
+%token <val> INFIX 41 "infix"
+%token <val> INOUT 42 "inout"
+%token <val> LEFT 43 "left"
+%token <val> MUTATING 44 "mutating"
+%token <val> NONE 45 "none"
+%token <val> NONMUTATING 46 "nonmutating"
+%token <val> OPERATOR 47 "operator"
+%token <val> OVERRIDE 48 "override"
+%token <val> POSTFIX 49 "postfix"
+%token <val> PRECEDENCE 50 "precedence"
+%token <val> PREFIX 51 "prefix"
+%token <val> RIGHT 52 "right"
+%token <val> SET 53 "set"
+%token <val> UNOWNED 54 "unowned"
+%token <val> UNOWNED_SAFE 55 "unowned(safe)"
+%token <val> UNOWNED_UNSAFE 56 "unowned(unsafe)"
+%token <val> WEAK 57 "weak"
+%token <val> WILLSET 58 "willSet"
+%token <val> NUMBER_LITERAL 59 "number"
+%token <val> STRING_LITERAL 60 "string"
+%token <val> BOOLEAN_LITERAL 61 "bool"
+%token <val> SLASH 62 "/"
+%token <val> EQUAL 63 "="
+%token <val> MINUS 64 "-"
+%token <val> PLUS 65 "+"
+%token <val> EXCLAMATION 66 "!"
+%token <val> ASTERISK 67 "*"
+%token <val> PERCENT 68 "%"
+%token <val> LT 69 "<"
+%token <val> GT 70 ">"
+%token <val> AMPERSAND 71 "&"
+%token <val> VERTICAL_BAR 72 "|"
+%token <val> CARET 73 "^"
+%token <val> TILDE 74 "~"
+%token <val> DOT 75 "."
+%token <val> LPAR 76 "("
+%token <val> RPAR 77 ")"
+%token <val> LBRACKET 78 "["
+%token <val> RBRACKET 79 "]"
+%token <val> LBRACE 80 "{"
+%token <val> RBRACE 81 "}"
+%token <val> COMMA 82 ","
+%token <val> COLON 83 ":"
+%token <val> SEMICOLON 84 ";"
+%token <val> AT 85 "@"
+%token <val> UNDERSCORE 86 "_"
+%token <val> HASH 87 "#"
+%token <val> DOLLAR 88 "$"
+%token <val> QUESTION 89 "?"
 
 %%
 
@@ -619,7 +705,7 @@ initializer_expression :  postfix_expression "." "init"		 { }
 
 // GRAMMAR OF AN EXPLICIT MEMBER EXPRESSION
 
-explicit_member_expression :  postfix_expression "." decimal_digit		 { }
+explicit_member_expression :  postfix_expression "." NUMBER_LITERAL		 { }
 explicit_member_expression :  postfix_expression "." identifier generic_argument_clause_opt		 { }
 
 // GRAMMAR OF A SELF EXPRESSION
@@ -645,10 +731,14 @@ optional_chaining_expression :  postfix_expression "?"		 { }
 
 /******* LEXICAL STRUCTURE *******/
 
+
 // GRAMMAR OF AN IDENTIFIER
 
 identifier_list :  identifier		 { }
 | identifier "," identifier_list		 { }
+literal: NUMBER_LITERAL     {}
+| STRING_LITERAL        {}
+| BOOLEAN_LITERAL       {}
 
 // GRAMMAR OF OPERATORS
 

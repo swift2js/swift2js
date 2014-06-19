@@ -341,5 +341,33 @@ class TokenData {
         code = codeCopy;
     }
 
+    //helper function to generate bison tokens
+    func bisonTokens() {
+        
+        let values = ["IDENTIFIER",
+        "CLASS","DEINIT","ENUM","EXTENSION","FUNC","IMPORT","INIT","LET","PROTOCOL","STATIC","STRUCT","SUBSCRIPT","TYPEALIAS","VAR",
+        "BREAK","CASE","CONTINUE","DEFAULT","DO","ELSE","FALLTHROUGH","IF","IN","FOR","RETURN","SWITCH","WHERE","WHILE",
+        "AS","DYNAMICTYPE","IS","NEW","SUPER","SELF","SELF_CLASS","TYPE",
+        "ASSOCIATIVITY","DIDSET","GET","INFIX","INOUT","LEFT","MUTATING","NONE","NONMUTATING","OPERATOR","OVERRIDE",
+        "POSTFIX","PRECEDENCE","PREFIX","RIGHT","SET","UNOWNED","UNOWNED_SAFE","UNOWNED_UNSAFE","WEAK","WILLSET",
+        "NUMBER_LITERAL","STRING_LITERAL","BOOLEAN_LITERAL",
+        "SLASH","EQUAL","MINUS","PLUS","EXCLAMATION","ASTERISK","PERCENT","LT","GT","AMPERSAND","VERTICAL_BAR","CARET","TILDE","DOT",
+            "LPAR","RPAR","LBRACKET","RBRACKET","LBRACE","RBRACE","COMMA","COLON","SEMICOLON","AT","UNDERSCORE","HASH","DOLLAR","QUESTION"];
+        
+        var index = 1;
+        for value in values {
+            
+            let token = TOKEN.fromRaw(index)!;
+            let str = tokenToString(token);
+            
+            println("%token <val> \(values[index-1]) \(String(index)) \"\(str)\"");
+            
+            index++;
+        }
+        
+        println("Mangu \(String(TOKEN.QUESTION.toRaw()))");
+        
+    }
+
     
 }

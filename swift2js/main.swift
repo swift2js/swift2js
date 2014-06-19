@@ -17,8 +17,9 @@ var sourceCode = NSString.stringWithContentsOfFile("/tmp/" + testFile);
 //println(sourceCode);
 var lexer = Lexer(sourceCode as String);
 lexer.debugTokens();
+//lexer.bisonTokens();
 
-//bridge_yyparse(lexer);
+bridge_yyparse(lexer);
 
 
 
