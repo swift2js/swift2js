@@ -5,6 +5,7 @@
     int  yylex ();
 %}
 
+%glr-parser
 %error-verbose
 %debug
 
