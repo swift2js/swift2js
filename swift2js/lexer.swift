@@ -22,9 +22,15 @@ enum TOKEN:Int {
     //value literals
     case NUMBER_LITERAL, STRING_LITERAL, BOOLEAN_LITERAL
     //operators /­  =­  -­  +­  !­  *­  %­  <­  >­  &­  |­  ^­  ~­  .­
-    case SLASH, EQUAL, MINUS, PLUS, EXCLAMATION, ASTERISK, PERCENT, LT, GT, AMPERSAND, VERTICAL_BAR, CARET, TILDE, DOT
+    case SLASH, EQUAL, MINUS, PLUS, EXCLAMATION, ASTERISK, PERCENT, LT, GT, AMPERSAND, OR, CARET, TILDE, DOT
+    //combined operators == === ++ -- ... << >> && ||
+    //+= -= *= %= /= &= |= ^= ~=
+    case EQUAL2, EQUAL3, PLUSPLUS, MINUSMINUS, DOT3, LT2, GT2, AMPERSAND2, OR2
+    case PLUS_EQ, MINUS_EQ, ASTERISK_EQ, SLASH_EQ, PERCENT_EQ, AMPERSAND_EQ, CARET_EQ, TILDE_EQ, OR_EQ
     //grammar symbols ( ) [ ] { } , : ; @ _ # $ ?
     case LPAR, RPAR, LBRACKET, RBRACKET, LBRACE, RBRACE, COMMA, COLON, SEMICOLON, AT, UNDERSCORE, HASH, DOLLAR, QUESTION
+    //helper tokens to resolve operator ambiguities
+    case PREFIX_OPERATOR, POSTFIX_OPERATOR
     //line or block comment
     case COMMENT
 }
@@ -42,6 +48,10 @@ class TokenData {
 @objc class Lexer {
     
     var code: String;
+    var lastParsed = "";
+    var consumed = 0;
+    var tokenStack:TokenData[] = [];
+    
     let cleanRegex = Regex("^[\\s\r\n]+");
     let identifierRegex = Regex("^[a-zA-Z_]+[\\w]*");
     
@@ -56,6 +66,9 @@ class TokenData {
     
     let lineCommentRegex = Regex("^//.*");
     let blockCommentRegex = Regex("^/[*].*?[*]/");
+    
+    let prefixOperatorRegex = Regex("^[^\\s,:;\\{\\(\\[]+");
+    let postfixOperatorRegex = Regex("[^\\s,:;\\)\\}\\]]+$");
     
     let declarationKeywords = [
         "class":TOKEN.CLASS,
@@ -132,8 +145,19 @@ class TokenData {
         "!": TOKEN.EXCLAMATION, "*": TOKEN.ASTERISK,
         "%": TOKEN.PERCENT,     "<": TOKEN.LT,
         ">": TOKEN.GT,          "&": TOKEN.AMPERSAND,
-        "|": TOKEN.VERTICAL_BAR,"^": TOKEN.CARET,
+        "|": TOKEN.OR,          "^": TOKEN.CARET,
         "~": TOKEN.TILDE,       ".": TOKEN.DOT,
+        //combined
+        "==": TOKEN.EQUAL2,     "===": TOKEN.EQUAL3,
+        "++": TOKEN.PLUSPLUS,   "--": TOKEN.MINUSMINUS,
+        "...":TOKEN.DOT3,
+        "<<": TOKEN.LT2,        ">>": TOKEN.GT2,
+        "&&": TOKEN.AMPERSAND2, "||": TOKEN.OR2,
+        "+=": TOKEN.PLUS_EQ,    "-=": TOKEN.MINUS_EQ,
+        "*=": TOKEN.ASTERISK_EQ, "%=": TOKEN.PERCENT_EQ,
+        "/=": TOKEN.SLASH_EQ,   "|=": TOKEN.OR_EQ,
+        "&=": TOKEN.AMPERSAND_EQ, "^=": TOKEN.CARET_EQ,
+        "~=": TOKEN.TILDE_EQ,
     ];
     
     let grammarSymbols = [
@@ -153,48 +177,57 @@ class TokenData {
     func cleanCode() {
         if let match = cleanRegex.firstMatch(code) {
             code = code.substringFromIndex(match.utf16count);
+            lastParsed = match;
         }
     }
     func nextToken() -> TokenData? {
         
-        cleanCode(); //clean whitespaces
-        
-        //sorted token parser functions by precedence
-        var checkFunctions = [
-            checkIdentifier,
-            checkNumberLiteral,
-            checkStringLiteral,
-            checkComment,
-            checkOperator,
-            checkGrammarSymbol
-        ];
-        
-        
-        var parsedToken: (consumed:Int, token:TokenData)?;
-        
-        //call parser functions until a token is found
-        for checkFunc in checkFunctions {
-            parsedToken = checkFunc();
-            if (parsedToken) {
-                break;
+        if tokenStack.count == 0 {
+            
+            cleanCode(); //clean whitespaces
+            
+            //sorted token parser functions by precedence
+            var checkFunctions = [
+                checkIdentifier,
+                checkNumberLiteral,
+                checkStringLiteral,
+                checkComment,
+                checkOperator,
+                checkGrammarSymbol
+            ];
+            
+            
+            var parsedToken: (consumed:Int, token:TokenData)?;
+            
+            //call parser functions until a token is found
+            for checkFunc in checkFunctions {
+                checkFunc();
+                if (consumed > 0) {
+                    lastParsed = code.substringToIndex(consumed);
+                    code = code.substringFromIndex(consumed);
+                    consumed = 0;
+                }
+                if (tokenStack.count > 0) {
+                    break;
+                }
             }
         }
         
         //return the found token and erase the parsed source code
-        if let foundToken = parsedToken {
-            code = code.substringFromIndex(foundToken.consumed);
+        if tokenStack.count  > 0 {
+            let foundToken = tokenStack.removeAtIndex(0);
             
-            if foundToken.token.token == .COMMENT {
+            if foundToken.token == .COMMENT {
                 //for now comment tokens are ommited and not pased to the parsed
                 return nextToken();
             }
             
-            return foundToken.token;
+            return foundToken;
         }
         else {
             
             if (code.utf16count > 0) {
-                println("Error, unknown token: " + code);
+                println("Lexer Error, unknown token: " + code);
             }
             
             return nil;
@@ -205,102 +238,123 @@ class TokenData {
     func yylex()-> CInt {
         if let data = nextToken() {
             let number = data.token.toRaw() as NSNumber;
+            println("yylex: \(tokenToString(data.token))")
             return number.intValue;
         }
         return 0;
     }
     
-    func checkIdentifier()-> (consumed:Int, token:TokenData)? {
+    func checkIdentifier() {
         var match = identifierRegex.firstMatch(code);
         if !match {
-            return nil;
+            return;
         }
         var identifier = match!
+        consumed+=identifier.utf16count;
         
         if let declarationToken = declarationKeywords[identifier] {
-            return (identifier.utf16count, TokenData(declarationToken, identifier));
+            tokenStack.append(TokenData(declarationToken, identifier));
         }
-        
-        if let statementToken = statementKeywords[identifier] {
-            return (identifier.utf16count, TokenData(statementToken, identifier));
+        else if let statementToken = statementKeywords[identifier] {
+            tokenStack.append(TokenData(statementToken, identifier));
         }
-        
-        if let expressionToken = expressionKeywords[identifier] {
-            return (identifier.utf16count, TokenData(expressionToken, identifier));
+        else if let expressionToken = expressionKeywords[identifier] {
+            tokenStack.append(TokenData(expressionToken, identifier));
         }
-        
-        if let particularToken = particularKeywords[identifier] {
+        else if let particularToken = particularKeywords[identifier] {
             //TODO: These keywords are only reserved in particular contexts
             //but outside the context in which they appear in the grammar, they can be used as identifiers.
-            return (identifier.utf16count, TokenData(particularToken, identifier));
+            tokenStack.append(TokenData(particularToken, identifier));
         }
-        
-        if booleanRegex.test(identifier) {
-            return (identifier.utf16count, TokenData(TOKEN.BOOLEAN_LITERAL, identifier));
+        else if booleanRegex.test(identifier) {
+            tokenStack.append(TokenData(TOKEN.BOOLEAN_LITERAL, identifier));
         }
-        
-        //user defined identifier
-        return (identifier.utf16count, TokenData(TOKEN.IDENTIFIER, identifier));
+        else {
+            //user defined identifier
+            tokenStack.append(TokenData(TOKEN.IDENTIFIER, identifier));
+        }
     }
     
-    func checkNumberLiteral()-> (consumed:Int, token:TokenData)? {
-        
+    func checkNumberLiteral(){
         for regex in [binaryNumberRegex, octalNumberRegex, hexNumberRegex, decimalNumberRegex] {
             if let match = regex.firstMatch(code) {
-                return (match.utf16count, TokenData(TOKEN.NUMBER_LITERAL, match));
+                consumed+=match.utf16count;
+                tokenStack.append(TokenData(TOKEN.NUMBER_LITERAL, match));
+                return;
+            }
+        }
+    }
+    
+    func checkStringLiteral() {
+        if let match = stringRegex.firstMatch(code) {
+            consumed+=match.utf16count;
+            tokenStack.append(TokenData(TOKEN.STRING_LITERAL, match));
+        }
+    }
+    
+    func checkComment() {
+        
+        if let match = lineCommentRegex.firstMatch(code) {
+            consumed+=match.utf16count;
+            tokenStack.append(TokenData(TOKEN.COMMENT, match));
+        }
+        else if let match = blockCommentRegex.firstMatch(code) {
+            consumed+=match.utf16count;
+            tokenStack.append(TokenData(TOKEN.COMMENT, match));
+        }
+    }
+    
+    func checkOperator() {
+        
+        var found:TOKEN?;
+        var value = "";
+        //check operators by precedence (test combined operators first)
+        for var i = 3; i > 0; --i {
+            if code.utf16count < i {
+                continue;
+            }
+            value = code.substringToIndex(i);
+            if let match = operatorSymbols[value] {
+                found = match;
+                break;
             }
         }
         
-        return nil;
+        if let token = found {
+            consumed+=value.utf16count;
+            //check if the operator is prefix, postfix or binary
+            var prefix = prefixOperatorRegex.test(code.substringFromIndex(value.utf16count));
+            var postfix = postfixOperatorRegex.test(lastParsed);
+            
+            if (prefix == postfix) {
+                //If an operator has whitespace around both sides or around neither side, 
+                //it is treated as a binary operator
+                tokenStack.append(TokenData(token, value));
+            }
+            else if (prefix) {
+                //prefix unary operator
+                tokenStack.append(TokenData(TOKEN.PREFIX_OPERATOR, ""));
+                tokenStack.append(TokenData(token, value));
+            }
+            else if (postfix) {
+                //postfix unary operator
+                tokenStack.append(TokenData(TOKEN.POSTFIX_OPERATOR, ""));
+                tokenStack.append(TokenData(token, value));
+            }
+        }
     }
     
-    func checkStringLiteral()-> (consumed:Int, token:TokenData)? {
-        if let match = stringRegex.firstMatch(code) {
-            return (match.utf16count, TokenData(TOKEN.STRING_LITERAL, match));
-        }
-        return nil;
-    }
-    
-    func checkComment()-> (consumed:Int, token:TokenData)? {
-        
-        if let match = lineCommentRegex.firstMatch(code) {
-            return (match.utf16count, TokenData(TOKEN.COMMENT, match));
-        }
-        else if let match = blockCommentRegex.firstMatch(code) {
-            return (match.utf16count, TokenData(TOKEN.COMMENT, match));
-        }
-        else  {
-            return nil;
-        }
-        
-    }
-    
-    func checkOperator()-> (consumed:Int, token:TokenData)? {
+    func checkGrammarSymbol(){
         if (code.utf16count <= 0) {
-            return nil;
-        }
-        
-        let firstChar = code.substringToIndex(1);
-        
-        if let match = operatorSymbols[firstChar] {
-            return (firstChar.utf16count, TokenData(match, firstChar));
-        }
-        
-        return nil;
-    }
-    
-    func checkGrammarSymbol()-> (consumed:Int, token:TokenData)? {
-        if (code.utf16count <= 0) {
-            return nil;
+            return;
         }
         
         let firstChar = code.substringToIndex(1);
         
         if let match = grammarSymbols[firstChar] {
-            return (firstChar.utf16count, TokenData(match, firstChar));
+            consumed+=firstChar.utf16count;
+            tokenStack.append(TokenData(match, firstChar));
         }
-        
-        return nil;
     }
     
     //debug helper function
@@ -311,6 +365,8 @@ class TokenData {
             case .STRING_LITERAL: return "string";
             case .BOOLEAN_LITERAL: return "bool";
             case .NUMBER_LITERAL: return "number";
+            case .PREFIX_OPERATOR: return "prefix_op";
+            case .POSTFIX_OPERATOR: return "postfix_op";
             default: break;
         }
         
@@ -340,19 +396,24 @@ class TokenData {
         
         code = codeCopy;
     }
-
+    
     //helper function to generate bison tokens
     func bisonTokens() {
         
+        //autogenerated values from text editor
         let values = ["IDENTIFIER",
-        "CLASS","DEINIT","ENUM","EXTENSION","FUNC","IMPORT","INIT","LET","PROTOCOL","STATIC","STRUCT","SUBSCRIPT","TYPEALIAS","VAR",
-        "BREAK","CASE","CONTINUE","DEFAULT","DO","ELSE","FALLTHROUGH","IF","IN","FOR","RETURN","SWITCH","WHERE","WHILE",
-        "AS","DYNAMICTYPE","IS","NEW","SUPER","SELF","SELF_CLASS","TYPE",
-        "ASSOCIATIVITY","DIDSET","GET","INFIX","INOUT","LEFT","MUTATING","NONE","NONMUTATING","OPERATOR","OVERRIDE",
-        "POSTFIX","PRECEDENCE","PREFIX","RIGHT","SET","UNOWNED","UNOWNED_SAFE","UNOWNED_UNSAFE","WEAK","WILLSET",
-        "NUMBER_LITERAL","STRING_LITERAL","BOOLEAN_LITERAL",
-        "SLASH","EQUAL","MINUS","PLUS","EXCLAMATION","ASTERISK","PERCENT","LT","GT","AMPERSAND","VERTICAL_BAR","CARET","TILDE","DOT",
-            "LPAR","RPAR","LBRACKET","RBRACKET","LBRACE","RBRACE","COMMA","COLON","SEMICOLON","AT","UNDERSCORE","HASH","DOLLAR","QUESTION"];
+            "CLASS","DEINIT","ENUM","EXTENSION","FUNC","IMPORT","INIT","LET","PROTOCOL","STATIC","STRUCT","SUBSCRIPT","TYPEALIAS","VAR",
+            "BREAK","CASE","CONTINUE","DEFAULT","DO","ELSE","FALLTHROUGH","IF","IN","FOR","RETURN","SWITCH","WHERE","WHILE",
+            "AS","DYNAMICTYPE","IS","NEW","SUPER","SELF","SELF_CLASS","TYPE",
+            "ASSOCIATIVITY","DIDSET","GET","INFIX","INOUT","LEFT","MUTATING","NONE","NONMUTATING","OPERATOR","OVERRIDE",
+            "POSTFIX","PRECEDENCE","PREFIX","RIGHT","SET","UNOWNED","UNOWNED_SAFE","UNOWNED_UNSAFE","WEAK","WILLSET",
+            "NUMBER_LITERAL","STRING_LITERAL","BOOLEAN_LITERAL",
+            "SLASH","EQUAL","MINUS","PLUS","EXCLAMATION","ASTERISK","PERCENT","LT","GT","AMPERSAND","OR","CARET","TILDE","DOT",
+            "EQUAL2","EQUAL3","PLUSPLUS","MINUSMINUS","DOT3","LT2","GT2","AMPERSAND2","OR2",
+            "PLUS_EQ","MINUS_EQ","ASTERISK_EQ","SLASH_EQ","PERCENT_EQ","AMPERSAND_EQ","CARET_EQ","TILDE_EQ","OR_EQ",
+            "LPAR","RPAR","LBRACKET","RBRACKET","LBRACE","RBRACE","COMMA","COLON","SEMICOLON","AT","UNDERSCORE","HASH","DOLLAR","QUESTION",
+            "PREFIX_OPERATOR","POSTFIX_OPERATOR",
+            "COMMENT"];
         
         var index = 1;
         for value in values {

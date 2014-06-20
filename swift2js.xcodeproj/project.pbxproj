@@ -7,13 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1103C8021954494000DF0977 /* test1.swift in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11076F91194C70B100358DB3 /* test1.swift */; };
 		11076F8B194C70A200358DB3 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11076F8A194C70A200358DB3 /* main.swift */; };
-		11076F92194C70B100358DB3 /* test1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11076F91194C70B100358DB3 /* test1.swift */; };
 		11076F94194C729D00358DB3 /* lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11076F93194C729D00358DB3 /* lexer.swift */; };
 		11076F96194C72D300358DB3 /* regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11076F95194C72D300358DB3 /* regex.swift */; };
 		11CA4D7A194DB15600E6B439 /* ast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11CA4D79194DB15600E6B439 /* ast.swift */; };
 		11CFDAF6194F6C6A0076EE9A /* grammar.mm in Sources */ = {isa = PBXBuildFile; fileRef = 11CFDAF5194F6C6A0076EE9A /* grammar.mm */; };
-		11F31A4F19537B9F00D4B99F /* test1.swift in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11076F91194C70B100358DB3 /* test1.swift */; };
 		11F31A5019537B9F00D4B99F /* test2.swift in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11CFDAF3194F6A930076EE9A /* test2.swift */; };
 /* End PBXBuildFile section */
 
@@ -24,7 +23,7 @@
 			dstPath = /tmp;
 			dstSubfolderSpec = 0;
 			files = (
-				11F31A4F19537B9F00D4B99F /* test1.swift in CopyFiles */,
+				1103C8021954494000DF0977 /* test1.swift in CopyFiles */,
 				11F31A5019537B9F00D4B99F /* test2.swift in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -156,7 +155,6 @@
 				11076F8B194C70A200358DB3 /* main.swift in Sources */,
 				11076F96194C72D300358DB3 /* regex.swift in Sources */,
 				11076F94194C729D00358DB3 /* lexer.swift in Sources */,
-				11076F92194C70B100358DB3 /* test1.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
