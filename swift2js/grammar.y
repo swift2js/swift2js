@@ -6,6 +6,7 @@
 %}
 
 %error-verbose
+%debug
 
 %union {
     int       val;  /* For the lexical analyser. NUMBER tokens */
