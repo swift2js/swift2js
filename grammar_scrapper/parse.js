@@ -142,7 +142,7 @@ function ruleToBison(rule) {
 			code+= title;
 		}
 
-		code+= "\t\t { }";
+		code+= "\t\t { printf(\"" + rule.left + "(" + i + ")" +  "\\n\"); }";
 
 	}
 
@@ -156,7 +156,7 @@ function ruleToBison(rule) {
 				title = "\"" + title + "\"";
 			}
 			code+=  " | " + title;
-			code+= "\t\t { }";
+			code+= "\t\t { printf(\"" + token.title + "-opt" +  "\\n\"); }";
 
 			expandedOptionals[token.title] = token;
 		}
@@ -194,7 +194,7 @@ function toBison(sections) {
 	code = code.split("...-opt").join("tripledot-opt");
 	code = code.split("#-opt").join("hash-opt");
 	code = code.split("?-opt").join("question-opt");
-	code = code.split("comma-opt").join("comma-opt");
+	code = code.split(",-opt").join("comma-opt");
 	code = code.split("-").join("_"); //bison doesn't support - for grammar rules
 
 	return code;
