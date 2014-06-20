@@ -329,7 +329,8 @@ import_path_identifier :  identifier		 { printf("import_path_identifier (0)\n");
 constant_declaration :  attributes_opt declaration_specifiers_opt "let" pattern_initializer_list		 { printf("constant_declaration (0)\n"); }
 pattern_initializer_list :  pattern_initializer		 { printf("pattern_initializer_list (0)\n"); }
 | pattern_initializer "," pattern_initializer_list		 { printf("pattern_initializer_list (1)\n"); }
-pattern_initializer :  pattern initializer_opt		 { printf("pattern_initializer (0)\n"); }
+pattern_initializer :  pattern initializer %dprec 1
+| pattern %dprec 2                                          { printf("pattern_initializer (0)\n"); }
 initializer_opt:  | initializer		 { printf("initializer_opt\n"); }
 initializer :  "=" expression		 { printf("initializer (0)\n"); }
 
