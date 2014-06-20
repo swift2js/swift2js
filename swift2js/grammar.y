@@ -1,5 +1,6 @@
 %{
     #include <iostream>
+    @class NSArray;
     #import "swift2js-Swift.h"
     void yyerror (const char *error);
     int  yylex ();
@@ -85,24 +86,44 @@
 %token <val> LT 69 "<"
 %token <val> GT 70 ">"
 %token <val> AMPERSAND 71 "&"
-%token <val> VERTICAL_BAR 72 "|"
+%token <val> OR 72 "|"
 %token <val> CARET 73 "^"
 %token <val> TILDE 74 "~"
 %token <val> DOT 75 "."
-%token <val> LPAR 76 "("
-%token <val> RPAR 77 ")"
-%token <val> LBRACKET 78 "["
-%token <val> RBRACKET 79 "]"
-%token <val> LBRACE 80 "{"
-%token <val> RBRACE 81 "}"
-%token <val> COMMA 82 ","
-%token <val> COLON 83 ":"
-%token <val> SEMICOLON 84 ";"
-%token <val> AT 85 "@"
-%token <val> UNDERSCORE 86 "_"
-%token <val> HASH 87 "#"
-%token <val> DOLLAR 88 "$"
-%token <val> QUESTION 89 "?"
+%token <val> EQUAL2 76 "=="
+%token <val> EQUAL3 77 "==="
+%token <val> PLUSPLUS 78 "++"
+%token <val> MINUSMINUS 79 "--"
+%token <val> DOT3 80 "..."
+%token <val> LT2 81 "<<"
+%token <val> GT2 82 ">>"
+%token <val> AMPERSAND2 83 "&&"
+%token <val> OR2 84 "||"
+%token <val> PLUS_EQ 85 "+="
+%token <val> MINUS_EQ 86 "-="
+%token <val> ASTERISK_EQ 87 "*="
+%token <val> SLASH_EQ 88 "/="
+%token <val> PERCENT_EQ 89 "%="
+%token <val> AMPERSAND_EQ 90 "&="
+%token <val> CARET_EQ 91 "^="
+%token <val> TILDE_EQ 92 "~="
+%token <val> OR_EQ 93 "|="
+%token <val> LPAR 94 "("
+%token <val> RPAR 95 ")"
+%token <val> LBRACKET 96 "["
+%token <val> RBRACKET 97 "]"
+%token <val> LBRACE 98 "{"
+%token <val> RBRACE 99 "}"
+%token <val> COMMA 100 ","
+%token <val> COLON 101 ":"
+%token <val> SEMICOLON 102 ";"
+%token <val> AT 103 "@"
+%token <val> UNDERSCORE 104 "_"
+%token <val> HASH 105 "#"
+%token <val> DOLLAR 106 "$"
+%token <val> QUESTION 107 "?"
+%token <val> PREFIX_OPERATOR 108 "prefix_op"
+%token <val> POSTFIX_OPERATOR 109 "postfix_op"
 
 %%
 
@@ -750,26 +771,29 @@ literal :  NUMBER_LITERAL		 { printf("literal (0)\n"); }
 | STRING_LITERAL		 { printf("literal (2)\n"); }
 
 // GRAMMAR OF OPERATORS
-
-operator :  operator_character operator_opt		 { printf("operator (0)\n"); }
-operator_opt:  | operator		 { printf("operator_opt\n"); }
-operator_character :  "/"		 { printf("operator_character (0)\n"); }
-| "="		 { printf("operator_character (1)\n"); }
-| "-"		 { printf("operator_character (2)\n"); }
-| "+"		 { printf("operator_character (3)\n"); }
-| "!"		 { printf("operator_character (4)\n"); }
-| "*"		 { printf("operator_character (5)\n"); }
-| "%"		 { printf("operator_character (6)\n"); }
-| "<"		 { printf("operator_character (7)\n"); }
-| ">"		 { printf("operator_character (8)\n"); }
-| "&"		 { printf("operator_character (9)\n"); }
-| "|"		 { printf("operator_character (10)\n"); }
-| "^"		 { printf("operator_character (11)\n"); }
-| "~"		 { printf("operator_character (12)\n"); }
-| "."		 { printf("operator_character (13)\n"); }
-binary_operator :  operator		 { printf("binary_operator (0)\n"); }
-prefix_operator :  operator		 { printf("prefix_operator (0)\n"); }
-postfix_operator :  operator		 { printf("postfix_operator (0)\n"); }
+operator: binary_operator | prefix_operator | postfix_operator
+binary_operator :  "/" | "/="
+| "==" | "==="
+| "-" | "-="
+| "+" | "+="
+| "!"
+| "*" | "*="
+| "%" | "%="
+| "<"
+| ">"
+| "&" | "&&"
+| "|" | "||"
+| "^" | "^="
+| "~" | "~="
+| "."
+prefix_operator : PREFIX_OPERATOR "++"
+| PREFIX_OPERATOR "--"
+| PREFIX_OPERATOR "!"
+| PREFIX_OPERATOR "~"
+| PREFIX_OPERATOR "+"
+| PREFIX_OPERATOR "-"
+postfix_operator : POSTFIX_OPERATOR "++"
+| POSTFIX_OPERATOR "--"
 
 /******* TYPES *******/
 
