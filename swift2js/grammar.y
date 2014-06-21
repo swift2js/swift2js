@@ -962,8 +962,8 @@ implicit_member_expression :  "." identifier		 { printf("implicit_member_express
 
 // GRAMMAR OF A PARENTHESIZED EXPRESSION
 
-parenthesized_expression :  "(" expression_element_list_opt ")"		 { printf("parenthesized_expression (0)\n"); }
-expression_element_list_opt:  | expression_element_list		 { printf("expression_element_list_opt\n"); }
+parenthesized_expression :  "(" expression_element_list_opt ")"		 { $$ = [[ParenthesizedExpression alloc] initWithExpression:$2]; printf("parenthesized_expression (0)\n"); }
+expression_element_list_opt: {$$ = NULL}  | expression_element_list		 { printf("expression_element_list_opt\n"); }
 expression_element_list :  expression_element		 { printf("expression_element_list (0)\n"); }
 | expression_element "," expression_element_list		 { printf("expression_element_list (1)\n"); }
 expression_element :  expression		 { printf("expression_element (0)\n"); }

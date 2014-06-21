@@ -127,6 +127,48 @@ import Foundation
     }
 }
 
+@objc class ExpressionList: ASTNode {
+    
+    var current:ASTNode?;
+    var next:ExpressionList?;
+    
+    init(expression:ASTNode?) {
+        self.current = expression;
+    }
+    
+    init(expression:ASTNode, next:ExpressionList) {
+        self.current = expression;
+        self.next = next;
+    }
+    
+    override func toJS() -> String {
+        var result = "";
+        if let currentExpression = current {
+            result+=currentExpression.toJS();
+        }
+        if let nextExpression = next {
+            result += ", " + nextExpression.toJS();
+        }
+        return result;
+    }
+}
+
+@objc class ParenthesizedExpression: ASTNode {
+    
+    let expression: ASTNode?;
+    
+    init(expression: ASTNode?) {
+        self.expression = expression;
+    }
+    
+    override func toJS() -> String {
+        if let expr = expression {
+            return "(" + expr.toJS() + ")";
+        }
+        return "()";
+    }
+}
+
 @objc class StatementsNode: ASTNode {
     
     var current:ASTNode?;
