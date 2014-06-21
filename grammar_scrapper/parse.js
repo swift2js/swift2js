@@ -114,10 +114,18 @@ function parseSections() {
 
 
 var expandedOptionals = {};
+var nonterminals = [];
+
+function addNonTerminal(value) {
+	if (nonterminals.indexOf(value) < 0) {
+		nonterminals.push(value);
+	}
+}
 
 function ruleToBison(rule) {
 	var code = "";
 	code+= rule.left + ": ";
+	addNonTerminal(rule.left);
 	var optionalTokensToExpand = [];
 
 	for (var i = 0; i < rule.alternatives.length; ++i) {
@@ -151,6 +159,7 @@ function ruleToBison(rule) {
 		var token = optionalTokensToExpand[j];
 		if (!expandedOptionals[token.title]) {
 			code+= "\n" + token.title + "-opt: ";
+			addNonTerminal(token.title + "-opt");
 			var title = token.title;
 			if (token.literal) {
 				title = "\"" + title + "\"";
@@ -187,6 +196,16 @@ function toBison(sections) {
 			}
 		}
 	}
+
+	//types for non terminals
+
+	var typesDeclaration = "";
+	for (var i = 0; i < nonterminals.length; ++i) {
+		typesDeclaration+= "%type <node> " + nonterminals[i] + "\n";
+	}
+
+	code = typesDeclaration + code;
+
 
 	//replace some token names
 	code = code.split(String.fromCharCode(173)).join(""); //annoying character...

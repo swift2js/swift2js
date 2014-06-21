@@ -11,119 +11,392 @@
 %debug
 
 %union {
-    int       val;  /* For the lexical analyser. NUMBER tokens */
-    char *    str;  /* For the lexical analyser. IDENT tokens */
+    ASTNode * node;
+    char *    str;
 }
 
-%token <val> identifier 1 "ID"
-%token <val> CLASS 2 "class"
-%token <val> DEINIT 3 "deinit"
-%token <val> ENUM 4 "enum"
-%token <val> EXTENSION 5 "extension"
-%token <val> FUNC 6 "func"
-%token <val> IMPORT 7 "import"
-%token <val> INIT 8 "init"
-%token <val> LET 9 "let"
-%token <val> PROTOCOL 10 "protocol"
-%token <val> STATIC 11 "static"
-%token <val> STRUCT 12 "struct"
-%token <val> SUBSCRIPT 13 "subscript"
-%token <val> TYPEALIAS 14 "typealias"
-%token <val> VAR 15 "var"
-%token <val> BREAK 16 "break"
-%token <val> CASE 17 "case"
-%token <val> CONTINUE 18 "continue"
-%token <val> DEFAULT 19 "default"
-%token <val> DO 20 "do"
-%token <val> ELSE 21 "else"
-%token <val> FALLTHROUGH 22 "fallthrough"
-%token <val> IF 23 "if"
-%token <val> IN 24 "in"
-%token <val> FOR 25 "for"
-%token <val> RETURN 26 "return"
-%token <val> SWITCH 27 "switch"
-%token <val> WHERE 28 "where"
-%token <val> WHILE 29 "while"
-%token <val> AS 30 "as"
-%token <val> DYNAMICTYPE 31 "dynamictype"
-%token <val> IS 32 "is"
-%token <val> NEW 33 "new"
-%token <val> SUPER 34 "super"
-%token <val> SELF 35 "self"
-%token <val> SELF_CLASS 36 "Self"
-%token <val> TYPE 37 "Type"
-%token <val> ASSOCIATIVITY 38 "associativity"
-%token <val> DIDSET 39 "didSet"
-%token <val> GET 40 "get"
-%token <val> INFIX 41 "infix"
-%token <val> INOUT 42 "inout"
-%token <val> LEFT 43 "left"
-%token <val> MUTATING 44 "mutating"
-%token <val> NONE 45 "none"
-%token <val> NONMUTATING 46 "nonmutating"
-%token <val> OPERATOR 47 "operator"
-%token <val> OVERRIDE 48 "override"
-%token <val> POSTFIX 49 "postfix"
-%token <val> PRECEDENCE 50 "precedence"
-%token <val> PREFIX 51 "prefix"
-%token <val> RIGHT 52 "right"
-%token <val> SET 53 "set"
-%token <val> UNOWNED 54 "unowned"
-%token <val> UNOWNED_SAFE 55 "unowned(safe)"
-%token <val> UNOWNED_UNSAFE 56 "unowned(unsafe)"
-%token <val> WEAK 57 "weak"
-%token <val> WILLSET 58 "willSet"
-%token <val> NUMBER_LITERAL 59 "number"
-%token <val> STRING_LITERAL 60 "string"
-%token <val> BOOLEAN_LITERAL 61 "bool"
-%token <val> SLASH 62 "/"
-%token <val> EQUAL 63 "="
-%token <val> MINUS 64 "-"
-%token <val> PLUS 65 "+"
-%token <val> EXCLAMATION 66 "!"
-%token <val> ASTERISK 67 "*"
-%token <val> PERCENT 68 "%"
-%token <val> LT 69 "<"
-%token <val> GT 70 ">"
-%token <val> AMPERSAND 71 "&"
-%token <val> OR 72 "|"
-%token <val> CARET 73 "^"
-%token <val> TILDE 74 "~"
-%token <val> DOT 75 "."
-%token <val> EQUAL2 76 "=="
-%token <val> EQUAL3 77 "==="
-%token <val> PLUSPLUS 78 "++"
-%token <val> MINUSMINUS 79 "--"
-%token <val> DOT3 80 "..."
-%token <val> LT2 81 "<<"
-%token <val> GT2 82 ">>"
-%token <val> AMPERSAND2 83 "&&"
-%token <val> OR2 84 "||"
-%token <val> PLUS_EQ 85 "+="
-%token <val> MINUS_EQ 86 "-="
-%token <val> ASTERISK_EQ 87 "*="
-%token <val> SLASH_EQ 88 "/="
-%token <val> PERCENT_EQ 89 "%="
-%token <val> AMPERSAND_EQ 90 "&="
-%token <val> CARET_EQ 91 "^="
-%token <val> TILDE_EQ 92 "~="
-%token <val> OR_EQ 93 "|="
-%token <val> LPAR 94 "("
-%token <val> RPAR 95 ")"
-%token <val> LBRACKET 96 "["
-%token <val> RBRACKET 97 "]"
-%token <val> LBRACE 98 "{"
-%token <val> RBRACE 99 "}"
-%token <val> COMMA 100 ","
-%token <val> COLON 101 ":"
-%token <val> SEMICOLON 102 ";"
-%token <val> AT 103 "@"
-%token <val> UNDERSCORE 104 "_"
-%token <val> HASH 105 "#"
-%token <val> DOLLAR 106 "$"
-%token <val> QUESTION 107 "?"
-%token <val> PREFIX_OPERATOR 108 "prefix_op"
-%token <val> POSTFIX_OPERATOR 109 "postfix_op"
+%token <str> identifier 1 "ID"
+%token <str> CLASS 2 "class"
+%token <str> DEINIT 3 "deinit"
+%token <str> ENUM 4 "enum"
+%token <str> EXTENSION 5 "extension"
+%token <str> FUNC 6 "func"
+%token <str> IMPORT 7 "import"
+%token <str> INIT 8 "init"
+%token <str> LET 9 "let"
+%token <str> PROTOCOL 10 "protocol"
+%token <str> STATIC 11 "static"
+%token <str> STRUCT 12 "struct"
+%token <str> SUBSCRIPT 13 "subscript"
+%token <str> TYPEALIAS 14 "typealias"
+%token <str> VAR 15 "var"
+%token <str> BREAK 16 "break"
+%token <str> CASE 17 "case"
+%token <str> CONTINUE 18 "continue"
+%token <str> DEFAULT 19 "default"
+%token <str> DO 20 "do"
+%token <str> ELSE 21 "else"
+%token <str> FALLTHROUGH 22 "fallthrough"
+%token <str> IF 23 "if"
+%token <str> IN 24 "in"
+%token <str> FOR 25 "for"
+%token <str> RETURN 26 "return"
+%token <str> SWITCH 27 "switch"
+%token <str> WHERE 28 "where"
+%token <str> WHILE 29 "while"
+%token <str> AS 30 "as"
+%token <str> DYNAMICTYPE 31 "dynamictype"
+%token <str> IS 32 "is"
+%token <str> NEW 33 "new"
+%token <str> SUPER 34 "super"
+%token <str> SELF 35 "self"
+%token <str> SELF_CLASS 36 "Self"
+%token <str> TYPE 37 "Type"
+%token <str> ASSOCIATIVITY 38 "associativity"
+%token <str> DIDSET 39 "didSet"
+%token <str> GET 40 "get"
+%token <str> INFIX 41 "infix"
+%token <str> INOUT 42 "inout"
+%token <str> LEFT 43 "left"
+%token <str> MUTATING 44 "mutating"
+%token <str> NONE 45 "none"
+%token <str> NONMUTATING 46 "nonmutating"
+%token <str> OPERATOR 47 "operator"
+%token <str> OVERRIDE 48 "override"
+%token <str> POSTFIX 49 "postfix"
+%token <str> PRECEDENCE 50 "precedence"
+%token <str> PREFIX 51 "prefix"
+%token <str> RIGHT 52 "right"
+%token <str> SET 53 "set"
+%token <str> UNOWNED 54 "unowned"
+%token <str> UNOWNED_SAFE 55 "unowned(safe)"
+%token <str> UNOWNED_UNSAFE 56 "unowned(unsafe)"
+%token <str> WEAK 57 "weak"
+%token <str> WILLSET 58 "willSet"
+%token <str> NUMBER_LITERAL 59 "number"
+%token <str> STRING_LITERAL 60 "string"
+%token <str> BOOLEAN_LITERAL 61 "bool"
+%token <str> SLASH 62 "/"
+%token <str> EQUAL 63 "="
+%token <str> MINUS 64 "-"
+%token <str> PLUS 65 "+"
+%token <str> EXCLAMATION 66 "!"
+%token <str> ASTERISK 67 "*"
+%token <str> PERCENT 68 "%"
+%token <str> LT 69 "<"
+%token <str> GT 70 ">"
+%token <str> AMPERSAND 71 "&"
+%token <str> OR 72 "|"
+%token <str> CARET 73 "^"
+%token <str> TILDE 74 "~"
+%token <str> DOT 75 "."
+%token <str> EQUAL2 76 "=="
+%token <str> EQUAL3 77 "==="
+%token <str> PLUSPLUS 78 "++"
+%token <str> MINUSMINUS 79 "--"
+%token <str> DOT3 80 "..."
+%token <str> LT2 81 "<<"
+%token <str> GT2 82 ">>"
+%token <str> AMPERSAND2 83 "&&"
+%token <str> OR2 84 "||"
+%token <str> PLUS_EQ 85 "+="
+%token <str> MINUS_EQ 86 "-="
+%token <str> ASTERISK_EQ 87 "*="
+%token <str> SLASH_EQ 88 "/="
+%token <str> PERCENT_EQ 89 "%="
+%token <str> AMPERSAND_EQ 90 "&="
+%token <str> CARET_EQ 91 "^="
+%token <str> TILDE_EQ 92 "~="
+%token <str> OR_EQ 93 "|="
+%token <str> LPAR 94 "("
+%token <str> RPAR 95 ")"
+%token <str> LBRACKET 96 "["
+%token <str> RBRACKET 97 "]"
+%token <str> LBRACE 98 "{"
+%token <str> RBRACE 99 "}"
+%token <str> COMMA 100 ","
+%token <str> COLON 101 ":"
+%token <str> SEMICOLON 102 ";"
+%token <str> AT 103 "@"
+%token <str> UNDERSCORE 104 "_"
+%token <str> HASH 105 "#"
+%token <str> DOLLAR 106 "$"
+%token <str> QUESTION 107 "?"
+%token <str> PREFIX_OPERATOR 108 "prefix_op"
+%token <str> POSTFIX_OPERATOR 109 "postfix_op"
+
+%type <node> statement
+//%type <node> semicolon_opt
+%type <node> statements
+%type <node> statements_opt
+%type <node> loop_statement
+%type <node> for_statement
+%type <node> for_init_opt
+%type <node> expression_opt
+%type <node> for_init
+%type <node> for_in_statement
+%type <node> while_statement
+%type <node> while_condition
+%type <node> do_while_statement
+%type <node> branch_statement
+%type <node> if_statement
+%type <node> else_clause_opt
+%type <node> if_condition
+%type <node> else_clause
+%type <node> switch_statement
+%type <node> switch_cases_opt
+%type <node> switch_cases
+%type <node> switch_case
+%type <node> case_label
+%type <node> case_item_list
+%type <node> guard_clause_opt
+%type <node> default_label
+%type <node> guard_clause
+%type <node> guard_expression
+%type <node> labeled_statement
+%type <node> statement_label
+%type <node> label_name
+%type <node> control_transfer_statement
+%type <node> break_statement
+%type <node> label_name_opt
+%type <node> continue_statement
+%type <node> fallthrough_statement
+%type <node> return_statement
+%type <node> generic_parameter_clause
+%type <node> requirement_clause_opt
+%type <node> generic_parameter_list
+%type <node> generic_parameter
+%type <node> requirement_clause
+%type <node> requirement_list
+%type <node> requirement
+%type <node> conformance_requirement
+%type <node> same_type_requirement
+%type <node> generic_argument_clause
+%type <node> generic_argument_list
+%type <node> generic_argument
+%type <node> declaration
+%type <node> declarations
+%type <node> declarations_opt
+%type <node> declaration_specifiers
+%type <node> declaration_specifiers_opt
+%type <node> declaration_specifier
+%type <node> top_level_declaration
+%type <node> code_block
+%type <node> import_declaration
+%type <node> attributes_opt
+%type <node> import_kind_opt
+%type <node> import_kind
+%type <node> import_path
+%type <node> import_path_identifier
+%type <node> constant_declaration
+%type <node> pattern_initializer_list
+%type <node> pattern_initializer
+%type <node> initializer_opt
+%type <node> initializer
+%type <node> variable_declaration
+%type <node> variable_declaration_head
+%type <node> variable_name
+%type <node> getter_setter_block
+%type <node> setter_clause_opt
+%type <node> getter_clause
+%type <node> setter_clause
+%type <node> setter_name_opt
+%type <node> setter_name
+%type <node> getter_setter_keyword_block
+%type <node> setter_keyword_clause_opt
+%type <node> getter_keyword_clause
+%type <node> setter_keyword_clause
+%type <node> willSet_didSet_block
+%type <node> didSet_clause_opt
+%type <node> willSet_clause
+%type <node> didSet_clause
+%type <node> typealias_declaration
+%type <node> typealias_head
+%type <node> typealias_name
+%type <node> typealias_assignment
+%type <node> function_declaration
+%type <node> generic_parameter_clause_opt
+%type <node> function_head
+%type <node> function_name
+%type <node> function_signature
+%type <node> function_result_opt
+%type <node> function_result
+%type <node> function_body
+%type <node> parameter_clauses
+%type <node> parameter_clauses_opt
+%type <node> parameter_clause
+%type <node> tripledot_opt
+%type <node> parameter_list
+%type <node> parameter
+%type <node> inout_opt
+%type <node> let_opt
+%type <node> hash_opt
+%type <node> local_parameter_name_opt
+%type <node> default_argument_clause_opt
+%type <node> parameter_name
+%type <node> local_parameter_name
+%type <node> default_argument_clause
+%type <node> enum_declaration
+%type <node> union_style_enum
+%type <node> union_style_enum_members_opt
+%type <node> union_style_enum_members
+%type <node> union_style_enum_member
+%type <node> union_style_enum_case_clause
+%type <node> union_style_enum_case_list
+%type <node> union_style_enum_case
+%type <node> tuple_type_opt
+%type <node> enum_name
+%type <node> enum_case_name
+%type <node> raw_value_style_enum
+%type <node> raw_value_style_enum_members_opt
+%type <node> raw_value_style_enum_members
+%type <node> raw_value_style_enum_member
+%type <node> raw_value_style_enum_case_clause
+%type <node> raw_value_style_enum_case_list
+%type <node> raw_value_style_enum_case
+%type <node> raw_value_assignment_opt
+%type <node> raw_value_assignment
+%type <node> struct_declaration
+%type <node> type_inheritance_clause_opt
+%type <node> struct_name
+%type <node> struct_body
+%type <node> class_declaration
+%type <node> class_name
+%type <node> class_body
+%type <node> protocol_declaration
+%type <node> protocol_name
+%type <node> protocol_body
+%type <node> protocol_member_declarations_opt
+%type <node> protocol_member_declaration
+%type <node> protocol_member_declarations
+%type <node> protocol_property_declaration
+%type <node> protocol_method_declaration
+%type <node> protocol_initializer_declaration
+%type <node> protocol_subscript_declaration
+%type <node> protocol_associated_type_declaration
+%type <node> typealias_assignment_opt
+%type <node> initializer_declaration
+%type <node> initializer_head
+%type <node> convenience_opt
+%type <node> initializer_body
+%type <node> deinitializer_declaration
+%type <node> extension_declaration
+%type <node> extension_body
+%type <node> subscript_declaration
+%type <node> subscript_head
+%type <node> subscript_result
+%type <node> operator_declaration
+%type <node> prefix_operator_declaration
+%type <node> postfix_operator_declaration
+%type <node> infix_operator_declaration
+%type <node> infix_operator_attributes_opt
+%type <node> infix_operator_attributes
+%type <node> precedence_clause_opt
+%type <node> associativity_clause_opt
+%type <node> precedence_clause
+%type <node> precedence_level
+%type <node> associativity_clause
+%type <node> associativity
+%type <node> pattern
+%type <node> type_annotation_opt
+%type <node> wildcard_pattern
+%type <node> identifier_pattern
+%type <node> value_binding_pattern
+%type <node> tuple_pattern
+%type <node> tuple_pattern_element_list_opt
+%type <node> tuple_pattern_element_list
+%type <node> tuple_pattern_element
+%type <node> enum_case_pattern
+%type <node> type_identifier_opt
+%type <node> tuple_pattern_opt
+%type <node> type_casting_pattern
+%type <node> is_pattern
+%type <node> as_pattern
+%type <node> expression_pattern
+%type <node> attribute
+%type <node> attribute_argument_clause_opt
+%type <node> attribute_name
+%type <node> attribute_argument_clause
+%type <node> balanced_tokens_opt
+%type <node> attributes
+%type <node> balanced_tokens
+%type <node> balanced_token
+%type <node> expression
+%type <node> binary_expressions_opt
+%type <node> expression_list
+%type <node> prefix_expression
+%type <node> prefix_operator_opt
+%type <node> in_out_expression
+%type <node> binary_expression
+%type <node> binary_expressions
+%type <node> assignment_operator
+%type <node> conditional_operator
+%type <node> type_casting_operator
+%type <node> question_opt
+%type <node> primary_expression
+%type <node> generic_argument_clause_opt
+%type <node> literal_expression
+%type <node> array_literal
+%type <node> array_literal_items_opt
+%type <node> array_literal_items
+%type <node> comma_opt
+%type <node> array_literal_item
+%type <node> dictionary_literal
+%type <node> dictionary_literal_items
+%type <node> dictionary_literal_item
+%type <node> self_expression
+%type <node> superclass_expression
+%type <node> superclass_method_expression
+%type <node> superclass_subscript_expression
+%type <node> superclass_initializer_expression
+%type <node> closure_expression
+%type <node> closure_signature_opt
+%type <node> closure_signature
+%type <node> capture_list
+%type <node> capture_specifier
+%type <node> implicit_member_expression
+%type <node> parenthesized_expression
+%type <node> expression_element_list_opt
+%type <node> expression_element_list
+%type <node> expression_element
+%type <node> wildcard_expression
+%type <node> postfix_expression
+%type <node> function_call_expression
+%type <node> parenthesized_expression_opt
+%type <node> trailing_closure
+%type <node> initializer_expression
+%type <node> explicit_member_expression
+%type <node> postfix_self_expression
+%type <node> dynamic_type_expression
+%type <node> subscript_expression
+%type <node> forced_value_expression
+%type <node> optional_chaining_expression
+%type <str> literal
+%type <str> operator
+%type <str> binary_operator
+%type <str> prefix_operator
+%type <str> postfix_operator
+%type <node> type
+%type <node> type_annotation
+%type <node> type_identifier
+%type <node> type_name
+%type <node> tuple_type
+%type <node> tuple_type_body_opt
+%type <node> tuple_type_body
+%type <node> tuple_type_element_list
+%type <node> tuple_type_element
+%type <node> element_name
+%type <node> function_type
+%type <node> array_type
+%type <node> optional_type
+%type <node> implicitly_unwrapped_optional_type
+%type <node> protocol_composition_type
+%type <node> protocol_identifier_list_opt
+%type <node> protocol_identifier_list
+%type <node> protocol_identifier
+%type <node> metatype_type
+%type <node> type_inheritance_clause
+%type <node> type_inheritance_list
 
 %%
 
