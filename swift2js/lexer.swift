@@ -235,13 +235,22 @@ class TokenData {
     }
     
     //bridge function used by bison grammar
+    var lastyylexToken: TokenData?;
     func yylex()-> CInt {
-        if let data = nextToken() {
+        lastyylexToken = nextToken();
+        if let data = lastyylexToken {
             let number = data.token.toRaw() as NSNumber;
             println("yylex: \(tokenToString(data.token))")
             return number.intValue;
         }
         return 0;
+    }
+
+    func yylexstr()-> String {
+        if let data = lastyylexToken {
+            return data.value;
+        }
+        return "";
     }
     
     func checkIdentifier() {

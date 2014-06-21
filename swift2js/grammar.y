@@ -878,7 +878,18 @@ static Lexer * lexer;
 
 int yylex ()
 {
-    return [lexer yylex];
+    int token = [lexer yylex];
+    
+    //set string value
+    const char * str = [lexer yylexstr].UTF8String;
+    if (str) {
+        yylval.str = strdup(str);
+    }
+    else {
+        yylval.str = NULL;
+    }
+    
+    return token;
 }
 
 extern "C" {
