@@ -7,4 +7,5 @@
 //
 
 @class Lexer;
-void bridge_yyparse(Lexer * lexer);
+@class ASTNode;
+ASTNode* bridge_yyparse(Lexer * lexer);

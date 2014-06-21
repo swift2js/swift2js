@@ -28,24 +28,50 @@ import Foundation
     }
 }
 
-@objc class BinaryExpression: ASTNode {
+@objc class BinaryOperator: ASTNode {
     
-    let op1: ASTNode;
-    let op2: ASTNode;
+    let rightOperand: ASTNode;
     let binaryOperator: String;
     
-    init(_ op1: ASTNode,_ op2: ASTNode,_ binaryOperator:String ) {
-        self.op1 = op1;
-        self.op2 = op2;
+    init(rightOperand: ASTNode, binaryOperator:String ) {
         self.binaryOperator = binaryOperator;
+        self.rightOperand = rightOperand;
     }
     
     override func toJS() -> String {
-        return op1.toJS() + " " + binaryOperator + " " + op2.toJS();
+        return " " + binaryOperator + " " + rightOperand.toJS();
     }
 }
 
-@objc class PrefixExpression: ASTNode {
+@objc class AssignmentOperator: ASTNode {
+    
+    let rightOperand: ASTNode;
+    
+    init(rightOperand: ASTNode) {
+        self.rightOperand = rightOperand;
+    }
+    
+    override func toJS() -> String {
+        return " = " + rightOperand.toJS();
+    }
+}
+
+@objc class TernaryOperator: ASTNode {
+    
+    let trueOperand: ASTNode;
+    let falseOperand: ASTNode;
+    
+    init(trueOperand: ASTNode, falseOperand: ASTNode) {
+        self.trueOperand = trueOperand;
+        self.falseOperand = falseOperand;
+    }
+    
+    override func toJS() -> String {
+        return " ? " + trueOperand.toJS() + " : " + falseOperand.toJS();
+    }
+}
+
+@objc class PrefixOperator: ASTNode {
     
     let operand: ASTNode;
     let prefixOperator: String;
@@ -60,7 +86,7 @@ import Foundation
     }
 }
 
-@objc class PostfixExpression: ASTNode {
+@objc class PostfixOperator: ASTNode {
     
     let operand: ASTNode;
     let postfixOperator: String;
@@ -72,6 +98,58 @@ import Foundation
     
     override func toJS() -> String {
         return operand.toJS() + postfixOperator;
+    }
+}
+
+@objc class BinaryExpression: ASTNode {
+    
+    var current:ASTNode?;
+    var next:BinaryExpression?;
+    
+    init(expression:ASTNode?) {
+        self.current = expression;
+    }
+    
+    init(expression:ASTNode, next:BinaryExpression) {
+        self.current = expression;
+        self.next = next;
+    }
+    
+    override func toJS() -> String {
+        var result = "";
+        if let currentExpression = current {
+            result+=currentExpression.toJS();
+        }
+        if let nextExpression = next {
+            result += nextExpression.toJS();
+        }
+        return result;
+    }
+}
+
+@objc class StatementsNode: ASTNode {
+    
+    var current:ASTNode?;
+    var next:StatementsNode?;
+    
+    init(current:ASTNode?) {
+        self.current = current;
+    }
+    
+    init(current:ASTNode, next:StatementsNode) {
+        self.current = current;
+        self.next = next;
+    }
+    
+    override func toJS() -> String {
+        var result = "";
+        if let currentStatement = current {
+            result+=currentStatement.toJS() + ";\n";
+        }
+        if let nextStatements = next {
+            result += nextStatements.toJS();
+        }
+        return result;
     }
 }
 

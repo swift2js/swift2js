@@ -8,7 +8,7 @@
 
 import Foundation
 
-let testFile = "test1.swift";
+let testFile = "test2.swift";
 //test objects are copied automatically to tmp using scode build phase
 //TODO: read files from args, from input stream, etc.
 
@@ -19,8 +19,17 @@ var lexer = Lexer(sourceCode as String);
 lexer.debugTokens();
 //lexer.bisonTokens();
 
-bridge_yyparse(lexer);
+var ast:ASTNode? = bridge_yyparse(lexer);
 
+if let program = ast {
+    
+    println();
+    println("--------------------")
+    println("Transpiled JavaScript")
+    println("--------------------")
+    println();
+    println(program.toJS());
+}
 
 
 

@@ -5,6 +5,7 @@
     #import "swift2js-Swift.h"
     void yyerror (const char *error);
     int  yylex ();
+    static ASTNode * ast = NULL;
     
     inline NSString * toSwift(const char * c) {
         return [NSString stringWithUTF8String:c];
@@ -131,9 +132,7 @@
 %token <str> POSTFIX_OPERATOR 109 "postfix_op"
 
 %type <node> statement
-//%type <node> semicolon_opt
 %type <node> statements
-%type <node> statements_opt
 %type <node> loop_statement
 %type <node> for_statement
 %type <node> for_init_opt
@@ -185,7 +184,6 @@
 %type <node> declaration_specifiers
 %type <node> declaration_specifiers_opt
 %type <node> declaration_specifier
-%type <node> top_level_declaration
 %type <node> code_block
 %type <node> import_declaration
 %type <node> attributes_opt
@@ -327,15 +325,12 @@
 %type <node> balanced_tokens
 %type <node> balanced_token
 %type <node> expression
-%type <node> binary_expressions_opt
 %type <node> expression_list
 %type <node> prefix_expression
-%type <node> prefix_operator_opt
+%type <str> prefix_operator_opt
 %type <node> in_out_expression
 %type <node> binary_expression
 %type <node> binary_expressions
-%type <node> assignment_operator
-%type <node> conditional_operator
 %type <node> type_casting_operator
 %type <node> question_opt
 %type <node> primary_expression
@@ -407,7 +402,7 @@
 
 /******* STATEMENTS *******/
 
-program: statements
+program: statements {ast = $1; printf("ederr %p", $1);}
 
 /******* STATEMENTS *******/
 
@@ -421,8 +416,8 @@ statement :  loop_statement semicolon_opt		 { printf("statement (0)\n"); }
 statement :  branch_statement semicolon_opt		 { printf("statement (0)\n"); }
 statement :  labeled_statement		 { printf("statement (0)\n"); }
 statement :  control_transfer_statement semicolon_opt		 { printf("statement (0)\n"); }
-statements :  statement statements_opt		 { printf("statements (0)\n"); }
-statements_opt:  | statements		 { printf("statements_opt\n"); }
+statements :  statement   {$$ = [[StatementsNode alloc] initWithCurrent:$1]; printf("current2 %p", $1); }
+|  statement statements {$$ = [[StatementsNode alloc] initWithCurrent:$1 next:(StatementsNode*)$2]; printf("current2 %p\n", $1);  }
 
 // GRAMMAR OF A LOOP STATEMENT
 
@@ -577,13 +572,10 @@ declaration_specifier :  "class"		 { printf("declaration_specifier (0)\n"); }
 | "unowned(unsafe)"		 { printf("declaration_specifier (7)\n"); }
 | "weak"		 { printf("declaration_specifier (8)\n"); }
 
-// GRAMMAR OF A TOP_LEVEL DECLARATION
-
-top_level_declaration :  statements_opt		 { printf("top_level_declaration (0)\n"); }
-
 // GRAMMAR OF A CODE BLOCK
 
-code_block :  "{" statements_opt "}"		 { printf("code_block (0)\n"); }
+code_block :  "{" statements "}"		 { printf("code_block (0)\n"); }
+| "{" "}"		 { printf("code_block (1)\n"); }
 
 // GRAMMAR OF AN IMPORT DECLARATION
 
@@ -871,33 +863,28 @@ balanced_token : 		 { printf("balanced_token (0)\n"); }
 
 // GRAMMAR OF AN EXPRESSION
 
-expression :  prefix_expression binary_expressions_opt		 { printf("expression (0)\n"); }
-binary_expressions_opt:  | binary_expressions		 { printf("binary_expressions_opt\n"); }
+expression :  prefix_expression		 {printf("expression (0)\n"); }
+| prefix_expression binary_expressions {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:(BinaryExpression*)$2];}
 expression_list :  expression		 { printf("expression_list (0)\n"); }
 | expression "," expression_list		 { printf("expression_list (1)\n"); }
 
 // GRAMMAR OF A PREFIX EXPRESSION
 
-prefix_expression :  prefix_operator_opt postfix_expression		 { printf("prefix_expression (0)\n"); }
-prefix_operator_opt:  | prefix_operator		 { printf("prefix_operator_opt\n"); }
+prefix_expression :  prefix_operator_opt postfix_expression	{$$ = $1 ? [[PrefixOperator alloc] init:$2:toSwift($1)] : $2;  printf("prefix_expression\n"); }
+prefix_operator_opt: {$$ = NULL}  | prefix_operator		 { printf("prefix_operator_opt\n"); }
 prefix_expression :  in_out_expression		 { printf("prefix_expression (0)\n"); }
 in_out_expression :  "&" identifier		 { printf("in_out_expression (0)\n"); }
 
 // GRAMMAR OF A BINARY EXPRESSION
 
-binary_expression :  binary_operator prefix_expression		 { printf("binary_expression (0)\n"); }
-binary_expression :  assignment_operator prefix_expression		 { printf("binary_expression (0)\n"); }
-binary_expression :  conditional_operator prefix_expression		 { printf("binary_expression (0)\n"); }
+binary_expression :  binary_operator prefix_expression  {$$ = [[BinaryOperator alloc] initWithRightOperand:$2 binaryOperator:toSwift($1)]; printf("binary_expression (0)\n"); }
+binary_expression :  "=" prefix_expression		 {$$ = [[AssignmentOperator alloc] initWithRightOperand:$2]; printf("binary_expression (0)\n"); }
+binary_expression :  "?" expression ":" prefix_expression   {$$ = [[TernaryOperator alloc] initWithTrueOperand:$2 falseOperand:$4]; printf("binary_expression (0)\n"); }
 binary_expression :  type_casting_operator		 { printf("binary_expression (0)\n"); }
-binary_expressions :  binary_expression binary_expressions_opt		 { printf("binary_expressions (0)\n"); }
+binary_expressions :  binary_expression 		 {$$ = [[BinaryExpression alloc] initWithExpression:$1]; }
+| binary_expression binary_expressions           {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:(BinaryExpression*)$2];  }
 
-// GRAMMAR OF AN ASSIGNMENT OPERATOR
 
-assignment_operator :  "="		 { printf("assignment_operator (0)\n"); }
-
-// GRAMMAR OF A CONDITIONAL OPERATOR
-
-conditional_operator :  "?" expression ":"		 { printf("conditional_operator (0)\n"); }
 
 // GRAMMAR OF A TYPE_CASTING OPERATOR
 
@@ -907,7 +894,7 @@ question_opt:  | "?"		 { printf("question_opt\n"); }
 
 // GRAMMAR OF A PRIMARY EXPRESSION
 
-primary_expression :  identifier generic_argument_clause_opt		 { printf("primary_expression (0)\n"); }
+primary_expression :  identifier generic_argument_clause_opt		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; printf("primary_expression (0)\n"); }
 generic_argument_clause_opt:  | generic_argument_clause		 { printf("generic_argument_clause_opt\n"); }
 primary_expression :  literal_expression		 { printf("primary_expression (0)\n"); }
 primary_expression :  self_expression		 { printf("primary_expression (0)\n"); }
@@ -919,7 +906,7 @@ primary_expression :  wildcard_expression		 { printf("primary_expression (0)\n")
 
 // GRAMMAR OF A LITERAL EXPRESSION
 
-literal_expression :  literal		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; printf("Literal: %s")}
+literal_expression :  literal		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; printf("Literal: %s\n", $1)}
 literal_expression :  array_literal		 { printf("literal_expression (0)\n"); }
 | dictionary_literal		 { printf("literal_expression (1)\n"); }
 literal_expression :  "__FILE__"		 { printf("literal_expression (0)\n"); }
@@ -989,7 +976,7 @@ wildcard_expression :  "_"		 { printf("wildcard_expression (0)\n"); }
 // GRAMMAR OF A POSTFIX EXPRESSION
 
 postfix_expression :  primary_expression		 { printf("postfix_expression (0)\n"); }
-postfix_expression :  postfix_expression postfix_operator		 { printf("postfix_expression (0)\n"); }
+postfix_expression :  postfix_expression postfix_operator   { $$ = [[PostfixOperator alloc] init:$1:toSwift($2)]; printf("postfix_expression op %s\n", $2); }
 postfix_expression :  function_call_expression		 { printf("postfix_expression (0)\n"); }
 postfix_expression :  initializer_expression		 { printf("postfix_expression (0)\n"); }
 postfix_expression :  explicit_member_expression		 { printf("postfix_expression (0)\n"); }
@@ -1065,14 +1052,14 @@ binary_operator :  "/" | "/="
 | "^" | "^="
 | "~" | "~="
 | "."
-prefix_operator : PREFIX_OPERATOR "++"
-| PREFIX_OPERATOR "--"
-| PREFIX_OPERATOR "!"
-| PREFIX_OPERATOR "~"
-| PREFIX_OPERATOR "+"
-| PREFIX_OPERATOR "-"
-postfix_operator : POSTFIX_OPERATOR "++"
-| POSTFIX_OPERATOR "--"
+prefix_operator : PREFIX_OPERATOR "++" {$$ = $2}
+| PREFIX_OPERATOR "--" {$$ = $2}
+| PREFIX_OPERATOR "!" {$$ = $2}
+| PREFIX_OPERATOR "~" {$$ = $2}
+| PREFIX_OPERATOR "+" {$$ = $2}
+| PREFIX_OPERATOR "-" {$$ = $2}
+postfix_operator : POSTFIX_OPERATOR "++" {$$ = $2}
+| POSTFIX_OPERATOR "--" {$$ = $2}
 
 /******* TYPES *******/
 
@@ -1171,8 +1158,9 @@ int yylex ()
 }
 
 extern "C" {
-    void bridge_yyparse(Lexer * instance) {
+    ASTNode* bridge_yyparse(Lexer * instance) {
         lexer = instance;
         yyparse();
+        return ast;
     }
 }
