@@ -416,8 +416,8 @@ statement :  loop_statement semicolon_opt		 { printf("statement (0)\n"); }
 statement :  branch_statement semicolon_opt		 { printf("statement (0)\n"); }
 statement :  labeled_statement		 { printf("statement (0)\n"); }
 statement :  control_transfer_statement semicolon_opt		 { printf("statement (0)\n"); }
-statements :  statement   {$$ = [[StatementsNode alloc] initWithCurrent:$1]; printf("current2 %p", $1); }
-|  statement statements {$$ = [[StatementsNode alloc] initWithCurrent:$1 next:(StatementsNode*)$2]; printf("current2 %p\n", $1);  }
+statements :  statement %dprec 2   {$$ = [[StatementsNode alloc] initWithCurrent:$1]; printf("current2 %p", $1); }
+|  statement statements %dprec 1 {$$ = [[StatementsNode alloc] initWithCurrent:$1 next:(StatementsNode*)$2]; printf("current2 %p\n", $1);  }
 
 // GRAMMAR OF A LOOP STATEMENT
 
