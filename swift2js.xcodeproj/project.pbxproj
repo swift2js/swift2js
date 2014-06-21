@@ -239,6 +239,7 @@
 		11076F8F194C70A200358DB3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
 				DEFINES_MODULE = YES;
 				PRODUCT_MODULE_NAME = swift2js;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -249,6 +250,7 @@
 		11076F90194C70A200358DB3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
 				DEFINES_MODULE = YES;
 				PRODUCT_MODULE_NAME = swift2js;
 				PRODUCT_NAME = "$(TARGET_NAME)";

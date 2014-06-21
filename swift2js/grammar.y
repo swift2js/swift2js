@@ -1,9 +1,14 @@
 %{
     #include <iostream>
     @class NSArray;
+    #include <Foundation/NSString.h>
     #import "swift2js-Swift.h"
     void yyerror (const char *error);
     int  yylex ();
+    
+    inline NSString * toSwift(const char * c) {
+        return [NSString stringWithUTF8String:c];
+    }
 %}
 
 %glr-parser
@@ -914,7 +919,7 @@ primary_expression :  wildcard_expression		 { printf("primary_expression (0)\n")
 
 // GRAMMAR OF A LITERAL EXPRESSION
 
-literal_expression :  literal		 { printf("literal_expression (0)\n"); }
+literal_expression :  literal		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; printf("Literal: %s")}
 literal_expression :  array_literal		 { printf("literal_expression (0)\n"); }
 | dictionary_literal		 { printf("literal_expression (1)\n"); }
 literal_expression :  "__FILE__"		 { printf("literal_expression (0)\n"); }
@@ -1040,9 +1045,9 @@ identifier_list :  identifier		 { printf("identifier_list (0)\n"); }
 
 // GRAMMAR OF A LITERAL
 
-literal :  NUMBER_LITERAL		 { printf("literal (0)\n"); }
-| BOOLEAN_LITERAL		 { printf("literal (1)\n"); }
-| STRING_LITERAL		 { printf("literal (2)\n"); }
+literal :  NUMBER_LITERAL
+| BOOLEAN_LITERAL
+| STRING_LITERAL
 
 // GRAMMAR OF OPERATORS
 operator: binary_operator | prefix_operator | postfix_operator
