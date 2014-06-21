@@ -963,11 +963,11 @@ implicit_member_expression :  "." identifier		 { printf("implicit_member_express
 // GRAMMAR OF A PARENTHESIZED EXPRESSION
 
 parenthesized_expression :  "(" expression_element_list_opt ")"		 { $$ = [[ParenthesizedExpression alloc] initWithExpression:$2]; printf("parenthesized_expression (0)\n"); }
-expression_element_list_opt: {$$ = NULL}  | expression_element_list		 { printf("expression_element_list_opt\n"); }
-expression_element_list :  expression_element		 { printf("expression_element_list (0)\n"); }
-| expression_element "," expression_element_list		 { printf("expression_element_list (1)\n"); }
+expression_element_list_opt: {$$ = NULL}  | expression_element_list		 { $$ = $1; printf("expression_element_list_opt\n"); }
+expression_element_list :  expression_element   {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; printf("expression_element_list (0)\n"); }
+| expression_element "," expression_element_list   {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; printf("expression_element_list (1)\n"); }
 expression_element :  expression		 { printf("expression_element (0)\n"); }
-| identifier ":" expression		 { printf("expression_element (1)\n"); }
+| identifier ":" expression		 { $$ = $3; printf("expression_element (1)\n"); }
 
 // GRAMMAR OF A WILDCARD EXPRESSION
 
@@ -988,7 +988,7 @@ postfix_expression :  optional_chaining_expression		 { printf("postfix_expressio
 
 // GRAMMAR OF A FUNCTION CALL EXPRESSION
 
-function_call_expression :  postfix_expression parenthesized_expression		 { printf("function_call_expression (0)\n"); }
+function_call_expression :  postfix_expression parenthesized_expression		 {$$ = [[FunctionCallExpression alloc] initWithFunction:$1 parenthesized:$2]; printf("function_call_expression (0)\n"); }
 function_call_expression :  postfix_expression parenthesized_expression_opt trailing_closure		 { printf("function_call_expression (0)\n"); }
 parenthesized_expression_opt:  | parenthesized_expression		 { printf("parenthesized_expression_opt\n"); }
 trailing_closure :  closure_expression		 { printf("trailing_closure (0)\n"); }

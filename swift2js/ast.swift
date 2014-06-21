@@ -128,18 +128,14 @@ import Foundation
 }
 
 @objc class ExpressionList: ASTNode {
-    
     var current:ASTNode?;
     var next:ExpressionList?;
     
-    init(expression:ASTNode?) {
-        self.current = expression;
-    }
-    
-    init(expression:ASTNode, next:ExpressionList) {
-        self.current = expression;
+    init(expr:ASTNode?, next:ExpressionList?) {
+        self.current = expr;
         self.next = next;
     }
+    
     
     override func toJS() -> String {
         var result = "";
@@ -166,6 +162,20 @@ import Foundation
             return "(" + expr.toJS() + ")";
         }
         return "()";
+    }
+}
+
+@objc class FunctionCallExpression: ASTNode {
+    let function: ASTNode;
+    let parenthesized: ASTNode;
+    
+    init(function: ASTNode, parenthesized: ASTNode) {
+        self.function = function;
+        self.parenthesized = parenthesized;
+    }
+    
+    override func toJS() -> String {
+        return function.toJS() + parenthesized.toJS();
     }
 }
 

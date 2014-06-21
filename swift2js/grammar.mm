@@ -908,7 +908,7 @@ static const unsigned char yyr2[] =
 static const unsigned char yydprec[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     2,     1,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
@@ -4252,22 +4252,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 417:
 #line 965 "grammar.y"
-    { printf("parenthesized_expression (0)\n"); ;}
+    { ((*yyvalp).node) = [[ParenthesizedExpression alloc] initWithExpression:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.node)]; printf("parenthesized_expression (0)\n"); ;}
+    break;
+
+  case 418:
+#line 966 "grammar.y"
+    {((*yyvalp).node) = NULL;}
     break;
 
   case 419:
 #line 966 "grammar.y"
-    { printf("expression_element_list_opt\n"); ;}
+    { ((*yyvalp).node) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.node); printf("expression_element_list_opt\n"); ;}
     break;
 
   case 420:
 #line 967 "grammar.y"
-    { printf("expression_element_list (0)\n"); ;}
+    {((*yyvalp).node)=[[ExpressionList alloc] initWithExpr:(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.node) next:nil]; printf("expression_element_list (0)\n"); ;}
     break;
 
   case 421:
 #line 968 "grammar.y"
-    { printf("expression_element_list (1)\n"); ;}
+    {((*yyvalp).node)=[[ExpressionList alloc] initWithExpr:(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.node) next:(ExpressionList*)(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.node)]; printf("expression_element_list (1)\n"); ;}
     break;
 
   case 422:
@@ -4277,7 +4282,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 423:
 #line 970 "grammar.y"
-    { printf("expression_element (1)\n"); ;}
+    { ((*yyvalp).node) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.node); printf("expression_element (1)\n"); ;}
     break;
 
   case 424:
@@ -4337,7 +4342,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 435:
 #line 991 "grammar.y"
-    { printf("function_call_expression (0)\n"); ;}
+    {((*yyvalp).node) = [[FunctionCallExpression alloc] initWithFunction:(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.node) parenthesized:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.node)]; printf("function_call_expression (0)\n"); ;}
     break;
 
   case 436:
@@ -4622,7 +4627,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
 
 /* Line 930 of glr.c.  */
-#line 4626 "grammar.mm"
+#line 4631 "grammar.mm"
       default: break;
     }
 
