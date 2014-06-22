@@ -105,31 +105,32 @@
 %token <str> GT2 82 ">>"
 %token <str> AMPERSAND2 83 "&&"
 %token <str> OR2 84 "||"
-%token <str> PLUS_EQ 85 "+="
-%token <str> MINUS_EQ 86 "-="
-%token <str> ASTERISK_EQ 87 "*="
-%token <str> SLASH_EQ 88 "/="
-%token <str> PERCENT_EQ 89 "%="
-%token <str> AMPERSAND_EQ 90 "&="
-%token <str> CARET_EQ 91 "^="
-%token <str> TILDE_EQ 92 "~="
-%token <str> OR_EQ 93 "|="
-%token <str> LPAR 94 "("
-%token <str> RPAR 95 ")"
-%token <str> LBRACKET 96 "["
-%token <str> RBRACKET 97 "]"
-%token <str> LBRACE 98 "{"
-%token <str> RBRACE 99 "}"
-%token <str> COMMA 100 ","
-%token <str> COLON 101 ":"
-%token <str> SEMICOLON 102 ";"
-%token <str> AT 103 "@"
-%token <str> UNDERSCORE 104 "_"
-%token <str> HASH 105 "#"
-%token <str> DOLLAR 106 "$"
-%token <str> QUESTION 107 "?"
-%token <str> PREFIX_OPERATOR 108 "prefix_op"
-%token <str> POSTFIX_OPERATOR 109 "postfix_op"
+%token <val> ARROW 85 "->"
+%token <val> PLUS_EQ 86 "+="
+%token <val> MINUS_EQ 87 "-="
+%token <val> ASTERISK_EQ 88 "*="
+%token <val> SLASH_EQ 89 "/="
+%token <val> PERCENT_EQ 90 "%="
+%token <val> AMPERSAND_EQ 91 "&="
+%token <val> CARET_EQ 92 "^="
+%token <val> TILDE_EQ 93 "~="
+%token <val> OR_EQ 94 "|="
+%token <val> LPAR 95 "("
+%token <val> RPAR 96 ")"
+%token <val> LBRACKET 97 "["
+%token <val> RBRACKET 98 "]"
+%token <val> LBRACE 99 "{"
+%token <val> RBRACE 100 "}"
+%token <val> COMMA 101 ","
+%token <val> COLON 102 ":"
+%token <val> SEMICOLON 103 ";"
+%token <val> AT 104 "@"
+%token <val> UNDERSCORE 105 "_"
+%token <val> HASH 106 "#"
+%token <val> DOLLAR 107 "$"
+%token <val> QUESTION 108 "?"
+%token <val> PREFIX_OPERATOR 109 "prefix_op"
+%token <val> POSTFIX_OPERATOR 110 "postfix_op"
 
 %type <node> statement
 %type <node> statements
@@ -402,7 +403,7 @@
 
 /******* STATEMENTS *******/
 
-program: statements {ast = $1; printf("ederr %p", $1);}
+program: statements {ast = $1;}
 
 /******* STATEMENTS *******/
 
@@ -650,7 +651,7 @@ function_name :  identifier		 { printf("function_name (0)\n"); }
 | operator		 { printf("function_name (1)\n"); }
 function_signature :  parameter_clauses function_result_opt		 {$$ = $1; printf("function_signature (0)\n"); }
 function_result_opt:  | function_result		 { printf("function_result_opt\n"); }
-function_result :  "_>" attributes_opt type		 { printf("function_result (0)\n"); }
+function_result :  "->" attributes_opt type		 { printf("function_result (0)\n"); }
 function_body :  code_block		 { printf("function_body (0)\n"); }
 parameter_clauses :  parameter_clause parameter_clauses_opt		 { printf("parameter_clauses (0)\n"); }
 parameter_clauses_opt:  | parameter_clauses		 { printf("parameter_clauses_opt\n"); }
@@ -773,7 +774,7 @@ subscript_declaration :  subscript_head subscript_result code_block		 { printf("
 subscript_declaration :  subscript_head subscript_result getter_setter_block		 { printf("subscript_declaration (0)\n"); }
 subscript_declaration :  subscript_head subscript_result getter_setter_keyword_block		 { printf("subscript_declaration (0)\n"); }
 subscript_head :  attributes_opt "subscript" parameter_clause		 { printf("subscript_head (0)\n"); }
-subscript_result :  "_>" attributes_opt type		 { printf("subscript_result (0)\n"); }
+subscript_result :  "->" attributes_opt type		 { printf("subscript_result (0)\n"); }
 
 // GRAMMAR OF AN OPERATOR DECLARATION
 
@@ -1104,7 +1105,7 @@ element_name :  identifier		 { printf("element_name (0)\n"); }
 
 // GRAMMAR OF A FUNCTION TYPE
 
-function_type :  type "_>" type		 { printf("function_type (0)\n"); }
+function_type :  type "->" type		 { printf("function_type (0)\n"); }
 
 // GRAMMAR OF AN ARRAY TYPE
 

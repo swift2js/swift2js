@@ -23,9 +23,9 @@ enum TOKEN:Int {
     case NUMBER_LITERAL, STRING_LITERAL, BOOLEAN_LITERAL
     //operators /­  =­  -­  +­  !­  *­  %­  <­  >­  &­  |­  ^­  ~­  .­
     case SLASH, EQUAL, MINUS, PLUS, EXCLAMATION, ASTERISK, PERCENT, LT, GT, AMPERSAND, OR, CARET, TILDE, DOT
-    //combined operators == === ++ -- ... << >> && ||
+    //combined operators == === ++ -- ... << >> && || ->
     //+= -= *= %= /= &= |= ^= ~=
-    case EQUAL2, EQUAL3, PLUSPLUS, MINUSMINUS, DOT3, LT2, GT2, AMPERSAND2, OR2
+    case EQUAL2, EQUAL3, PLUSPLUS, MINUSMINUS, DOT3, LT2, GT2, AMPERSAND2, OR2, ARROW
     case PLUS_EQ, MINUS_EQ, ASTERISK_EQ, SLASH_EQ, PERCENT_EQ, AMPERSAND_EQ, CARET_EQ, TILDE_EQ, OR_EQ
     //grammar symbols ( ) [ ] { } , : ; @ _ # $ ?
     case LPAR, RPAR, LBRACKET, RBRACKET, LBRACE, RBRACE, COMMA, COLON, SEMICOLON, AT, UNDERSCORE, HASH, DOLLAR, QUESTION
@@ -150,7 +150,7 @@ class TokenData {
         //combined
         "==": TOKEN.EQUAL2,     "===": TOKEN.EQUAL3,
         "++": TOKEN.PLUSPLUS,   "--": TOKEN.MINUSMINUS,
-        "...":TOKEN.DOT3,
+        "...":TOKEN.DOT3,       "->": TOKEN.ARROW,
         "<<": TOKEN.LT2,        ">>": TOKEN.GT2,
         "&&": TOKEN.AMPERSAND2, "||": TOKEN.OR2,
         "+=": TOKEN.PLUS_EQ,    "-=": TOKEN.MINUS_EQ,
@@ -418,7 +418,7 @@ class TokenData {
             "POSTFIX","PRECEDENCE","PREFIX","RIGHT","SET","UNOWNED","UNOWNED_SAFE","UNOWNED_UNSAFE","WEAK","WILLSET",
             "NUMBER_LITERAL","STRING_LITERAL","BOOLEAN_LITERAL",
             "SLASH","EQUAL","MINUS","PLUS","EXCLAMATION","ASTERISK","PERCENT","LT","GT","AMPERSAND","OR","CARET","TILDE","DOT",
-            "EQUAL2","EQUAL3","PLUSPLUS","MINUSMINUS","DOT3","LT2","GT2","AMPERSAND2","OR2",
+            "EQUAL2","EQUAL3","PLUSPLUS","MINUSMINUS","DOT3","LT2","GT2","AMPERSAND2","OR2","ARROW",
             "PLUS_EQ","MINUS_EQ","ASTERISK_EQ","SLASH_EQ","PERCENT_EQ","AMPERSAND_EQ","CARET_EQ","TILDE_EQ","OR_EQ",
             "LPAR","RPAR","LBRACKET","RBRACKET","LBRACE","RBRACE","COMMA","COLON","SEMICOLON","AT","UNDERSCORE","HASH","DOLLAR","QUESTION",
             "PREFIX_OPERATOR","POSTFIX_OPERATOR",
