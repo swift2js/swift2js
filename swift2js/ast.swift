@@ -187,6 +187,18 @@ func tabulate(code: String) -> String {
     }
 }
 
+@objc class DeclarationStatement: ASTNode {
+    let initializer: ASTNode;
+    
+    init(initializer:ASTNode) {
+        self.initializer = initializer;
+    }
+    
+    override func toJS() -> String {
+        return "var " + initializer.toJS();
+    }
+}
+
 @objc class StatementsNode: ASTNode {
     
     var current:ASTNode?;

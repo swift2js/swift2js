@@ -303,7 +303,7 @@
 %type <node> pattern
 %type <node> type_annotation_opt
 %type <node> wildcard_pattern
-%type <node> identifier_pattern
+%type <str> identifier_pattern
 %type <node> value_binding_pattern
 %type <node> tuple_pattern
 %type <node> tuple_pattern_element_list_opt
@@ -596,17 +596,17 @@ import_path_identifier :  identifier		 { printf("import_path_identifier (0)\n");
 
 // GRAMMAR OF A CONSTANT DECLARATION
 
-constant_declaration :  attributes_opt declaration_specifiers_opt "let" pattern_initializer_list		 { printf("constant_declaration (0)\n"); }
-pattern_initializer_list :  pattern_initializer		 { printf("pattern_initializer_list (0)\n"); }
-| pattern_initializer "," pattern_initializer_list		 { printf("pattern_initializer_list (1)\n"); }
-pattern_initializer :  pattern initializer %dprec 1
-| pattern %dprec 2                                          { printf("pattern_initializer (0)\n"); }
+constant_declaration :  attributes_opt declaration_specifiers_opt "let" pattern_initializer_list		 {$$ = [[DeclarationStatement alloc] initWithInitializer:$4]; printf("constant_declaration (0)\n"); }
+pattern_initializer_list :  pattern_initializer		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil];  printf("pattern_initializer_list (0)\n"); }
+| pattern_initializer "," pattern_initializer_list		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; printf("pattern_initializer_list (1)\n"); }
+pattern_initializer :  pattern initializer %dprec 1         {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:[[BinaryExpression alloc] initWithExpression:$2 next:nil]]; printf("pattern_initializer (0)\n"); }
+| pattern %dprec 2                                          { printf("pattern_initializer (1)\n"); }
 initializer_opt:  | initializer		 { printf("initializer_opt\n"); }
-initializer :  "=" expression		 { printf("initializer (0)\n"); }
+initializer :  "=" expression		 {$$ = [[AssignmentOperator alloc] initWithRightOperand:$2];  printf("initializer (0)\n"); }
 
 // GRAMMAR OF A VARIABLE DECLARATION
 
-variable_declaration :  variable_declaration_head pattern_initializer_list 		 { printf("variable_declaration (0)\n"); }
+variable_declaration :  variable_declaration_head pattern_initializer_list 		 {$$ = [[DeclarationStatement alloc] initWithInitializer:$2]; printf("variable_declaration (0)\n"); }
 variable_declaration :  variable_declaration_head variable_name type_annotation code_block		 { printf("variable_declaration (0)\n"); }
 variable_declaration :  variable_declaration_head variable_name type_annotation getter_setter_block		 { printf("variable_declaration (0)\n"); }
 variable_declaration :  variable_declaration_head variable_name type_annotation getter_setter_keyword_block		 { printf("variable_declaration (0)\n"); }
@@ -795,12 +795,12 @@ associativity :  "left"		 { printf("associativity (0)\n"); }
 
 pattern :  wildcard_pattern type_annotation_opt		 { printf("pattern (0)\n"); }
 type_annotation_opt:  | type_annotation		 { printf("type_annotation_opt\n"); }
-pattern :  identifier_pattern type_annotation_opt %dprec 1		 { printf("pattern (0)\n"); }
-pattern :  value_binding_pattern		 { printf("pattern (0)\n"); }
-pattern :  tuple_pattern type_annotation_opt		 { printf("pattern (0)\n"); }
-pattern :  enum_case_pattern		 { printf("pattern (0)\n"); }
-pattern :  type_casting_pattern		 { printf("pattern (0)\n"); }
-pattern :  expression_pattern %dprec 2		 { printf("pattern (0)\n"); }
+pattern :  identifier_pattern type_annotation_opt %dprec 1		 {$$ = [[LiteralExpression alloc] init:toSwift($1)]; printf("pattern (1)\n"); }
+pattern :  value_binding_pattern		 { printf("pattern (3)\n"); }
+pattern :  tuple_pattern type_annotation_opt		 { printf("pattern (4)\n"); }
+pattern :  enum_case_pattern		 { printf("pattern (5)\n"); }
+pattern :  type_casting_pattern		 { printf("pattern (6)\n"); }
+pattern :  expression_pattern %dprec 2		 { printf("pattern (7)\n"); }
 
 // GRAMMAR OF A WILDCARD PATTERN
 
@@ -894,15 +894,15 @@ question_opt:  | "?"		 { printf("question_opt\n"); }
 
 // GRAMMAR OF A PRIMARY EXPRESSION
 
-primary_expression :  identifier generic_argument_clause_opt		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; printf("primary_expression (0)\n"); }
+primary_expression :  identifier generic_argument_clause_opt		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; printf("primary_expression (1)\n"); }
 generic_argument_clause_opt:  | generic_argument_clause		 { printf("generic_argument_clause_opt\n"); }
-primary_expression :  literal_expression		 { printf("primary_expression (0)\n"); }
-primary_expression :  self_expression		 { printf("primary_expression (0)\n"); }
-primary_expression :  superclass_expression		 { printf("primary_expression (0)\n"); }
-primary_expression :  closure_expression		 { printf("primary_expression (0)\n"); }
-primary_expression :  parenthesized_expression		 { printf("primary_expression (0)\n"); }
-primary_expression :  implicit_member_expression		 { printf("primary_expression (0)\n"); }
-primary_expression :  wildcard_expression		 { printf("primary_expression (0)\n"); }
+primary_expression :  literal_expression		 { printf("primary_expression (2)\n"); }
+primary_expression :  self_expression		 { printf("primary_expression (3)\n"); }
+primary_expression :  superclass_expression		 { printf("primary_expression (4)\n"); }
+primary_expression :  closure_expression		 { printf("primary_expression (5)\n"); }
+primary_expression :  parenthesized_expression		 { printf("primary_expression (6)\n"); }
+primary_expression :  implicit_member_expression		 { printf("primary_expression (7)\n"); }
+primary_expression :  wildcard_expression		 { printf("primary_expression (8)\n"); }
 
 // GRAMMAR OF A LITERAL EXPRESSION
 
