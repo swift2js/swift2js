@@ -51,6 +51,7 @@ class TokenData {
     var lastParsed = "";
     var consumed = 0;
     var tokenStack:TokenData[] = [];
+    var debugYYLex = false;
     
     let cleanRegex = Regex("^[\\s\r\n]+");
     let identifierRegex = Regex("^[a-zA-Z_]+[\\w]*");
@@ -240,7 +241,9 @@ class TokenData {
         lastyylexToken = nextToken();
         if let data = lastyylexToken {
             let number = data.token.toRaw() as NSNumber;
-            println("yylex: \(tokenToString(data.token))")
+            if debugYYLex {
+                println("yylex: \(tokenToString(data.token))")
+            }
             return number.intValue;
         }
         return 0;

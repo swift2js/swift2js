@@ -8,28 +8,67 @@
 
 import Foundation
 
-let testFile = "test2.swift";
-//test objects are copied automatically to tmp using scode build phase
-//TODO: read files from args, from input stream, etc.
-
-var sourceCode = NSString.stringWithContentsOfFile("/tmp/" + testFile);
-
-//println(sourceCode);
-var lexer = Lexer(sourceCode as String);
-lexer.debugTokens();
-//lexer.bisonTokens();
-
-var ast:ASTNode? = bridge_yyparse(lexer);
-
-if let program = ast {
+func swift2js(sourceCode: String, debug:Bool) -> (js:String?, error:String?) {
+    var lexer = Lexer(sourceCode);
+    lexer.debugYYLex = debug;
+    if debug {
+        println()
+        println("---------------------")
+        println("Lexer Tokens Debug")
+        println("---------------------")
+        println()
+        lexer.debugTokens();
+        
+        println()
+        println("---------------------")
+        println("AST Parser")
+        println("---------------------")
+        println()
+    }
     
-    println();
-    println("--------------------")
-    println("Transpiled JavaScript")
-    println("--------------------")
-    println();
-    println(program.toJS());
+    var ast:ASTNode? = bridge_yyparse(lexer, debug ? 1 : 0);
+    
+    if let program = ast {
+        return (program.toJS(),nil);
+    }
+    
+    var error = NSString.stringWithUTF8String(bridge_yyerror());
+    
+    return ("", error);
 }
+
+
+let debug = true;
+//Test files are copied automatically to tmp using xcode build phase
+//TODO: read files from args, from input stream, etc.
+let testFile = "test2.swift";
+
+var sourceCode: AnyObject? = NSString.stringWithContentsOfFile("/tmp/" + testFile);
+
+if sourceCode {
+    
+    let (js,error) = swift2js(sourceCode as NSString, debug);
+    
+    if let translation = js {
+        if debug {
+            println();
+            println("---------------------")
+            println("Transpiled JavaScript")
+            println("---------------------")
+            println();
+        }
+        println(translation);
+    }
+    
+    if let parseError = error {
+        println("Error: \(parseError)");
+    }
+
+}
+else {
+    println("File not found: \(testFile)");
+}
+
 
 
 

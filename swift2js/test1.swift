@@ -8,17 +8,13 @@
 
 import Foundation;
 
-func test1(){
-    var team = ["Javi", "Mortimer", "Karliky", "Gorka", "Carlos", "Pablo"]
+func test1(iker mortimer:String, eder:Int) -> Int {
+    var team = ["Javi", "Mortimer", "Karliky", "Gorka", "Carlos", "Pablo"];
     
-    
-    sort(team) {  $0 > $1 }
+    //sort(team) {  $0 > $1 }
     var index:Int = 0;
     
-    for name in team {
-        index++;
-        println("Team member \(index): \(name) charcont \(name.utf16count)" );
-    }
-    
     println("Total members:" + String(index), "aaa");
+    
+    return 0;
 }

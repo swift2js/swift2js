@@ -10,6 +10,10 @@
     inline NSString * toSwift(const char * c) {
         return c ? [NSString stringWithUTF8String:c] : nil;
     }
+    
+    static bool debugRules = false;
+    
+    #define LOG(...) if (debugRules)printf(__VA_ARGS__);
 %}
 
 %glr-parser
@@ -410,484 +414,484 @@ program: statements {ast = $1;}
 
 // GRAMMAR OF A STATEMENT
 
-statement :  expression semicolon_opt		 { $$ = [[StatementNode alloc] initWithStatement:$1]; printf("statement (0)\n"); }
-semicolon_opt:  | ";"		 { printf("semicolon_opt\n"); }
-statement :  declaration semicolon_opt		 { printf("statement (0)\n"); }
-statement :  loop_statement semicolon_opt		 { printf("statement (0)\n"); }
-statement :  branch_statement semicolon_opt		 { printf("statement (0)\n"); }
-statement :  labeled_statement		 { printf("statement (0)\n"); }
-statement :  control_transfer_statement semicolon_opt		 { printf("statement (0)\n"); }
-statements :  statement %dprec 2   {$$ = [[StatementsNode alloc] initWithCurrent:$1]; printf("current2 %p", $1); }
-|  statement statements %dprec 1 {$$ = [[StatementsNode alloc] initWithCurrent:$1 next:(StatementsNode*)$2]; printf("current2 %p\n", $1);  }
+statement :  expression semicolon_opt		 { $$ = [[StatementNode alloc] initWithStatement:$1]; LOG("statement (0)\n"); }
+semicolon_opt:  | ";"		 { LOG("semicolon_opt\n"); }
+statement :  declaration semicolon_opt		 { LOG("statement (0)\n"); }
+statement :  loop_statement semicolon_opt		 { LOG("statement (0)\n"); }
+statement :  branch_statement semicolon_opt		 { LOG("statement (0)\n"); }
+statement :  labeled_statement		 { LOG("statement (0)\n"); }
+statement :  control_transfer_statement semicolon_opt		 { LOG("statement (0)\n"); }
+statements :  statement %dprec 2   {$$ = [[StatementsNode alloc] initWithCurrent:$1]; }
+|  statement statements %dprec 1 {$$ = [[StatementsNode alloc] initWithCurrent:$1 next:(StatementsNode*)$2]; }
 
 // GRAMMAR OF A LOOP STATEMENT
 
-loop_statement :  for_statement		 { printf("loop_statement (0)\n"); }
-loop_statement :  for_in_statement		 { printf("loop_statement (0)\n"); }
-loop_statement :  while_statement		 { printf("loop_statement (0)\n"); }
-loop_statement :  do_while_statement		 { printf("loop_statement (0)\n"); }
+loop_statement :  for_statement		 { LOG("loop_statement (0)\n"); }
+loop_statement :  for_in_statement		 { LOG("loop_statement (0)\n"); }
+loop_statement :  while_statement		 { LOG("loop_statement (0)\n"); }
+loop_statement :  do_while_statement		 { LOG("loop_statement (0)\n"); }
 
 // GRAMMAR OF A FOR STATEMENT
 
-for_statement :  "for" for_init_opt ";" expression_opt ";" expression_opt code_block		 { printf("for_statement (0)\n"); }
-for_init_opt:  | for_init		 { printf("for_init_opt\n"); }
-expression_opt:  | expression		 { printf("expression_opt\n"); }
-for_statement :  "for" "(" for_init_opt ";" expression_opt ";" expression_opt ")" code_block		 { printf("for_statement (0)\n"); }
-for_init :  variable_declaration		 { printf("for_init (0)\n"); }
-| expression_list		 { printf("for_init (1)\n"); }
+for_statement :  "for" for_init_opt ";" expression_opt ";" expression_opt code_block		 { LOG("for_statement (0)\n"); }
+for_init_opt:  | for_init		 { LOG("for_init_opt\n"); }
+expression_opt:  | expression		 { LOG("expression_opt\n"); }
+for_statement :  "for" "(" for_init_opt ";" expression_opt ";" expression_opt ")" code_block		 { LOG("for_statement (0)\n"); }
+for_init :  variable_declaration		 { LOG("for_init (0)\n"); }
+| expression_list		 { LOG("for_init (1)\n"); }
 
 // GRAMMAR OF A FOR_IN STATEMENT
 
-for_in_statement :  "for" pattern "in" expression code_block		 { printf("for_in_statement (0)\n"); }
+for_in_statement :  "for" pattern "in" expression code_block		 { LOG("for_in_statement (0)\n"); }
 
 // GRAMMAR OF A WHILE STATEMENT
 
-while_statement :  "while" while_condition code_block		 { printf("while_statement (0)\n"); }
-while_condition :  expression		 { printf("while_condition (0)\n"); }
-| declaration		 { printf("while_condition (1)\n"); }
+while_statement :  "while" while_condition code_block		 { LOG("while_statement (0)\n"); }
+while_condition :  expression		 { LOG("while_condition (0)\n"); }
+| declaration		 { LOG("while_condition (1)\n"); }
 
 // GRAMMAR OF A DO_WHILE STATEMENT
 
-do_while_statement :  "do" code_block "while" while_condition		 { printf("do_while_statement (0)\n"); }
+do_while_statement :  "do" code_block "while" while_condition		 { LOG("do_while_statement (0)\n"); }
 
 // GRAMMAR OF A BRANCH STATEMENT
 
-branch_statement :  if_statement		 { printf("branch_statement (0)\n"); }
-branch_statement :  switch_statement		 { printf("branch_statement (0)\n"); }
+branch_statement :  if_statement		 { LOG("branch_statement (0)\n"); }
+branch_statement :  switch_statement		 { LOG("branch_statement (0)\n"); }
 
 // GRAMMAR OF AN IF STATEMENT
 
-if_statement :  "if" if_condition code_block else_clause_opt		 {$$ = [[IfStatement alloc] initWithIfCondition:$2 body:$3 elseClause:$4]; printf("if_statement (0)\n"); }
-else_clause_opt:  | else_clause		 { printf("else_clause_opt\n"); }
-if_condition :  expression		 { printf("if_condition (0)\n"); }
-| declaration		 { printf("if_condition (1)\n"); }
-else_clause :  "else" code_block		 {$$ = $2; printf("else_clause (0)\n"); }
-| "else" if_statement		 {$$ = $2; printf("else_clause (1)\n"); }
+if_statement :  "if" if_condition code_block else_clause_opt		 {$$ = [[IfStatement alloc] initWithIfCondition:$2 body:$3 elseClause:$4]; LOG("if_statement (0)\n"); }
+else_clause_opt:  | else_clause		 { LOG("else_clause_opt\n"); }
+if_condition :  expression		 { LOG("if_condition (0)\n"); }
+| declaration		 { LOG("if_condition (1)\n"); }
+else_clause :  "else" code_block		 {$$ = $2; LOG("else_clause (0)\n"); }
+| "else" if_statement		 {$$ = $2; LOG("else_clause (1)\n"); }
 
 // GRAMMAR OF A SWITCH STATEMENT
 
-switch_statement :  "switch" expression "{" switch_cases_opt "}"		 { printf("switch_statement (0)\n"); }
-switch_cases_opt:  | switch_cases		 { printf("switch_cases_opt\n"); }
-switch_cases :  switch_case switch_cases_opt		 { printf("switch_cases (0)\n"); }
-switch_case :  case_label statements		 { printf("switch_case (0)\n"); }
-| default_label statements		 { printf("switch_case (1)\n"); }
-switch_case :  case_label ";"		 { printf("switch_case (0)\n"); }
-| default_label ";"		 { printf("switch_case (1)\n"); }
-case_label :  "case" case_item_list ":"		 { printf("case_label (0)\n"); }
-case_item_list :  pattern guard_clause_opt		 { printf("case_item_list (0)\n"); }
-| pattern guard_clause_opt "," case_item_list		 { printf("case_item_list (1)\n"); }
-guard_clause_opt:  | guard_clause		 { printf("guard_clause_opt\n"); }
-default_label :  "default" ":"		 { printf("default_label (0)\n"); }
-guard_clause :  "where" guard_expression		 { printf("guard_clause (0)\n"); }
-guard_expression :  expression		 { printf("guard_expression (0)\n"); }
+switch_statement :  "switch" expression "{" switch_cases_opt "}"		 { LOG("switch_statement (0)\n"); }
+switch_cases_opt:  | switch_cases		 { LOG("switch_cases_opt\n"); }
+switch_cases :  switch_case switch_cases_opt		 { LOG("switch_cases (0)\n"); }
+switch_case :  case_label statements		 { LOG("switch_case (0)\n"); }
+| default_label statements		 { LOG("switch_case (1)\n"); }
+switch_case :  case_label ";"		 { LOG("switch_case (0)\n"); }
+| default_label ";"		 { LOG("switch_case (1)\n"); }
+case_label :  "case" case_item_list ":"		 { LOG("case_label (0)\n"); }
+case_item_list :  pattern guard_clause_opt		 { LOG("case_item_list (0)\n"); }
+| pattern guard_clause_opt "," case_item_list		 { LOG("case_item_list (1)\n"); }
+guard_clause_opt:  | guard_clause		 { LOG("guard_clause_opt\n"); }
+default_label :  "default" ":"		 { LOG("default_label (0)\n"); }
+guard_clause :  "where" guard_expression		 { LOG("guard_clause (0)\n"); }
+guard_expression :  expression		 { LOG("guard_expression (0)\n"); }
 
 // GRAMMAR OF A LABELED STATEMENT
 
-labeled_statement :  statement_label loop_statement		 { printf("labeled_statement (0)\n"); }
-| statement_label switch_statement		 { printf("labeled_statement (1)\n"); }
-statement_label :  label_name ":"		 { printf("statement_label (0)\n"); }
-label_name :  identifier		 { printf("label_name (0)\n"); }
+labeled_statement :  statement_label loop_statement		 { LOG("labeled_statement (0)\n"); }
+| statement_label switch_statement		 { LOG("labeled_statement (1)\n"); }
+statement_label :  label_name ":"		 { LOG("statement_label (0)\n"); }
+label_name :  identifier		 { LOG("label_name (0)\n"); }
 
 // GRAMMAR OF A CONTROL TRANSFER STATEMENT
 
-control_transfer_statement :  break_statement		 { printf("control_transfer_statement (0)\n"); }
-control_transfer_statement :  continue_statement		 { printf("control_transfer_statement (0)\n"); }
-control_transfer_statement :  fallthrough_statement		 { printf("control_transfer_statement (0)\n"); }
-control_transfer_statement :  return_statement		 { printf("control_transfer_statement (0)\n"); }
+control_transfer_statement :  break_statement		 { LOG("control_transfer_statement (0)\n"); }
+control_transfer_statement :  continue_statement		 { LOG("control_transfer_statement (0)\n"); }
+control_transfer_statement :  fallthrough_statement		 { LOG("control_transfer_statement (0)\n"); }
+control_transfer_statement :  return_statement		 { LOG("control_transfer_statement (0)\n"); }
 
 // GRAMMAR OF A BREAK STATEMENT
 
-break_statement :  "break" label_name_opt		 { printf("break_statement (0)\n"); }
-label_name_opt:  | label_name		 { printf("label_name_opt\n"); }
+break_statement :  "break" label_name_opt		 { LOG("break_statement (0)\n"); }
+label_name_opt:  | label_name		 { LOG("label_name_opt\n"); }
 
 // GRAMMAR OF A CONTINUE STATEMENT
 
-continue_statement :  "continue" label_name_opt		 { printf("continue_statement (0)\n"); }
+continue_statement :  "continue" label_name_opt		 { LOG("continue_statement (0)\n"); }
 
 // GRAMMAR OF A FALLTHROUGH STATEMENT
 
-fallthrough_statement :  "fallthrough"		 { printf("fallthrough_statement (0)\n"); }
+fallthrough_statement :  "fallthrough"		 { LOG("fallthrough_statement (0)\n"); }
 
 // GRAMMAR OF A RETURN STATEMENT
 
-return_statement :  "return" expression_opt		 {$$ = [[ReturnStatement alloc] initWithReturnExpr:$2]; printf("return_statement (0)\n"); }
+return_statement :  "return" expression_opt		 {$$ = [[ReturnStatement alloc] initWithReturnExpr:$2]; LOG("return_statement (0)\n"); }
 
 /******* GENERIC PARAMETERS AND ARGUMENTS *******/
 
 
 // GRAMMAR OF A GENERIC PARAMETER CLAUSE
 
-generic_parameter_clause :  "<" generic_parameter_list requirement_clause_opt ">"		 { printf("generic_parameter_clause (0)\n"); }
-requirement_clause_opt:  | requirement_clause		 { printf("requirement_clause_opt\n"); }
-generic_parameter_list :  generic_parameter		 { printf("generic_parameter_list (0)\n"); }
-| generic_parameter "," generic_parameter_list		 { printf("generic_parameter_list (1)\n"); }
-generic_parameter :  type_name		 { printf("generic_parameter (0)\n"); }
-generic_parameter :  type_name ":" type_identifier		 { printf("generic_parameter (0)\n"); }
-generic_parameter :  type_name ":" protocol_composition_type		 { printf("generic_parameter (0)\n"); }
-requirement_clause :  "where" requirement_list		 { printf("requirement_clause (0)\n"); }
-requirement_list :  requirement		 { printf("requirement_list (0)\n"); }
-| requirement "," requirement_list		 { printf("requirement_list (1)\n"); }
-requirement :  conformance_requirement		 { printf("requirement (0)\n"); }
-| same_type_requirement		 { printf("requirement (1)\n"); }
-conformance_requirement :  type_identifier ":" type_identifier		 { printf("conformance_requirement (0)\n"); }
-conformance_requirement :  type_identifier ":" protocol_composition_type		 { printf("conformance_requirement (0)\n"); }
-same_type_requirement :  type_identifier "==" type_identifier		 { printf("same_type_requirement (0)\n"); }
+generic_parameter_clause :  "<" generic_parameter_list requirement_clause_opt ">"		 { LOG("generic_parameter_clause (0)\n"); }
+requirement_clause_opt:  | requirement_clause		 { LOG("requirement_clause_opt\n"); }
+generic_parameter_list :  generic_parameter		 { LOG("generic_parameter_list (0)\n"); }
+| generic_parameter "," generic_parameter_list		 { LOG("generic_parameter_list (1)\n"); }
+generic_parameter :  type_name		 { LOG("generic_parameter (0)\n"); }
+generic_parameter :  type_name ":" type_identifier		 { LOG("generic_parameter (0)\n"); }
+generic_parameter :  type_name ":" protocol_composition_type		 { LOG("generic_parameter (0)\n"); }
+requirement_clause :  "where" requirement_list		 { LOG("requirement_clause (0)\n"); }
+requirement_list :  requirement		 { LOG("requirement_list (0)\n"); }
+| requirement "," requirement_list		 { LOG("requirement_list (1)\n"); }
+requirement :  conformance_requirement		 { LOG("requirement (0)\n"); }
+| same_type_requirement		 { LOG("requirement (1)\n"); }
+conformance_requirement :  type_identifier ":" type_identifier		 { LOG("conformance_requirement (0)\n"); }
+conformance_requirement :  type_identifier ":" protocol_composition_type		 { LOG("conformance_requirement (0)\n"); }
+same_type_requirement :  type_identifier "==" type_identifier		 { LOG("same_type_requirement (0)\n"); }
 
 // GRAMMAR OF A GENERIC ARGUMENT CLAUSE
 
-generic_argument_clause :  "<" generic_argument_list ">"		 { printf("generic_argument_clause (0)\n"); }
-generic_argument_list :  generic_argument		 { printf("generic_argument_list (0)\n"); }
-| generic_argument "," generic_argument_list		 { printf("generic_argument_list (1)\n"); }
-generic_argument :  type		 { printf("generic_argument (0)\n"); }
+generic_argument_clause :  "<" generic_argument_list ">"		 { LOG("generic_argument_clause (0)\n"); }
+generic_argument_list :  generic_argument		 { LOG("generic_argument_list (0)\n"); }
+| generic_argument "," generic_argument_list		 { LOG("generic_argument_list (1)\n"); }
+generic_argument :  type		 { LOG("generic_argument (0)\n"); }
 
 /******* DECLARATIONS *******/
 
 
 // GRAMMAR OF A DECLARATION
 
-declaration :  import_declaration		 { printf("declaration (0)\n"); }
-declaration :  constant_declaration		 { printf("declaration (0)\n"); }
-declaration :  variable_declaration		 { printf("declaration (0)\n"); }
-declaration :  typealias_declaration		 { printf("declaration (0)\n"); }
-declaration :  function_declaration		 { printf("declaration (0)\n"); }
-declaration :  enum_declaration		 { printf("declaration (0)\n"); }
-declaration :  struct_declaration		 { printf("declaration (0)\n"); }
-declaration :  class_declaration		 { printf("declaration (0)\n"); }
-declaration :  protocol_declaration		 { printf("declaration (0)\n"); }
-declaration :  initializer_declaration		 { printf("declaration (0)\n"); }
-declaration :  deinitializer_declaration		 { printf("declaration (0)\n"); }
-declaration :  extension_declaration		 { printf("declaration (0)\n"); }
-declaration :  subscript_declaration		 { printf("declaration (0)\n"); }
-declaration :  operator_declaration		 { printf("declaration (0)\n"); }
-declarations :  declaration declarations_opt		 { printf("declarations (0)\n"); }
-declarations_opt:  | declarations		 { printf("declarations_opt\n"); }
-declaration_specifiers :  declaration_specifier declaration_specifiers_opt		 { printf("declaration_specifiers (0)\n"); }
-declaration_specifiers_opt:  | declaration_specifiers		 { printf("declaration_specifiers_opt\n"); }
-declaration_specifier :  "class"		 { printf("declaration_specifier (0)\n"); }
-| "mutating"		 { printf("declaration_specifier (1)\n"); }
-| "nonmutating"		 { printf("declaration_specifier (2)\n"); }
-| "override"		 { printf("declaration_specifier (3)\n"); }
-| "static"		 { printf("declaration_specifier (4)\n"); }
-| "unowned"		 { printf("declaration_specifier (5)\n"); }
-| "unowned(safe)"		 { printf("declaration_specifier (6)\n"); }
-| "unowned(unsafe)"		 { printf("declaration_specifier (7)\n"); }
-| "weak"		 { printf("declaration_specifier (8)\n"); }
+declaration :  import_declaration		 { LOG("declaration (0)\n"); }
+declaration :  constant_declaration		 { LOG("declaration (0)\n"); }
+declaration :  variable_declaration		 { LOG("declaration (0)\n"); }
+declaration :  typealias_declaration		 { LOG("declaration (0)\n"); }
+declaration :  function_declaration		 { LOG("declaration (0)\n"); }
+declaration :  enum_declaration		 { LOG("declaration (0)\n"); }
+declaration :  struct_declaration		 { LOG("declaration (0)\n"); }
+declaration :  class_declaration		 { LOG("declaration (0)\n"); }
+declaration :  protocol_declaration		 { LOG("declaration (0)\n"); }
+declaration :  initializer_declaration		 { LOG("declaration (0)\n"); }
+declaration :  deinitializer_declaration		 { LOG("declaration (0)\n"); }
+declaration :  extension_declaration		 { LOG("declaration (0)\n"); }
+declaration :  subscript_declaration		 { LOG("declaration (0)\n"); }
+declaration :  operator_declaration		 { LOG("declaration (0)\n"); }
+declarations :  declaration declarations_opt		 { LOG("declarations (0)\n"); }
+declarations_opt:  | declarations		 { LOG("declarations_opt\n"); }
+declaration_specifiers :  declaration_specifier declaration_specifiers_opt		 { LOG("declaration_specifiers (0)\n"); }
+declaration_specifiers_opt:  | declaration_specifiers		 { LOG("declaration_specifiers_opt\n"); }
+declaration_specifier :  "class"		 { LOG("declaration_specifier (0)\n"); }
+| "mutating"		 { LOG("declaration_specifier (1)\n"); }
+| "nonmutating"		 { LOG("declaration_specifier (2)\n"); }
+| "override"		 { LOG("declaration_specifier (3)\n"); }
+| "static"		 { LOG("declaration_specifier (4)\n"); }
+| "unowned"		 { LOG("declaration_specifier (5)\n"); }
+| "unowned(safe)"		 { LOG("declaration_specifier (6)\n"); }
+| "unowned(unsafe)"		 { LOG("declaration_specifier (7)\n"); }
+| "weak"		 { LOG("declaration_specifier (8)\n"); }
 
 // GRAMMAR OF A CODE BLOCK
 
-code_block :  "{" statements "}"		 {$$ = $2; printf("code_block (0)\n"); }
-| "{" "}"		 { $$ = NULL; printf("code_block (1)\n"); }
+code_block :  "{" statements "}"		 {$$ = $2; LOG("code_block (0)\n"); }
+| "{" "}"		 { $$ = NULL; LOG("code_block (1)\n"); }
 
 // GRAMMAR OF AN IMPORT DECLARATION
 
-import_declaration :  attributes_opt "import" import_kind_opt import_path		 { printf("import_declaration (0)\n"); }
-attributes_opt:  | attributes		 { printf("attributes_opt\n"); }
-import_kind_opt:  | import_kind		 { printf("import_kind_opt\n"); }
-import_kind :  "typealias"		 { printf("import_kind (0)\n"); }
-| "struct"		 { printf("import_kind (1)\n"); }
-| "class"		 { printf("import_kind (2)\n"); }
-| "enum"		 { printf("import_kind (3)\n"); }
-| "protocol"		 { printf("import_kind (4)\n"); }
-| "var"		 { printf("import_kind (5)\n"); }
-| "func"		 { printf("import_kind (6)\n"); }
-import_path :  import_path_identifier		 { printf("import_path (0)\n"); }
-| import_path_identifier "." import_path		 { printf("import_path (1)\n"); }
-import_path_identifier :  identifier		 { printf("import_path_identifier (0)\n"); }
-| operator		 { printf("import_path_identifier (1)\n"); }
+import_declaration :  attributes_opt "import" import_kind_opt import_path		 { LOG("import_declaration (0)\n"); }
+attributes_opt:  | attributes		 { LOG("attributes_opt\n"); }
+import_kind_opt:  | import_kind		 { LOG("import_kind_opt\n"); }
+import_kind :  "typealias"		 { LOG("import_kind (0)\n"); }
+| "struct"		 { LOG("import_kind (1)\n"); }
+| "class"		 { LOG("import_kind (2)\n"); }
+| "enum"		 { LOG("import_kind (3)\n"); }
+| "protocol"		 { LOG("import_kind (4)\n"); }
+| "var"		 { LOG("import_kind (5)\n"); }
+| "func"		 { LOG("import_kind (6)\n"); }
+import_path :  import_path_identifier		 { LOG("import_path (0)\n"); }
+| import_path_identifier "." import_path		 { LOG("import_path (1)\n"); }
+import_path_identifier :  identifier		 { LOG("import_path_identifier (0)\n"); }
+| operator		 { LOG("import_path_identifier (1)\n"); }
 
 // GRAMMAR OF A CONSTANT DECLARATION
 
-constant_declaration :  attributes_opt declaration_specifiers_opt "let" pattern_initializer_list		 {$$ = [[DeclarationStatement alloc] initWithInitializer:$4]; printf("constant_declaration (0)\n"); }
-pattern_initializer_list :  pattern_initializer		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil];  printf("pattern_initializer_list (0)\n"); }
-| pattern_initializer "," pattern_initializer_list		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; printf("pattern_initializer_list (1)\n"); }
-pattern_initializer :  pattern initializer %dprec 1         {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:[[BinaryExpression alloc] initWithExpression:$2 next:nil]]; printf("pattern_initializer (0)\n"); }
-| pattern %dprec 2                                          { printf("pattern_initializer (1)\n"); }
-initializer_opt:  | initializer		 { printf("initializer_opt\n"); }
-initializer :  "=" expression		 {$$ = [[AssignmentOperator alloc] initWithRightOperand:$2];  printf("initializer (0)\n"); }
+constant_declaration :  attributes_opt declaration_specifiers_opt "let" pattern_initializer_list		 {$$ = [[DeclarationStatement alloc] initWithInitializer:$4]; LOG("constant_declaration (0)\n"); }
+pattern_initializer_list :  pattern_initializer		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil];  LOG("pattern_initializer_list (0)\n"); }
+| pattern_initializer "," pattern_initializer_list		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; LOG("pattern_initializer_list (1)\n"); }
+pattern_initializer :  pattern initializer %dprec 1         {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:[[BinaryExpression alloc] initWithExpression:$2 next:nil]]; LOG("pattern_initializer (0)\n"); }
+| pattern %dprec 2                                          { LOG("pattern_initializer (1)\n"); }
+initializer_opt:  | initializer		 { LOG("initializer_opt\n"); }
+initializer :  "=" expression		 {$$ = [[AssignmentOperator alloc] initWithRightOperand:$2];  LOG("initializer (0)\n"); }
 
 // GRAMMAR OF A VARIABLE DECLARATION
 
-variable_declaration :  variable_declaration_head pattern_initializer_list 		 {$$ = [[DeclarationStatement alloc] initWithInitializer:$2]; printf("variable_declaration (0)\n"); }
-variable_declaration :  variable_declaration_head variable_name type_annotation code_block		 { printf("variable_declaration (0)\n"); }
-variable_declaration :  variable_declaration_head variable_name type_annotation getter_setter_block		 { printf("variable_declaration (0)\n"); }
-variable_declaration :  variable_declaration_head variable_name type_annotation getter_setter_keyword_block		 { printf("variable_declaration (0)\n"); }
-variable_declaration :  variable_declaration_head variable_name type_annotation initializer_opt willSet_didSet_block		 { printf("variable_declaration (0)\n"); }
-variable_declaration_head :  attributes_opt declaration_specifiers_opt "var"		 { printf("variable_declaration_head (0)\n"); }
-variable_name :  identifier		 { printf("variable_name (0)\n"); }
-getter_setter_block :  "{" getter_clause setter_clause_opt "}"		 { printf("getter_setter_block (0)\n"); }
-setter_clause_opt:  | setter_clause		 { printf("setter_clause_opt\n"); }
-getter_setter_block :  "{" setter_clause getter_clause "}"		 { printf("getter_setter_block (0)\n"); }
-getter_clause :  attributes_opt "get" code_block		 { printf("getter_clause (0)\n"); }
-setter_clause :  attributes_opt "set" setter_name_opt code_block		 { printf("setter_clause (0)\n"); }
-setter_name_opt:  | setter_name		 { printf("setter_name_opt\n"); }
-setter_name :  "(" identifier ")"		 { printf("setter_name (0)\n"); }
-getter_setter_keyword_block :  "{" getter_keyword_clause setter_keyword_clause_opt "}"		 { printf("getter_setter_keyword_block (0)\n"); }
-setter_keyword_clause_opt:  | setter_keyword_clause		 { printf("setter_keyword_clause_opt\n"); }
-getter_setter_keyword_block :  "{" setter_keyword_clause getter_keyword_clause "}"		 { printf("getter_setter_keyword_block (0)\n"); }
-getter_keyword_clause :  attributes_opt "get"		 { printf("getter_keyword_clause (0)\n"); }
-setter_keyword_clause :  attributes_opt "set"		 { printf("setter_keyword_clause (0)\n"); }
-willSet_didSet_block :  "{" willSet_clause didSet_clause_opt "}"		 { printf("willSet_didSet_block (0)\n"); }
-didSet_clause_opt:  | didSet_clause		 { printf("didSet_clause_opt\n"); }
-willSet_didSet_block :  "{" didSet_clause willSet_clause "}"		 { printf("willSet_didSet_block (0)\n"); }
-willSet_clause :  attributes_opt "willSet" setter_name_opt code_block		 { printf("willSet_clause (0)\n"); }
-didSet_clause :  attributes_opt "didSet" setter_name_opt code_block		 { printf("didSet_clause (0)\n"); }
+variable_declaration :  variable_declaration_head pattern_initializer_list 		 {$$ = [[DeclarationStatement alloc] initWithInitializer:$2]; LOG("variable_declaration (0)\n"); }
+variable_declaration :  variable_declaration_head variable_name type_annotation code_block		 { LOG("variable_declaration (0)\n"); }
+variable_declaration :  variable_declaration_head variable_name type_annotation getter_setter_block		 { LOG("variable_declaration (0)\n"); }
+variable_declaration :  variable_declaration_head variable_name type_annotation getter_setter_keyword_block		 { LOG("variable_declaration (0)\n"); }
+variable_declaration :  variable_declaration_head variable_name type_annotation initializer_opt willSet_didSet_block		 { LOG("variable_declaration (0)\n"); }
+variable_declaration_head :  attributes_opt declaration_specifiers_opt "var"		 { LOG("variable_declaration_head (0)\n"); }
+variable_name :  identifier		 { LOG("variable_name (0)\n"); }
+getter_setter_block :  "{" getter_clause setter_clause_opt "}"		 { LOG("getter_setter_block (0)\n"); }
+setter_clause_opt:  | setter_clause		 { LOG("setter_clause_opt\n"); }
+getter_setter_block :  "{" setter_clause getter_clause "}"		 { LOG("getter_setter_block (0)\n"); }
+getter_clause :  attributes_opt "get" code_block		 { LOG("getter_clause (0)\n"); }
+setter_clause :  attributes_opt "set" setter_name_opt code_block		 { LOG("setter_clause (0)\n"); }
+setter_name_opt:  | setter_name		 { LOG("setter_name_opt\n"); }
+setter_name :  "(" identifier ")"		 { LOG("setter_name (0)\n"); }
+getter_setter_keyword_block :  "{" getter_keyword_clause setter_keyword_clause_opt "}"		 { LOG("getter_setter_keyword_block (0)\n"); }
+setter_keyword_clause_opt:  | setter_keyword_clause		 { LOG("setter_keyword_clause_opt\n"); }
+getter_setter_keyword_block :  "{" setter_keyword_clause getter_keyword_clause "}"		 { LOG("getter_setter_keyword_block (0)\n"); }
+getter_keyword_clause :  attributes_opt "get"		 { LOG("getter_keyword_clause (0)\n"); }
+setter_keyword_clause :  attributes_opt "set"		 { LOG("setter_keyword_clause (0)\n"); }
+willSet_didSet_block :  "{" willSet_clause didSet_clause_opt "}"		 { LOG("willSet_didSet_block (0)\n"); }
+didSet_clause_opt:  | didSet_clause		 { LOG("didSet_clause_opt\n"); }
+willSet_didSet_block :  "{" didSet_clause willSet_clause "}"		 { LOG("willSet_didSet_block (0)\n"); }
+willSet_clause :  attributes_opt "willSet" setter_name_opt code_block		 { LOG("willSet_clause (0)\n"); }
+didSet_clause :  attributes_opt "didSet" setter_name_opt code_block		 { LOG("didSet_clause (0)\n"); }
 
 // GRAMMAR OF A TYPE ALIAS DECLARATION
 
-typealias_declaration :  typealias_head typealias_assignment		 { printf("typealias_declaration (0)\n"); }
-typealias_head :  "typealias" typealias_name		 { printf("typealias_head (0)\n"); }
-typealias_name :  identifier		 { printf("typealias_name (0)\n"); }
-typealias_assignment :  "=" type		 { printf("typealias_assignment (0)\n"); }
+typealias_declaration :  typealias_head typealias_assignment		 { LOG("typealias_declaration (0)\n"); }
+typealias_head :  "typealias" typealias_name		 { LOG("typealias_head (0)\n"); }
+typealias_name :  identifier		 { LOG("typealias_name (0)\n"); }
+typealias_assignment :  "=" type		 { LOG("typealias_assignment (0)\n"); }
 
 // GRAMMAR OF A FUNCTION DECLARATION
 
 function_declaration :  function_head function_name generic_parameter_clause_opt function_signature function_body		 {
     $$ = [[FunctionDeclaration alloc] initWithName:toSwift($2) signature:$4 body:$5];
-    printf("function_declaration (0)\n");
+    LOG("function_declaration (0)\n");
 }
-generic_parameter_clause_opt:  | generic_parameter_clause		 { printf("generic_parameter_clause_opt\n"); }
-function_head :  attributes_opt declaration_specifiers_opt "func"		 { printf("function_head (0)\n"); }
-function_name :  identifier		 { printf("function_name (0)\n"); }
-| operator		 { printf("function_name (1)\n"); }
-function_signature :  parameter_clauses function_result_opt		 {$$ = $1; printf("function_signature (0)\n"); }
-function_result_opt:  | function_result		 { printf("function_result_opt\n"); }
-function_result :  "->" attributes_opt type		 { printf("function_result (0)\n"); }
-function_body :  code_block		 { printf("function_body (0)\n"); }
-parameter_clauses :  parameter_clause parameter_clauses_opt		 { printf("parameter_clauses (0)\n"); }
-parameter_clauses_opt:  | parameter_clauses		 { printf("parameter_clauses_opt\n"); }
-parameter_clause :  "(" ")"		 {$$ = NULL; printf("parameter_clause (0)\n"); }
-| "(" parameter_list tripledot_opt ")"		 {$$ = $2; printf("parameter_clause (1)\n"); }
-tripledot_opt:  | "..."		 { printf("tripledot_opt\n"); }
-parameter_list :  parameter		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; printf("parameter_list (0)\n"); }
-| parameter "," parameter_list		 { $$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3];printf("parameter_list (1)\n"); }
+generic_parameter_clause_opt:  | generic_parameter_clause		 { LOG("generic_parameter_clause_opt\n"); }
+function_head :  attributes_opt declaration_specifiers_opt "func"		 { LOG("function_head (0)\n"); }
+function_name :  identifier		 { LOG("function_name (0)\n"); }
+| operator		 { LOG("function_name (1)\n"); }
+function_signature :  parameter_clauses function_result_opt		 {$$ = $1; LOG("function_signature (0)\n"); }
+function_result_opt:  | function_result		 { LOG("function_result_opt\n"); }
+function_result :  "->" attributes_opt type		 { LOG("function_result (0)\n"); }
+function_body :  code_block		 { LOG("function_body (0)\n"); }
+parameter_clauses :  parameter_clause parameter_clauses_opt		 { LOG("parameter_clauses (0)\n"); }
+parameter_clauses_opt:  | parameter_clauses		 { LOG("parameter_clauses_opt\n"); }
+parameter_clause :  "(" ")"		 {$$ = NULL; LOG("parameter_clause (0)\n"); }
+| "(" parameter_list tripledot_opt ")"		 {$$ = $2; LOG("parameter_clause (1)\n"); }
+tripledot_opt:  | "..."		 { LOG("tripledot_opt\n"); }
+parameter_list :  parameter		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; LOG("parameter_list (0)\n"); }
+| parameter "," parameter_list		 { $$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3];LOG("parameter_list (1)\n"); }
 parameter :  inout_opt let_opt hash_opt parameter_name local_parameter_name_opt type_annotation default_argument_clause_opt		 {
     $$ = [[FunctionParameter alloc] initWithInoutVal:!!$1 letVal:!!$2 hashVal:!!$3 external:toSwift($4) local:toSwift($5) defVal:$6];
-    printf("parameter (0)\n");
+    LOG("parameter (0)\n");
 }
-inout_opt:  | "inout"		 { printf("inout_opt\n"); }
-let_opt:  | "let"		 { printf("let_opt\n"); }
-hash_opt:  | "#"		 { printf("hash_opt\n"); }
-local_parameter_name_opt:  | local_parameter_name		 { printf("local_parameter_name_opt\n"); }
-default_argument_clause_opt:  | default_argument_clause		 { printf("default_argument_clause_opt\n"); }
-parameter :  inout_opt "var" hash_opt parameter_name local_parameter_name_opt type_annotation default_argument_clause_opt		 { printf("parameter (0)\n"); }
-parameter :  attributes_opt type		 { printf("parameter (0)\n"); }
-parameter_name :  identifier		 { printf("parameter_name (0)\n"); }
-| "_"		 { printf("parameter_name (1)\n"); }
-local_parameter_name :  identifier		 { printf("local_parameter_name (0)\n"); }
-| "_"		 { printf("local_parameter_name (1)\n"); }
-default_argument_clause :  "=" expression		 {$$ = $2; printf("default_argument_clause (0)\n"); }
+inout_opt:  | "inout"		 { LOG("inout_opt\n"); }
+let_opt:  | "let"		 { LOG("let_opt\n"); }
+hash_opt:  | "#"		 { LOG("hash_opt\n"); }
+local_parameter_name_opt:  | local_parameter_name		 { LOG("local_parameter_name_opt\n"); }
+default_argument_clause_opt:  | default_argument_clause		 { LOG("default_argument_clause_opt\n"); }
+parameter :  inout_opt "var" hash_opt parameter_name local_parameter_name_opt type_annotation default_argument_clause_opt		 { LOG("parameter (0)\n"); }
+parameter :  attributes_opt type		 { LOG("parameter (0)\n"); }
+parameter_name :  identifier		 { LOG("parameter_name (0)\n"); }
+| "_"		 { LOG("parameter_name (1)\n"); }
+local_parameter_name :  identifier		 { LOG("local_parameter_name (0)\n"); }
+| "_"		 { LOG("local_parameter_name (1)\n"); }
+default_argument_clause :  "=" expression		 {$$ = $2; LOG("default_argument_clause (0)\n"); }
 
 // GRAMMAR OF AN ENUMERATION DECLARATION
 
-enum_declaration :  attributes_opt union_style_enum		 { printf("enum_declaration (0)\n"); }
-| attributes_opt raw_value_style_enum		 { printf("enum_declaration (1)\n"); }
-union_style_enum :  enum_name generic_parameter_clause_opt "{" union_style_enum_members_opt "}"		 { printf("union_style_enum (0)\n"); }
-union_style_enum_members_opt:  | union_style_enum_members		 { printf("union_style_enum_members_opt\n"); }
-union_style_enum_members :  union_style_enum_member union_style_enum_members_opt		 { printf("union_style_enum_members (0)\n"); }
-union_style_enum_member :  declaration		 { printf("union_style_enum_member (0)\n"); }
-| union_style_enum_case_clause		 { printf("union_style_enum_member (1)\n"); }
-union_style_enum_case_clause :  attributes_opt "case" union_style_enum_case_list		 { printf("union_style_enum_case_clause (0)\n"); }
-union_style_enum_case_list :  union_style_enum_case		 { printf("union_style_enum_case_list (0)\n"); }
-| union_style_enum_case "," union_style_enum_case_list		 { printf("union_style_enum_case_list (1)\n"); }
-union_style_enum_case :  enum_case_name tuple_type_opt		 { printf("union_style_enum_case (0)\n"); }
-tuple_type_opt:  | tuple_type		 { printf("tuple_type_opt\n"); }
-enum_name :  identifier		 { printf("enum_name (0)\n"); }
-enum_case_name :  identifier		 { printf("enum_case_name (0)\n"); }
-raw_value_style_enum :  enum_name generic_parameter_clause_opt ":" type_identifier "{" raw_value_style_enum_members_opt "}"		 { printf("raw_value_style_enum (0)\n"); }
-raw_value_style_enum_members_opt:  | raw_value_style_enum_members		 { printf("raw_value_style_enum_members_opt\n"); }
-raw_value_style_enum_members :  raw_value_style_enum_member raw_value_style_enum_members_opt		 { printf("raw_value_style_enum_members (0)\n"); }
-raw_value_style_enum_member :  declaration		 { printf("raw_value_style_enum_member (0)\n"); }
-| raw_value_style_enum_case_clause		 { printf("raw_value_style_enum_member (1)\n"); }
-raw_value_style_enum_case_clause :  attributes_opt "case" raw_value_style_enum_case_list		 { printf("raw_value_style_enum_case_clause (0)\n"); }
-raw_value_style_enum_case_list :  raw_value_style_enum_case		 { printf("raw_value_style_enum_case_list (0)\n"); }
-| raw_value_style_enum_case "," raw_value_style_enum_case_list		 { printf("raw_value_style_enum_case_list (1)\n"); }
-raw_value_style_enum_case :  enum_case_name raw_value_assignment_opt		 { printf("raw_value_style_enum_case (0)\n"); }
-raw_value_assignment_opt:  | raw_value_assignment		 { printf("raw_value_assignment_opt\n"); }
-raw_value_assignment :  "=" literal		 { printf("raw_value_assignment (0)\n"); }
+enum_declaration :  attributes_opt union_style_enum		 { LOG("enum_declaration (0)\n"); }
+| attributes_opt raw_value_style_enum		 { LOG("enum_declaration (1)\n"); }
+union_style_enum :  enum_name generic_parameter_clause_opt "{" union_style_enum_members_opt "}"		 { LOG("union_style_enum (0)\n"); }
+union_style_enum_members_opt:  | union_style_enum_members		 { LOG("union_style_enum_members_opt\n"); }
+union_style_enum_members :  union_style_enum_member union_style_enum_members_opt		 { LOG("union_style_enum_members (0)\n"); }
+union_style_enum_member :  declaration		 { LOG("union_style_enum_member (0)\n"); }
+| union_style_enum_case_clause		 { LOG("union_style_enum_member (1)\n"); }
+union_style_enum_case_clause :  attributes_opt "case" union_style_enum_case_list		 { LOG("union_style_enum_case_clause (0)\n"); }
+union_style_enum_case_list :  union_style_enum_case		 { LOG("union_style_enum_case_list (0)\n"); }
+| union_style_enum_case "," union_style_enum_case_list		 { LOG("union_style_enum_case_list (1)\n"); }
+union_style_enum_case :  enum_case_name tuple_type_opt		 { LOG("union_style_enum_case (0)\n"); }
+tuple_type_opt:  | tuple_type		 { LOG("tuple_type_opt\n"); }
+enum_name :  identifier		 { LOG("enum_name (0)\n"); }
+enum_case_name :  identifier		 { LOG("enum_case_name (0)\n"); }
+raw_value_style_enum :  enum_name generic_parameter_clause_opt ":" type_identifier "{" raw_value_style_enum_members_opt "}"		 { LOG("raw_value_style_enum (0)\n"); }
+raw_value_style_enum_members_opt:  | raw_value_style_enum_members		 { LOG("raw_value_style_enum_members_opt\n"); }
+raw_value_style_enum_members :  raw_value_style_enum_member raw_value_style_enum_members_opt		 { LOG("raw_value_style_enum_members (0)\n"); }
+raw_value_style_enum_member :  declaration		 { LOG("raw_value_style_enum_member (0)\n"); }
+| raw_value_style_enum_case_clause		 { LOG("raw_value_style_enum_member (1)\n"); }
+raw_value_style_enum_case_clause :  attributes_opt "case" raw_value_style_enum_case_list		 { LOG("raw_value_style_enum_case_clause (0)\n"); }
+raw_value_style_enum_case_list :  raw_value_style_enum_case		 { LOG("raw_value_style_enum_case_list (0)\n"); }
+| raw_value_style_enum_case "," raw_value_style_enum_case_list		 { LOG("raw_value_style_enum_case_list (1)\n"); }
+raw_value_style_enum_case :  enum_case_name raw_value_assignment_opt		 { LOG("raw_value_style_enum_case (0)\n"); }
+raw_value_assignment_opt:  | raw_value_assignment		 { LOG("raw_value_assignment_opt\n"); }
+raw_value_assignment :  "=" literal		 { LOG("raw_value_assignment (0)\n"); }
 
 // GRAMMAR OF A STRUCTURE DECLARATION
 
-struct_declaration :  attributes_opt "struct" struct_name generic_parameter_clause_opt type_inheritance_clause_opt struct_body		 { printf("struct_declaration (0)\n"); }
-type_inheritance_clause_opt:  | type_inheritance_clause		 { printf("type_inheritance_clause_opt\n"); }
-struct_name :  identifier		 { printf("struct_name (0)\n"); }
-struct_body :  "{" declarations_opt "}"		 { printf("struct_body (0)\n"); }
+struct_declaration :  attributes_opt "struct" struct_name generic_parameter_clause_opt type_inheritance_clause_opt struct_body		 { LOG("struct_declaration (0)\n"); }
+type_inheritance_clause_opt:  | type_inheritance_clause		 { LOG("type_inheritance_clause_opt\n"); }
+struct_name :  identifier		 { LOG("struct_name (0)\n"); }
+struct_body :  "{" declarations_opt "}"		 { LOG("struct_body (0)\n"); }
 
 // GRAMMAR OF A CLASS DECLARATION
 
-class_declaration :  attributes_opt "class" class_name generic_parameter_clause_opt type_inheritance_clause_opt class_body		 { printf("class_declaration (0)\n"); }
-class_name :  identifier		 { printf("class_name (0)\n"); }
-class_body :  "{" declarations_opt "}"		 { printf("class_body (0)\n"); }
+class_declaration :  attributes_opt "class" class_name generic_parameter_clause_opt type_inheritance_clause_opt class_body		 { LOG("class_declaration (0)\n"); }
+class_name :  identifier		 { LOG("class_name (0)\n"); }
+class_body :  "{" declarations_opt "}"		 { LOG("class_body (0)\n"); }
 
 // GRAMMAR OF A PROTOCOL DECLARATION
 
-protocol_declaration :  attributes_opt "protocol" protocol_name type_inheritance_clause_opt protocol_body		 { printf("protocol_declaration (0)\n"); }
-protocol_name :  identifier		 { printf("protocol_name (0)\n"); }
-protocol_body :  "{" protocol_member_declarations_opt "}"		 { printf("protocol_body (0)\n"); }
-protocol_member_declarations_opt:  | protocol_member_declarations		 { printf("protocol_member_declarations_opt\n"); }
-protocol_member_declaration :  protocol_property_declaration		 { printf("protocol_member_declaration (0)\n"); }
-protocol_member_declaration :  protocol_method_declaration		 { printf("protocol_member_declaration (0)\n"); }
-protocol_member_declaration :  protocol_initializer_declaration		 { printf("protocol_member_declaration (0)\n"); }
-protocol_member_declaration :  protocol_subscript_declaration		 { printf("protocol_member_declaration (0)\n"); }
-protocol_member_declaration :  protocol_associated_type_declaration		 { printf("protocol_member_declaration (0)\n"); }
-protocol_member_declarations :  protocol_member_declaration protocol_member_declarations_opt		 { printf("protocol_member_declarations (0)\n"); }
+protocol_declaration :  attributes_opt "protocol" protocol_name type_inheritance_clause_opt protocol_body		 { LOG("protocol_declaration (0)\n"); }
+protocol_name :  identifier		 { LOG("protocol_name (0)\n"); }
+protocol_body :  "{" protocol_member_declarations_opt "}"		 { LOG("protocol_body (0)\n"); }
+protocol_member_declarations_opt:  | protocol_member_declarations		 { LOG("protocol_member_declarations_opt\n"); }
+protocol_member_declaration :  protocol_property_declaration		 { LOG("protocol_member_declaration (0)\n"); }
+protocol_member_declaration :  protocol_method_declaration		 { LOG("protocol_member_declaration (0)\n"); }
+protocol_member_declaration :  protocol_initializer_declaration		 { LOG("protocol_member_declaration (0)\n"); }
+protocol_member_declaration :  protocol_subscript_declaration		 { LOG("protocol_member_declaration (0)\n"); }
+protocol_member_declaration :  protocol_associated_type_declaration		 { LOG("protocol_member_declaration (0)\n"); }
+protocol_member_declarations :  protocol_member_declaration protocol_member_declarations_opt		 { LOG("protocol_member_declarations (0)\n"); }
 
 // GRAMMAR OF A PROTOCOL PROPERTY DECLARATION
 
-protocol_property_declaration :  variable_declaration_head variable_name type_annotation getter_setter_keyword_block		 { printf("protocol_property_declaration (0)\n"); }
+protocol_property_declaration :  variable_declaration_head variable_name type_annotation getter_setter_keyword_block		 { LOG("protocol_property_declaration (0)\n"); }
 
 // GRAMMAR OF A PROTOCOL METHOD DECLARATION
 
-protocol_method_declaration :  function_head function_name generic_parameter_clause_opt function_signature		 { printf("protocol_method_declaration (0)\n"); }
+protocol_method_declaration :  function_head function_name generic_parameter_clause_opt function_signature		 { LOG("protocol_method_declaration (0)\n"); }
 
 // GRAMMAR OF A PROTOCOL INITIALIZER DECLARATION
 
-protocol_initializer_declaration :  initializer_head generic_parameter_clause_opt parameter_clause		 { printf("protocol_initializer_declaration (0)\n"); }
+protocol_initializer_declaration :  initializer_head generic_parameter_clause_opt parameter_clause		 { LOG("protocol_initializer_declaration (0)\n"); }
 
 // GRAMMAR OF A PROTOCOL SUBSCRIPT DECLARATION
 
-protocol_subscript_declaration :  subscript_head subscript_result getter_setter_keyword_block		 { printf("protocol_subscript_declaration (0)\n"); }
+protocol_subscript_declaration :  subscript_head subscript_result getter_setter_keyword_block		 { LOG("protocol_subscript_declaration (0)\n"); }
 
 // GRAMMAR OF A PROTOCOL ASSOCIATED TYPE DECLARATION
 
-protocol_associated_type_declaration :  typealias_head type_inheritance_clause_opt typealias_assignment_opt		 { printf("protocol_associated_type_declaration (0)\n"); }
-typealias_assignment_opt:  | typealias_assignment		 { printf("typealias_assignment_opt\n"); }
+protocol_associated_type_declaration :  typealias_head type_inheritance_clause_opt typealias_assignment_opt		 { LOG("protocol_associated_type_declaration (0)\n"); }
+typealias_assignment_opt:  | typealias_assignment		 { LOG("typealias_assignment_opt\n"); }
 
 // GRAMMAR OF AN INITIALIZER DECLARATION
 
-initializer_declaration :  initializer_head generic_parameter_clause_opt parameter_clause initializer_body		 { printf("initializer_declaration (0)\n"); }
-initializer_head :  attributes_opt convenience_opt "init"		 { printf("initializer_head (0)\n"); }
-convenience_opt:  | "convenience"		 { printf("convenience_opt\n"); }
-initializer_body :  code_block		 { printf("initializer_body (0)\n"); }
+initializer_declaration :  initializer_head generic_parameter_clause_opt parameter_clause initializer_body		 { LOG("initializer_declaration (0)\n"); }
+initializer_head :  attributes_opt convenience_opt "init"		 { LOG("initializer_head (0)\n"); }
+convenience_opt:  | "convenience"		 { LOG("convenience_opt\n"); }
+initializer_body :  code_block		 { LOG("initializer_body (0)\n"); }
 
 // GRAMMAR OF A DEINITIALIZER DECLARATION
 
-deinitializer_declaration :  attributes_opt "deinit" code_block		 { printf("deinitializer_declaration (0)\n"); }
+deinitializer_declaration :  attributes_opt "deinit" code_block		 { LOG("deinitializer_declaration (0)\n"); }
 
 // GRAMMAR OF AN EXTENSION DECLARATION
 
-extension_declaration :  "extension" type_identifier type_inheritance_clause_opt extension_body		 { printf("extension_declaration (0)\n"); }
-extension_body :  "{" declarations_opt "}"		 { printf("extension_body (0)\n"); }
+extension_declaration :  "extension" type_identifier type_inheritance_clause_opt extension_body		 { LOG("extension_declaration (0)\n"); }
+extension_body :  "{" declarations_opt "}"		 { LOG("extension_body (0)\n"); }
 
 // GRAMMAR OF A SUBSCRIPT DECLARATION
 
-subscript_declaration :  subscript_head subscript_result code_block		 { printf("subscript_declaration (0)\n"); }
-subscript_declaration :  subscript_head subscript_result getter_setter_block		 { printf("subscript_declaration (0)\n"); }
-subscript_declaration :  subscript_head subscript_result getter_setter_keyword_block		 { printf("subscript_declaration (0)\n"); }
-subscript_head :  attributes_opt "subscript" parameter_clause		 { printf("subscript_head (0)\n"); }
-subscript_result :  "->" attributes_opt type		 { printf("subscript_result (0)\n"); }
+subscript_declaration :  subscript_head subscript_result code_block		 { LOG("subscript_declaration (0)\n"); }
+subscript_declaration :  subscript_head subscript_result getter_setter_block		 { LOG("subscript_declaration (0)\n"); }
+subscript_declaration :  subscript_head subscript_result getter_setter_keyword_block		 { LOG("subscript_declaration (0)\n"); }
+subscript_head :  attributes_opt "subscript" parameter_clause		 { LOG("subscript_head (0)\n"); }
+subscript_result :  "->" attributes_opt type		 { LOG("subscript_result (0)\n"); }
 
 // GRAMMAR OF AN OPERATOR DECLARATION
 
-operator_declaration :  prefix_operator_declaration		 { printf("operator_declaration (0)\n"); }
-| postfix_operator_declaration		 { printf("operator_declaration (1)\n"); }
-| infix_operator_declaration		 { printf("operator_declaration (2)\n"); }
-prefix_operator_declaration :  "operator" "prefix" operator "{" "}"		 { printf("prefix_operator_declaration (0)\n"); }
-postfix_operator_declaration :  "operator" "postfix" operator "{" "}"		 { printf("postfix_operator_declaration (0)\n"); }
-infix_operator_declaration :  "operator" "infix" operator "{" infix_operator_attributes_opt "}"		 { printf("infix_operator_declaration (0)\n"); }
-infix_operator_attributes_opt:  | infix_operator_attributes		 { printf("infix_operator_attributes_opt\n"); }
-infix_operator_attributes :  precedence_clause_opt associativity_clause_opt		 { printf("infix_operator_attributes (0)\n"); }
-precedence_clause_opt:  | precedence_clause		 { printf("precedence_clause_opt\n"); }
-associativity_clause_opt:  | associativity_clause		 { printf("associativity_clause_opt\n"); }
-precedence_clause :  "precedence" precedence_level		 { printf("precedence_clause (0)\n"); }
-precedence_level : 		 { printf("precedence_level (0)\n"); }
-associativity_clause :  "associativity" associativity		 { printf("associativity_clause (0)\n"); }
-associativity :  "left"		 { printf("associativity (0)\n"); }
-| "right"		 { printf("associativity (1)\n"); }
-| "none"		 { printf("associativity (2)\n"); }
+operator_declaration :  prefix_operator_declaration		 { LOG("operator_declaration (0)\n"); }
+| postfix_operator_declaration		 { LOG("operator_declaration (1)\n"); }
+| infix_operator_declaration		 { LOG("operator_declaration (2)\n"); }
+prefix_operator_declaration :  "operator" "prefix" operator "{" "}"		 { LOG("prefix_operator_declaration (0)\n"); }
+postfix_operator_declaration :  "operator" "postfix" operator "{" "}"		 { LOG("postfix_operator_declaration (0)\n"); }
+infix_operator_declaration :  "operator" "infix" operator "{" infix_operator_attributes_opt "}"		 { LOG("infix_operator_declaration (0)\n"); }
+infix_operator_attributes_opt:  | infix_operator_attributes		 { LOG("infix_operator_attributes_opt\n"); }
+infix_operator_attributes :  precedence_clause_opt associativity_clause_opt		 { LOG("infix_operator_attributes (0)\n"); }
+precedence_clause_opt:  | precedence_clause		 { LOG("precedence_clause_opt\n"); }
+associativity_clause_opt:  | associativity_clause		 { LOG("associativity_clause_opt\n"); }
+precedence_clause :  "precedence" precedence_level		 { LOG("precedence_clause (0)\n"); }
+precedence_level : 		 { LOG("precedence_level (0)\n"); }
+associativity_clause :  "associativity" associativity		 { LOG("associativity_clause (0)\n"); }
+associativity :  "left"		 { LOG("associativity (0)\n"); }
+| "right"		 { LOG("associativity (1)\n"); }
+| "none"		 { LOG("associativity (2)\n"); }
 
 /******* PATTERNS *******/
 
 
 // GRAMMAR OF A PATTERN
 
-pattern :  wildcard_pattern type_annotation_opt		 { printf("pattern (0)\n"); }
-type_annotation_opt:  | type_annotation		 { printf("type_annotation_opt\n"); }
-pattern :  identifier_pattern type_annotation_opt %dprec 1		 {$$ = [[LiteralExpression alloc] init:toSwift($1)]; printf("pattern (1)\n"); }
-pattern :  value_binding_pattern		 { printf("pattern (3)\n"); }
-pattern :  tuple_pattern type_annotation_opt		 { printf("pattern (4)\n"); }
-pattern :  enum_case_pattern		 { printf("pattern (5)\n"); }
-pattern :  type_casting_pattern		 { printf("pattern (6)\n"); }
-pattern :  expression_pattern %dprec 2		 { printf("pattern (7)\n"); }
+pattern :  wildcard_pattern type_annotation_opt		 { LOG("pattern (0)\n"); }
+type_annotation_opt:  | type_annotation		 { LOG("type_annotation_opt\n"); }
+pattern :  identifier_pattern type_annotation_opt %dprec 1		 {$$ = [[LiteralExpression alloc] init:toSwift($1)]; LOG("pattern (1)\n"); }
+pattern :  value_binding_pattern		 { LOG("pattern (3)\n"); }
+pattern :  tuple_pattern type_annotation_opt		 { LOG("pattern (4)\n"); }
+pattern :  enum_case_pattern		 { LOG("pattern (5)\n"); }
+pattern :  type_casting_pattern		 { LOG("pattern (6)\n"); }
+pattern :  expression_pattern %dprec 2		 { LOG("pattern (7)\n"); }
 
 // GRAMMAR OF A WILDCARD PATTERN
 
-wildcard_pattern :  "_"		 { printf("wildcard_pattern (0)\n"); }
+wildcard_pattern :  "_"		 { LOG("wildcard_pattern (0)\n"); }
 
 // GRAMMAR OF AN IDENTIFIER PATTERN
 
-identifier_pattern :  identifier		 { printf("identifier_pattern (0)\n"); }
+identifier_pattern :  identifier		 { LOG("identifier_pattern (0)\n"); }
 
 // GRAMMAR OF A VALUE_BINDING PATTERN
 
-value_binding_pattern :  "var" pattern		 { printf("value_binding_pattern (0)\n"); }
-| "let" pattern		 { printf("value_binding_pattern (1)\n"); }
+value_binding_pattern :  "var" pattern		 { LOG("value_binding_pattern (0)\n"); }
+| "let" pattern		 { LOG("value_binding_pattern (1)\n"); }
 
 // GRAMMAR OF A TUPLE PATTERN
 
-tuple_pattern :  "(" tuple_pattern_element_list_opt ")"		 { printf("tuple_pattern (0)\n"); }
-tuple_pattern_element_list_opt:  | tuple_pattern_element_list		 { printf("tuple_pattern_element_list_opt\n"); }
-tuple_pattern_element_list :  tuple_pattern_element		 { printf("tuple_pattern_element_list (0)\n"); }
-| tuple_pattern_element "," tuple_pattern_element_list		 { printf("tuple_pattern_element_list (1)\n"); }
-tuple_pattern_element :  pattern		 { printf("tuple_pattern_element (0)\n"); }
+tuple_pattern :  "(" tuple_pattern_element_list_opt ")"		 { LOG("tuple_pattern (0)\n"); }
+tuple_pattern_element_list_opt:  | tuple_pattern_element_list		 { LOG("tuple_pattern_element_list_opt\n"); }
+tuple_pattern_element_list :  tuple_pattern_element		 { LOG("tuple_pattern_element_list (0)\n"); }
+| tuple_pattern_element "," tuple_pattern_element_list		 { LOG("tuple_pattern_element_list (1)\n"); }
+tuple_pattern_element :  pattern		 { LOG("tuple_pattern_element (0)\n"); }
 
 // GRAMMAR OF AN ENUMERATION CASE PATTERN
 
-enum_case_pattern :  type_identifier_opt "." enum_case_name tuple_pattern_opt		 { printf("enum_case_pattern (0)\n"); }
-type_identifier_opt:  | type_identifier		 { printf("type_identifier_opt\n"); }
-tuple_pattern_opt:  | tuple_pattern		 { printf("tuple_pattern_opt\n"); }
+enum_case_pattern :  type_identifier_opt "." enum_case_name tuple_pattern_opt		 { LOG("enum_case_pattern (0)\n"); }
+type_identifier_opt:  | type_identifier		 { LOG("type_identifier_opt\n"); }
+tuple_pattern_opt:  | tuple_pattern		 { LOG("tuple_pattern_opt\n"); }
 
 // GRAMMAR OF A TYPE CASTING PATTERN
 
-type_casting_pattern :  is_pattern		 { printf("type_casting_pattern (0)\n"); }
-| as_pattern		 { printf("type_casting_pattern (1)\n"); }
-is_pattern :  "is" type		 { printf("is_pattern (0)\n"); }
-as_pattern :  pattern "as" type		 { printf("as_pattern (0)\n"); }
+type_casting_pattern :  is_pattern		 { LOG("type_casting_pattern (0)\n"); }
+| as_pattern		 { LOG("type_casting_pattern (1)\n"); }
+is_pattern :  "is" type		 { LOG("is_pattern (0)\n"); }
+as_pattern :  pattern "as" type		 { LOG("as_pattern (0)\n"); }
 
 // GRAMMAR OF AN EXPRESSION PATTERN
 
-expression_pattern :  expression		 { printf("expression_pattern (0)\n"); }
+expression_pattern :  expression		 { LOG("expression_pattern (0)\n"); }
 
 /******* ATTRIBUTES *******/
 
 
 // GRAMMAR OF AN ATTRIBUTE
 
-attribute :  "@" attribute_name attribute_argument_clause_opt		 { printf("attribute (0)\n"); }
-attribute_argument_clause_opt:  | attribute_argument_clause		 { printf("attribute_argument_clause_opt\n"); }
-attribute_name :  identifier		 { printf("attribute_name (0)\n"); }
-attribute_argument_clause :  "(" balanced_tokens_opt ")"		 { printf("attribute_argument_clause (0)\n"); }
-balanced_tokens_opt:  | balanced_tokens		 { printf("balanced_tokens_opt\n"); }
-attributes :  attribute attributes_opt		 { printf("attributes (0)\n"); }
-balanced_tokens :  balanced_token balanced_tokens_opt		 { printf("balanced_tokens (0)\n"); }
-balanced_token :  "(" balanced_tokens_opt ")"		 { printf("balanced_token (0)\n"); }
-balanced_token :  "[" balanced_tokens_opt "]"		 { printf("balanced_token (0)\n"); }
-balanced_token :  "{" balanced_tokens_opt "}"		 { printf("balanced_token (0)\n"); }
-balanced_token : 		 { printf("balanced_token (0)\n"); }
-balanced_token : 		 { printf("balanced_token (0)\n"); }
+attribute :  "@" attribute_name attribute_argument_clause_opt		 { LOG("attribute (0)\n"); }
+attribute_argument_clause_opt:  | attribute_argument_clause		 { LOG("attribute_argument_clause_opt\n"); }
+attribute_name :  identifier		 { LOG("attribute_name (0)\n"); }
+attribute_argument_clause :  "(" balanced_tokens_opt ")"		 { LOG("attribute_argument_clause (0)\n"); }
+balanced_tokens_opt:  | balanced_tokens		 { LOG("balanced_tokens_opt\n"); }
+attributes :  attribute attributes_opt		 { LOG("attributes (0)\n"); }
+balanced_tokens :  balanced_token balanced_tokens_opt		 { LOG("balanced_tokens (0)\n"); }
+balanced_token :  "(" balanced_tokens_opt ")"		 { LOG("balanced_token (0)\n"); }
+balanced_token :  "[" balanced_tokens_opt "]"		 { LOG("balanced_token (0)\n"); }
+balanced_token :  "{" balanced_tokens_opt "}"		 { LOG("balanced_token (0)\n"); }
+balanced_token : 		 { LOG("balanced_token (0)\n"); }
+balanced_token : 		 { LOG("balanced_token (0)\n"); }
 
 /******* EXPRESSIONS *******/
 
 
 // GRAMMAR OF AN EXPRESSION
 
-expression :  prefix_expression		 {printf("expression (0)\n"); }
+expression :  prefix_expression		 {LOG("expression (0)\n"); }
 | prefix_expression binary_expressions {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:(BinaryExpression*)$2];}
-expression_list :  expression		 { printf("expression_list (0)\n"); }
-| expression "," expression_list		 { printf("expression_list (1)\n"); }
+expression_list :  expression		 { LOG("expression_list (0)\n"); }
+| expression "," expression_list		 { LOG("expression_list (1)\n"); }
 
 // GRAMMAR OF A PREFIX EXPRESSION
 
-prefix_expression :  prefix_operator_opt postfix_expression	{$$ = $1 ? [[PrefixOperator alloc] init:$2:toSwift($1)] : $2;  printf("prefix_expression\n"); }
-prefix_operator_opt: {$$ = NULL}  | prefix_operator		 { printf("prefix_operator_opt\n"); }
-prefix_expression :  in_out_expression		 { printf("prefix_expression (0)\n"); }
-in_out_expression :  "&" identifier		 { printf("in_out_expression (0)\n"); }
+prefix_expression :  prefix_operator_opt postfix_expression	{$$ = $1 ? [[PrefixOperator alloc] init:$2:toSwift($1)] : $2;  LOG("prefix_expression\n"); }
+prefix_operator_opt: {$$ = NULL}  | prefix_operator		 { LOG("prefix_operator_opt\n"); }
+prefix_expression :  in_out_expression		 { LOG("prefix_expression (0)\n"); }
+in_out_expression :  "&" identifier		 { LOG("in_out_expression (0)\n"); }
 
 // GRAMMAR OF A BINARY EXPRESSION
 
-binary_expression :  binary_operator prefix_expression  {$$ = [[BinaryOperator alloc] initWithRightOperand:$2 binaryOperator:toSwift($1)]; printf("binary_expression (0)\n"); }
-binary_expression :  "=" prefix_expression		 {$$ = [[AssignmentOperator alloc] initWithRightOperand:$2]; printf("binary_expression (0)\n"); }
-binary_expression :  "?" expression ":" prefix_expression   {$$ = [[TernaryOperator alloc] initWithTrueOperand:$2 falseOperand:$4]; printf("binary_expression (0)\n"); }
-binary_expression :  type_casting_operator		 { printf("binary_expression (0)\n"); }
+binary_expression :  binary_operator prefix_expression  {$$ = [[BinaryOperator alloc] initWithRightOperand:$2 binaryOperator:toSwift($1)]; LOG("binary_expression (0)\n"); }
+binary_expression :  "=" prefix_expression		 {$$ = [[AssignmentOperator alloc] initWithRightOperand:$2]; LOG("binary_expression (0)\n"); }
+binary_expression :  "?" expression ":" prefix_expression   {$$ = [[TernaryOperator alloc] initWithTrueOperand:$2 falseOperand:$4]; LOG("binary_expression (0)\n"); }
+binary_expression :  type_casting_operator		 { LOG("binary_expression (0)\n"); }
 binary_expressions :  binary_expression 		 {$$ = [[BinaryExpression alloc] initWithExpression:$1]; }
 | binary_expression binary_expressions           {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:(BinaryExpression*)$2];  }
 
@@ -895,147 +899,147 @@ binary_expressions :  binary_expression 		 {$$ = [[BinaryExpression alloc] initW
 
 // GRAMMAR OF A TYPE_CASTING OPERATOR
 
-type_casting_operator :  "is" type		 { printf("type_casting_operator (0)\n"); }
-| "as" question_opt type		 { printf("type_casting_operator (1)\n"); }
-question_opt:  | "?"		 { printf("question_opt\n"); }
+type_casting_operator :  "is" type		 { LOG("type_casting_operator (0)\n"); }
+| "as" question_opt type		 { LOG("type_casting_operator (1)\n"); }
+question_opt:  | "?"		 { LOG("question_opt\n"); }
 
 // GRAMMAR OF A PRIMARY EXPRESSION
 
-primary_expression :  identifier generic_argument_clause_opt		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; printf("primary_expression (1)\n"); }
-generic_argument_clause_opt:  | generic_argument_clause		 { printf("generic_argument_clause_opt\n"); }
-primary_expression :  literal_expression		 { printf("primary_expression (2)\n"); }
-primary_expression :  self_expression		 { printf("primary_expression (3)\n"); }
-primary_expression :  superclass_expression		 { printf("primary_expression (4)\n"); }
-primary_expression :  closure_expression		 { printf("primary_expression (5)\n"); }
-primary_expression :  parenthesized_expression		 { printf("primary_expression (6)\n"); }
-primary_expression :  implicit_member_expression		 { printf("primary_expression (7)\n"); }
-primary_expression :  wildcard_expression		 { printf("primary_expression (8)\n"); }
+primary_expression :  identifier generic_argument_clause_opt		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; LOG("primary_expression (1)\n"); }
+generic_argument_clause_opt:  | generic_argument_clause		 { LOG("generic_argument_clause_opt\n"); }
+primary_expression :  literal_expression		 { LOG("primary_expression (2)\n"); }
+primary_expression :  self_expression		 { LOG("primary_expression (3)\n"); }
+primary_expression :  superclass_expression		 { LOG("primary_expression (4)\n"); }
+primary_expression :  closure_expression		 { LOG("primary_expression (5)\n"); }
+primary_expression :  parenthesized_expression		 { LOG("primary_expression (6)\n"); }
+primary_expression :  implicit_member_expression		 { LOG("primary_expression (7)\n"); }
+primary_expression :  wildcard_expression		 { LOG("primary_expression (8)\n"); }
 
 // GRAMMAR OF A LITERAL EXPRESSION
 
-literal_expression :  literal		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; printf("Literal: %s\n", $1)}
-literal_expression :  array_literal		 { printf("literal_expression (0)\n"); }
-| dictionary_literal		 { printf("literal_expression (1)\n"); }
-literal_expression :  "__FILE__"		 { printf("literal_expression (0)\n"); }
-| "__LINE__"		 { printf("literal_expression (1)\n"); }
-| "__COLUMN__"		 { printf("literal_expression (2)\n"); }
-| "__FUNCTION__"		 { printf("literal_expression (3)\n"); }
-array_literal :  "[" array_literal_items_opt "]"		 {$$ = [[ArrayLiteral alloc] initWithItems:$2]; printf("array_literal (0)\n"); }
-array_literal_items_opt:  | array_literal_items		 { printf("array_literal_items_opt\n"); }
-array_literal_items :  array_literal_item comma_opt		 { $$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; printf("array_literal_items (0)\n"); }
-| array_literal_item "," array_literal_items		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; printf("array_literal_items (1)\n"); }
-comma_opt:  | ","		 { printf("comma_opt\n"); }
-array_literal_item :  expression		 { printf("array_literal_item (0)\n"); }
-dictionary_literal :  "[" dictionary_literal_items "]"		 {$$ = [[DictionaryLiteral alloc] initWithPairs:$2]; printf("array_literal (0)\n"); printf("dictionary_literal (0)\n"); }
-| "[" ":" "]"		 {$$ = [[DictionaryLiteral alloc] initWithPairs:nil];  printf("dictionary_literal (1)\n"); }
-dictionary_literal_items :  dictionary_literal_item comma_opt		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; printf("dictionary_literal_items (0)\n"); }
-| dictionary_literal_item "," dictionary_literal_items		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; printf("dictionary_literal_items (1)\n"); }
-dictionary_literal_item :  expression ":" expression		 {$$ = [[DictionaryItem alloc] initWithKey:$1 value:$3]; printf("dictionary_literal_item (0)\n"); }
+literal_expression :  literal		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; LOG("Literal: %s\n", $1)}
+literal_expression :  array_literal		 { LOG("literal_expression (0)\n"); }
+| dictionary_literal		 { LOG("literal_expression (1)\n"); }
+literal_expression :  "__FILE__"		 { LOG("literal_expression (0)\n"); }
+| "__LINE__"		 { LOG("literal_expression (1)\n"); }
+| "__COLUMN__"		 { LOG("literal_expression (2)\n"); }
+| "__FUNCTION__"		 { LOG("literal_expression (3)\n"); }
+array_literal :  "[" array_literal_items_opt "]"		 {$$ = [[ArrayLiteral alloc] initWithItems:$2]; LOG("array_literal (0)\n"); }
+array_literal_items_opt:  | array_literal_items		 { LOG("array_literal_items_opt\n"); }
+array_literal_items :  array_literal_item comma_opt		 { $$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; LOG("array_literal_items (0)\n"); }
+| array_literal_item "," array_literal_items		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; LOG("array_literal_items (1)\n"); }
+comma_opt:  | ","		 { LOG("comma_opt\n"); }
+array_literal_item :  expression		 { LOG("array_literal_item (0)\n"); }
+dictionary_literal :  "[" dictionary_literal_items "]"		 {$$ = [[DictionaryLiteral alloc] initWithPairs:$2]; LOG("array_literal (0)\n"); LOG("dictionary_literal (0)\n"); }
+| "[" ":" "]"		 {$$ = [[DictionaryLiteral alloc] initWithPairs:nil];  LOG("dictionary_literal (1)\n"); }
+dictionary_literal_items :  dictionary_literal_item comma_opt		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; LOG("dictionary_literal_items (0)\n"); }
+| dictionary_literal_item "," dictionary_literal_items		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; LOG("dictionary_literal_items (1)\n"); }
+dictionary_literal_item :  expression ":" expression		 {$$ = [[DictionaryItem alloc] initWithKey:$1 value:$3]; LOG("dictionary_literal_item (0)\n"); }
 
 // GRAMMAR OF A SELF EXPRESSION
 
-self_expression :  "self"		 { printf("self_expression (0)\n"); }
-self_expression :  "self" "." identifier		 { printf("self_expression (0)\n"); }
-self_expression :  "self" "[" expression "]"		 { printf("self_expression (0)\n"); }
-self_expression :  "self" "." "init"		 { printf("self_expression (0)\n"); }
+self_expression :  "self"		 { LOG("self_expression (0)\n"); }
+self_expression :  "self" "." identifier		 { LOG("self_expression (0)\n"); }
+self_expression :  "self" "[" expression "]"		 { LOG("self_expression (0)\n"); }
+self_expression :  "self" "." "init"		 { LOG("self_expression (0)\n"); }
 
 // GRAMMAR OF A SUPERCLASS EXPRESSION
 
-superclass_expression :  superclass_method_expression		 { printf("superclass_expression (0)\n"); }
-| superclass_subscript_expression		 { printf("superclass_expression (1)\n"); }
-| superclass_initializer_expression		 { printf("superclass_expression (2)\n"); }
-superclass_method_expression :  "super" "." identifier		 { printf("superclass_method_expression (0)\n"); }
-superclass_subscript_expression :  "super" "[" expression "]"		 { printf("superclass_subscript_expression (0)\n"); }
-superclass_initializer_expression :  "super" "." "init"		 { printf("superclass_initializer_expression (0)\n"); }
+superclass_expression :  superclass_method_expression		 { LOG("superclass_expression (0)\n"); }
+| superclass_subscript_expression		 { LOG("superclass_expression (1)\n"); }
+| superclass_initializer_expression		 { LOG("superclass_expression (2)\n"); }
+superclass_method_expression :  "super" "." identifier		 { LOG("superclass_method_expression (0)\n"); }
+superclass_subscript_expression :  "super" "[" expression "]"		 { LOG("superclass_subscript_expression (0)\n"); }
+superclass_initializer_expression :  "super" "." "init"		 { LOG("superclass_initializer_expression (0)\n"); }
 
 // GRAMMAR OF A CLOSURE EXPRESSION
 
-closure_expression :  "{" closure_signature_opt statements "}"		 { printf("closure_expression (0)\n"); }
-closure_signature_opt:  | closure_signature		 { printf("closure_signature_opt\n"); }
-closure_signature :  parameter_clause function_result_opt "in"		 { printf("closure_signature (0)\n"); }
-closure_signature :  identifier_list function_result_opt "in"		 { printf("closure_signature (0)\n"); }
-closure_signature :  capture_list parameter_clause function_result_opt "in"		 { printf("closure_signature (0)\n"); }
-closure_signature :  capture_list identifier_list function_result_opt "in"		 { printf("closure_signature (0)\n"); }
-closure_signature :  capture_list "in"		 { printf("closure_signature (0)\n"); }
-capture_list :  "[" capture_specifier expression "]"		 { printf("capture_list (0)\n"); }
-capture_specifier :  "weak"		 { printf("capture_specifier (0)\n"); }
-| "unowned"		 { printf("capture_specifier (1)\n"); }
-| "unowned(safe)"		 { printf("capture_specifier (2)\n"); }
-| "unowned(unsafe)"		 { printf("capture_specifier (3)\n"); }
+closure_expression :  "{" closure_signature_opt statements "}"		 { LOG("closure_expression (0)\n"); }
+closure_signature_opt:  | closure_signature		 { LOG("closure_signature_opt\n"); }
+closure_signature :  parameter_clause function_result_opt "in"		 { LOG("closure_signature (0)\n"); }
+closure_signature :  identifier_list function_result_opt "in"		 { LOG("closure_signature (0)\n"); }
+closure_signature :  capture_list parameter_clause function_result_opt "in"		 { LOG("closure_signature (0)\n"); }
+closure_signature :  capture_list identifier_list function_result_opt "in"		 { LOG("closure_signature (0)\n"); }
+closure_signature :  capture_list "in"		 { LOG("closure_signature (0)\n"); }
+capture_list :  "[" capture_specifier expression "]"		 { LOG("capture_list (0)\n"); }
+capture_specifier :  "weak"		 { LOG("capture_specifier (0)\n"); }
+| "unowned"		 { LOG("capture_specifier (1)\n"); }
+| "unowned(safe)"		 { LOG("capture_specifier (2)\n"); }
+| "unowned(unsafe)"		 { LOG("capture_specifier (3)\n"); }
 
 // GRAMMAR OF A IMPLICIT MEMBER EXPRESSION
 
-implicit_member_expression :  "." identifier		 { printf("implicit_member_expression (0)\n"); }
+implicit_member_expression :  "." identifier		 { LOG("implicit_member_expression (0)\n"); }
 
 // GRAMMAR OF A PARENTHESIZED EXPRESSION
 
-parenthesized_expression :  "(" expression_element_list_opt ")"		 { $$ = [[ParenthesizedExpression alloc] initWithExpression:$2]; printf("parenthesized_expression (0)\n"); }
-expression_element_list_opt: {$$ = NULL}  | expression_element_list		 { $$ = $1; printf("expression_element_list_opt\n"); }
-expression_element_list :  expression_element   {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; printf("expression_element_list (0)\n"); }
-| expression_element "," expression_element_list   {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; printf("expression_element_list (1)\n"); }
-expression_element :  expression		 { printf("expression_element (0)\n"); }
-| identifier ":" expression		 { $$ = $3; printf("expression_element (1)\n"); }
+parenthesized_expression :  "(" expression_element_list_opt ")"		 { $$ = [[ParenthesizedExpression alloc] initWithExpression:$2]; LOG("parenthesized_expression (0)\n"); }
+expression_element_list_opt: {$$ = NULL}  | expression_element_list		 { $$ = $1; LOG("expression_element_list_opt\n"); }
+expression_element_list :  expression_element   {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; LOG("expression_element_list (0)\n"); }
+| expression_element "," expression_element_list   {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; LOG("expression_element_list (1)\n"); }
+expression_element :  expression		 { LOG("expression_element (0)\n"); }
+| identifier ":" expression		 { $$ = $3; LOG("expression_element (1)\n"); }
 
 // GRAMMAR OF A WILDCARD EXPRESSION
 
-wildcard_expression :  "_"		 { printf("wildcard_expression (0)\n"); }
+wildcard_expression :  "_"		 { LOG("wildcard_expression (0)\n"); }
 
 // GRAMMAR OF A POSTFIX EXPRESSION
 
-postfix_expression :  primary_expression		 { printf("postfix_expression (0)\n"); }
-postfix_expression :  postfix_expression postfix_operator   { $$ = [[PostfixOperator alloc] init:$1:toSwift($2)]; printf("postfix_expression op %s\n", $2); }
-postfix_expression :  function_call_expression		 { printf("postfix_expression (0)\n"); }
-postfix_expression :  initializer_expression		 { printf("postfix_expression (0)\n"); }
-postfix_expression :  explicit_member_expression		 { printf("postfix_expression (0)\n"); }
-postfix_expression :  postfix_self_expression		 { printf("postfix_expression (0)\n"); }
-postfix_expression :  dynamic_type_expression		 { printf("postfix_expression (0)\n"); }
-postfix_expression :  subscript_expression		 { printf("postfix_expression (0)\n"); }
-postfix_expression :  forced_value_expression		 { printf("postfix_expression (0)\n"); }
-postfix_expression :  optional_chaining_expression		 { printf("postfix_expression (0)\n"); }
+postfix_expression :  primary_expression		 { LOG("postfix_expression (0)\n"); }
+postfix_expression :  postfix_expression postfix_operator   { $$ = [[PostfixOperator alloc] init:$1:toSwift($2)]; LOG("postfix_expression op %s\n", $2); }
+postfix_expression :  function_call_expression		 { LOG("postfix_expression (0)\n"); }
+postfix_expression :  initializer_expression		 { LOG("postfix_expression (0)\n"); }
+postfix_expression :  explicit_member_expression		 { LOG("postfix_expression (0)\n"); }
+postfix_expression :  postfix_self_expression		 { LOG("postfix_expression (0)\n"); }
+postfix_expression :  dynamic_type_expression		 { LOG("postfix_expression (0)\n"); }
+postfix_expression :  subscript_expression		 { LOG("postfix_expression (0)\n"); }
+postfix_expression :  forced_value_expression		 { LOG("postfix_expression (0)\n"); }
+postfix_expression :  optional_chaining_expression		 { LOG("postfix_expression (0)\n"); }
 
 // GRAMMAR OF A FUNCTION CALL EXPRESSION
 
-function_call_expression :  postfix_expression parenthesized_expression		 {$$ = [[FunctionCallExpression alloc] initWithFunction:$1 parenthesized:$2]; printf("function_call_expression (0)\n"); }
-function_call_expression :  postfix_expression parenthesized_expression_opt trailing_closure		 { printf("function_call_expression (0)\n"); }
-parenthesized_expression_opt:  | parenthesized_expression		 { printf("parenthesized_expression_opt\n"); }
-trailing_closure :  closure_expression		 { printf("trailing_closure (0)\n"); }
+function_call_expression :  postfix_expression parenthesized_expression		 {$$ = [[FunctionCallExpression alloc] initWithFunction:$1 parenthesized:$2]; LOG("function_call_expression (0)\n"); }
+function_call_expression :  postfix_expression parenthesized_expression_opt trailing_closure		 { LOG("function_call_expression (0)\n"); }
+parenthesized_expression_opt:  | parenthesized_expression		 { LOG("parenthesized_expression_opt\n"); }
+trailing_closure :  closure_expression		 { LOG("trailing_closure (0)\n"); }
 
 // GRAMMAR OF AN INITIALIZER EXPRESSION
 
-initializer_expression :  postfix_expression "." "init"		 { printf("initializer_expression (0)\n"); }
+initializer_expression :  postfix_expression "." "init"		 { LOG("initializer_expression (0)\n"); }
 
 // GRAMMAR OF AN EXPLICIT MEMBER EXPRESSION
 
-explicit_member_expression :  postfix_expression "." NUMBER_LITERAL		 { printf("explicit_member_expression (0)\n"); }
-explicit_member_expression :  postfix_expression "." identifier generic_argument_clause_opt		 { printf("explicit_member_expression (0)\n"); }
+explicit_member_expression :  postfix_expression "." NUMBER_LITERAL		 { LOG("explicit_member_expression (0)\n"); }
+explicit_member_expression :  postfix_expression "." identifier generic_argument_clause_opt		 { LOG("explicit_member_expression (0)\n"); }
 
 // GRAMMAR OF A SELF EXPRESSION
 
-postfix_self_expression :  postfix_expression "." "self"		 { printf("postfix_self_expression (0)\n"); }
+postfix_self_expression :  postfix_expression "." "self"		 { LOG("postfix_self_expression (0)\n"); }
 
 // GRAMMAR OF A DYNAMIC TYPE EXPRESSION
 
-dynamic_type_expression :  postfix_expression "." "dynamicType"		 { printf("dynamic_type_expression (0)\n"); }
+dynamic_type_expression :  postfix_expression "." "dynamicType"		 { LOG("dynamic_type_expression (0)\n"); }
 
 // GRAMMAR OF A SUBSCRIPT EXPRESSION
 
-subscript_expression :  postfix_expression "[" expression_list "]"		 { printf("subscript_expression (0)\n"); }
+subscript_expression :  postfix_expression "[" expression_list "]"		 { LOG("subscript_expression (0)\n"); }
 
 // GRAMMAR OF A FORCED_VALUE EXPRESSION
 
-forced_value_expression :  postfix_expression "!"		 { printf("forced_value_expression (0)\n"); }
+forced_value_expression :  postfix_expression "!"		 { LOG("forced_value_expression (0)\n"); }
 
 // GRAMMAR OF AN OPTIONAL_CHAINING EXPRESSION
 
-optional_chaining_expression :  postfix_expression "?"		 { printf("optional_chaining_expression (0)\n"); }
+optional_chaining_expression :  postfix_expression "?"		 { LOG("optional_chaining_expression (0)\n"); }
 
 /******* LEXICAL STRUCTURE *******/
 
 
 // GRAMMAR OF AN IDENTIFIER
 
-identifier_list :  identifier		 { printf("identifier_list (0)\n"); }
-| identifier "," identifier_list		 { printf("identifier_list (1)\n"); }
+identifier_list :  identifier		 { LOG("identifier_list (0)\n"); }
+| identifier "," identifier_list		 { LOG("identifier_list (1)\n"); }
 
 // GRAMMAR OF A LITERAL
 
@@ -1073,77 +1077,79 @@ postfix_operator : POSTFIX_OPERATOR "++" {$$ = $2}
 
 // GRAMMAR OF A TYPE
 
-type :  array_type		 { printf("type (0)\n"); }
-| function_type		 { printf("type (1)\n"); }
-| type_identifier		 { printf("type (2)\n"); }
-| tuple_type		 { printf("type (3)\n"); }
-| optional_type		 { printf("type (4)\n"); }
-| implicitly_unwrapped_optional_type		 { printf("type (5)\n"); }
-| protocol_composition_type		 { printf("type (6)\n"); }
-| metatype_type		 { printf("type (7)\n"); }
+type :  array_type		 { LOG("type (0)\n"); }
+| function_type		 { LOG("type (1)\n"); }
+| type_identifier		 { LOG("type (2)\n"); }
+| tuple_type		 { LOG("type (3)\n"); }
+| optional_type		 { LOG("type (4)\n"); }
+| implicitly_unwrapped_optional_type		 { LOG("type (5)\n"); }
+| protocol_composition_type		 { LOG("type (6)\n"); }
+| metatype_type		 { LOG("type (7)\n"); }
 
 // GRAMMAR OF A TYPE ANNOTATION
 
-type_annotation :  ":" attributes_opt type		 { printf("type_annotation (0)\n"); }
+type_annotation :  ":" attributes_opt type		 { LOG("type_annotation (0)\n"); }
 
 // GRAMMAR OF A TYPE IDENTIFIER
 
-type_identifier :  type_name generic_argument_clause_opt		 { printf("type_identifier (0)\n"); }
-| type_name generic_argument_clause_opt "." type_identifier		 { printf("type_identifier (1)\n"); }
-type_name :  identifier		 { printf("type_name (0)\n"); }
+type_identifier :  type_name generic_argument_clause_opt		 { LOG("type_identifier (0)\n"); }
+| type_name generic_argument_clause_opt "." type_identifier		 { LOG("type_identifier (1)\n"); }
+type_name :  identifier		 { LOG("type_name (0)\n"); }
 
 // GRAMMAR OF A TUPLE TYPE
 
-tuple_type :  "(" tuple_type_body_opt ")"		 { printf("tuple_type (0)\n"); }
-tuple_type_body_opt:  | tuple_type_body		 { printf("tuple_type_body_opt\n"); }
-tuple_type_body :  tuple_type_element_list tripledot_opt		 { printf("tuple_type_body (0)\n"); }
-tuple_type_element_list :  tuple_type_element		 { printf("tuple_type_element_list (0)\n"); }
-| tuple_type_element "," tuple_type_element_list		 { printf("tuple_type_element_list (1)\n"); }
-tuple_type_element :  attributes_opt inout_opt type		 { printf("tuple_type_element (0)\n"); }
-| inout_opt element_name type_annotation		 { printf("tuple_type_element (1)\n"); }
-element_name :  identifier		 { printf("element_name (0)\n"); }
+tuple_type :  "(" tuple_type_body_opt ")"		 { LOG("tuple_type (0)\n"); }
+tuple_type_body_opt:  | tuple_type_body		 { LOG("tuple_type_body_opt\n"); }
+tuple_type_body :  tuple_type_element_list tripledot_opt		 { LOG("tuple_type_body (0)\n"); }
+tuple_type_element_list :  tuple_type_element		 { LOG("tuple_type_element_list (0)\n"); }
+| tuple_type_element "," tuple_type_element_list		 { LOG("tuple_type_element_list (1)\n"); }
+tuple_type_element :  attributes_opt inout_opt type		 { LOG("tuple_type_element (0)\n"); }
+| inout_opt element_name type_annotation		 { LOG("tuple_type_element (1)\n"); }
+element_name :  identifier		 { LOG("element_name (0)\n"); }
 
 // GRAMMAR OF A FUNCTION TYPE
 
-function_type :  type "->" type		 { printf("function_type (0)\n"); }
+function_type :  type "->" type		 { LOG("function_type (0)\n"); }
 
 // GRAMMAR OF AN ARRAY TYPE
 
-array_type :  type "[" "]"		 { printf("array_type (0)\n"); }
-| array_type "[" "]"		 { printf("array_type (1)\n"); }
+array_type :  type "[" "]"		 { LOG("array_type (0)\n"); }
+| array_type "[" "]"		 { LOG("array_type (1)\n"); }
 
 // GRAMMAR OF AN OPTIONAL TYPE
 
-optional_type :  type "?"		 { printf("optional_type (0)\n"); }
+optional_type :  type "?"		 { LOG("optional_type (0)\n"); }
 
 // GRAMMAR OF AN IMPLICITLY UNWRAPPED OPTIONAL TYPE
 
-implicitly_unwrapped_optional_type :  type "!"		 { printf("implicitly_unwrapped_optional_type (0)\n"); }
+implicitly_unwrapped_optional_type :  type "!"		 { LOG("implicitly_unwrapped_optional_type (0)\n"); }
 
 // GRAMMAR OF A PROTOCOL COMPOSITION TYPE
 
-protocol_composition_type :  "protocol" "<" protocol_identifier_list_opt ">"		 { printf("protocol_composition_type (0)\n"); }
-protocol_identifier_list_opt:  | protocol_identifier_list		 { printf("protocol_identifier_list_opt\n"); }
-protocol_identifier_list :  protocol_identifier		 { printf("protocol_identifier_list (0)\n"); }
-| protocol_identifier "," protocol_identifier_list		 { printf("protocol_identifier_list (1)\n"); }
-protocol_identifier :  type_identifier		 { printf("protocol_identifier (0)\n"); }
+protocol_composition_type :  "protocol" "<" protocol_identifier_list_opt ">"		 { LOG("protocol_composition_type (0)\n"); }
+protocol_identifier_list_opt:  | protocol_identifier_list		 { LOG("protocol_identifier_list_opt\n"); }
+protocol_identifier_list :  protocol_identifier		 { LOG("protocol_identifier_list (0)\n"); }
+| protocol_identifier "," protocol_identifier_list		 { LOG("protocol_identifier_list (1)\n"); }
+protocol_identifier :  type_identifier		 { LOG("protocol_identifier (0)\n"); }
 
 // GRAMMAR OF A METATYPE TYPE
 
-metatype_type :  type "." "Type"		 { printf("metatype_type (0)\n"); }
-| type "." "Protocol"		 { printf("metatype_type (1)\n"); }
+metatype_type :  type "." "Type"		 { LOG("metatype_type (0)\n"); }
+| type "." "Protocol"		 { LOG("metatype_type (1)\n"); }
 
 // GRAMMAR OF A TYPE INHERITANCE CLAUSE
 
-type_inheritance_clause :  ":" type_inheritance_list		 { printf("type_inheritance_clause (0)\n"); }
-type_inheritance_list :  type_identifier		 { printf("type_inheritance_list (0)\n"); }
-| type_identifier "," type_inheritance_list		 { printf("type_inheritance_list (1)\n"); }
+type_inheritance_clause :  ":" type_inheritance_list		 { LOG("type_inheritance_clause (0)\n"); }
+type_inheritance_list :  type_identifier		 { LOG("type_inheritance_list (0)\n"); }
+| type_identifier "," type_inheritance_list		 { LOG("type_inheritance_list (1)\n"); }
 
 %%
 
+static const char * lastError = NULL;
+
 void yyerror (const char *error)
 {
-    printf("Grammar Error!: %s\n", error);
+    lastError = strdup(error);
 }
 
 static Lexer * lexer;
@@ -1165,9 +1171,14 @@ int yylex ()
 }
 
 extern "C" {
-    ASTNode* bridge_yyparse(Lexer * instance) {
+    ASTNode* bridge_yyparse(Lexer * instance, int debug) {
         lexer = instance;
+        debugRules = debug;
         yyparse();
         return ast;
+    }
+    
+    const char * bridge_yyerror() {
+        return lastError;
     }
 }
