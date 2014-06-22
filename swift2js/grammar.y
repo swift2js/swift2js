@@ -919,11 +919,11 @@ array_literal_items :  array_literal_item comma_opt		 { $$=[[ExpressionList allo
 | array_literal_item "," array_literal_items		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; printf("array_literal_items (1)\n"); }
 comma_opt:  | ","		 { printf("comma_opt\n"); }
 array_literal_item :  expression		 { printf("array_literal_item (0)\n"); }
-dictionary_literal :  "[" dictionary_literal_items "]"		 { printf("dictionary_literal (0)\n"); }
-| "[" ":" "]"		 { printf("dictionary_literal (1)\n"); }
-dictionary_literal_items :  dictionary_literal_item comma_opt		 { printf("dictionary_literal_items (0)\n"); }
-| dictionary_literal_item "," dictionary_literal_items		 { printf("dictionary_literal_items (1)\n"); }
-dictionary_literal_item :  expression ":" expression		 { printf("dictionary_literal_item (0)\n"); }
+dictionary_literal :  "[" dictionary_literal_items "]"		 {$$ = [[DictionaryLiteral alloc] initWithPairs:$2]; printf("array_literal (0)\n"); printf("dictionary_literal (0)\n"); }
+| "[" ":" "]"		 {$$ = [[DictionaryLiteral alloc] initWithPairs:nil];  printf("dictionary_literal (1)\n"); }
+dictionary_literal_items :  dictionary_literal_item comma_opt		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; printf("dictionary_literal_items (0)\n"); }
+| dictionary_literal_item "," dictionary_literal_items		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; printf("dictionary_literal_items (1)\n"); }
+dictionary_literal_item :  expression ":" expression		 {$$ = [[DictionaryItem alloc] initWithKey:$1 value:$3]; printf("dictionary_literal_item (0)\n"); }
 
 // GRAMMAR OF A SELF EXPRESSION
 

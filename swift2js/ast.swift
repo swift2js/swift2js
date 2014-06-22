@@ -215,6 +215,37 @@ func tabulate(code: String) -> String {
         return result;
     }
 }
+
+@objc class DictionaryLiteral: ASTNode {
+    let pairs: ASTNode?;
+    
+    init(pairs:ASTNode?){
+        self.pairs = pairs;
+    }
+    
+    override func toJS() -> String {
+        var result = "{";
+        if let data = pairs {
+            result += tabulate(data.toJS()) + "\n";
+        }
+        result+="}";
+        return result;
+    }
+}
+
+@objc class DictionaryItem: ASTNode {
+    let key: ASTNode;
+    let value: ASTNode;
+    
+    init(key:ASTNode, value:ASTNode){
+        self.key = key;
+        self.value = value;
+    }
+    
+    override func toJS() -> String {
+        return "\n" + key.toJS() + " : " + value.toJS();
+    }
+}
 @objc class StatementsNode: ASTNode {
     
     var current:ASTNode?;
