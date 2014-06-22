@@ -8,7 +8,7 @@
     static ASTNode * ast = NULL;
     
     inline NSString * toSwift(const char * c) {
-        return [NSString stringWithUTF8String:c];
+        return c ? [NSString stringWithUTF8String:c] : nil;
     }
 %}
 
@@ -220,7 +220,7 @@
 %type <node> function_declaration
 %type <node> generic_parameter_clause_opt
 %type <node> function_head
-%type <node> function_name
+%type <str> function_name
 %type <node> function_signature
 %type <node> function_result_opt
 %type <node> function_result
@@ -234,10 +234,10 @@
 %type <node> inout_opt
 %type <node> let_opt
 %type <node> hash_opt
-%type <node> local_parameter_name_opt
+%type <str> local_parameter_name_opt
 %type <node> default_argument_clause_opt
-%type <node> parameter_name
-%type <node> local_parameter_name
+%type <str> parameter_name
+%type <str> local_parameter_name
 %type <node> default_argument_clause
 %type <node> enum_declaration
 %type <node> union_style_enum
@@ -509,7 +509,7 @@ fallthrough_statement :  "fallthrough"		 { printf("fallthrough_statement (0)\n")
 
 // GRAMMAR OF A RETURN STATEMENT
 
-return_statement :  "return" expression_opt		 { printf("return_statement (0)\n"); }
+return_statement :  "return" expression_opt		 {$$ = [[ReturnStatement alloc] initWithReturnExpr:$2]; printf("return_statement (0)\n"); }
 
 /******* GENERIC PARAMETERS AND ARGUMENTS *******/
 
@@ -574,8 +574,8 @@ declaration_specifier :  "class"		 { printf("declaration_specifier (0)\n"); }
 
 // GRAMMAR OF A CODE BLOCK
 
-code_block :  "{" statements "}"		 { printf("code_block (0)\n"); }
-| "{" "}"		 { printf("code_block (1)\n"); }
+code_block :  "{" statements "}"		 {$$ = $2; printf("code_block (0)\n"); }
+| "{" "}"		 { $$ = NULL; printf("code_block (1)\n"); }
 
 // GRAMMAR OF AN IMPORT DECLARATION
 
@@ -640,23 +640,29 @@ typealias_assignment :  "=" type		 { printf("typealias_assignment (0)\n"); }
 
 // GRAMMAR OF A FUNCTION DECLARATION
 
-function_declaration :  function_head function_name generic_parameter_clause_opt function_signature function_body		 { printf("function_declaration (0)\n"); }
+function_declaration :  function_head function_name generic_parameter_clause_opt function_signature function_body		 {
+    $$ = [[FunctionDeclaration alloc] initWithName:toSwift($2) signature:$4 body:$5];
+    printf("function_declaration (0)\n");
+}
 generic_parameter_clause_opt:  | generic_parameter_clause		 { printf("generic_parameter_clause_opt\n"); }
 function_head :  attributes_opt declaration_specifiers_opt "func"		 { printf("function_head (0)\n"); }
 function_name :  identifier		 { printf("function_name (0)\n"); }
 | operator		 { printf("function_name (1)\n"); }
-function_signature :  parameter_clauses function_result_opt		 { printf("function_signature (0)\n"); }
+function_signature :  parameter_clauses function_result_opt		 {$$ = $1; printf("function_signature (0)\n"); }
 function_result_opt:  | function_result		 { printf("function_result_opt\n"); }
 function_result :  "_>" attributes_opt type		 { printf("function_result (0)\n"); }
 function_body :  code_block		 { printf("function_body (0)\n"); }
 parameter_clauses :  parameter_clause parameter_clauses_opt		 { printf("parameter_clauses (0)\n"); }
 parameter_clauses_opt:  | parameter_clauses		 { printf("parameter_clauses_opt\n"); }
-parameter_clause :  "(" ")"		 { printf("parameter_clause (0)\n"); }
-| "(" parameter_list tripledot_opt ")"		 { printf("parameter_clause (1)\n"); }
+parameter_clause :  "(" ")"		 {$$ = NULL; printf("parameter_clause (0)\n"); }
+| "(" parameter_list tripledot_opt ")"		 {$$ = $2; printf("parameter_clause (1)\n"); }
 tripledot_opt:  | "..."		 { printf("tripledot_opt\n"); }
-parameter_list :  parameter		 { printf("parameter_list (0)\n"); }
-| parameter "," parameter_list		 { printf("parameter_list (1)\n"); }
-parameter :  inout_opt let_opt hash_opt parameter_name local_parameter_name_opt type_annotation default_argument_clause_opt		 { printf("parameter (0)\n"); }
+parameter_list :  parameter		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; printf("parameter_list (0)\n"); }
+| parameter "," parameter_list		 { $$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3];printf("parameter_list (1)\n"); }
+parameter :  inout_opt let_opt hash_opt parameter_name local_parameter_name_opt type_annotation default_argument_clause_opt		 {
+    $$ = [[FunctionParameter alloc] initWithInoutVal:!!$1 letVal:!!$2 hashVal:!!$3 external:toSwift($4) local:toSwift($5) defVal:$6];
+    printf("parameter (0)\n");
+}
 inout_opt:  | "inout"		 { printf("inout_opt\n"); }
 let_opt:  | "let"		 { printf("let_opt\n"); }
 hash_opt:  | "#"		 { printf("hash_opt\n"); }
@@ -668,7 +674,7 @@ parameter_name :  identifier		 { printf("parameter_name (0)\n"); }
 | "_"		 { printf("parameter_name (1)\n"); }
 local_parameter_name :  identifier		 { printf("local_parameter_name (0)\n"); }
 | "_"		 { printf("local_parameter_name (1)\n"); }
-default_argument_clause :  "=" expression		 { printf("default_argument_clause (0)\n"); }
+default_argument_clause :  "=" expression		 {$$ = $2; printf("default_argument_clause (0)\n"); }
 
 // GRAMMAR OF AN ENUMERATION DECLARATION
 

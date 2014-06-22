@@ -246,6 +246,71 @@ func tabulate(code: String) -> String {
         return "\n" + key.toJS() + " : " + value.toJS();
     }
 }
+
+@objc class FunctionParameter: ASTNode {
+    let inoutVal:Boolean;
+    let letVal:Boolean;
+    let hashVal:Boolean;
+    let external:String;
+    let local:String?;
+    let defVal:ASTNode?;
+    
+    init(inoutVal:Boolean, letVal:Boolean, hashVal:Boolean, external:String, local:String?, defVal:ASTNode?) {
+        self.inoutVal = inoutVal;
+        self.letVal = letVal;
+        self.hashVal = hashVal;
+        self.external = external;
+        self.local = local;
+        self.defVal = defVal;
+    }
+    
+    override func toJS() -> String {
+        //TODO: default value, inout, etc...
+        return local ? local! : external;
+    }
+    
+}
+
+@objc class FunctionDeclaration: ASTNode {
+    let name:String;
+    let signature:ASTNode?;
+    let body:ASTNode?;
+    
+    init(name:String, signature:ASTNode?, body:ASTNode?) {
+        self.name = name;
+        self.signature = signature;
+        self.body = body;
+    }
+    
+    override func toJS() -> String {
+        var result = "function " + name + "(";
+        if let parameters = signature {
+            result += parameters.toJS();
+        }
+        result += ") {\n";
+        if let statements = body {
+            result += tabulate(statements.toJS());
+        }
+        result += "}";
+        return result;
+    }
+}
+
+@objc class ReturnStatement: ASTNode {
+    let returnExpr: ASTNode?;
+    
+    init(returnExpr: ASTNode?) {
+        self.returnExpr = returnExpr;
+    }
+    
+    override func toJS() -> String {
+        if let expr = returnExpr {
+            return "return " + expr.toJS();
+        }
+        
+        return "return;"
+    }
+}
 @objc class StatementsNode: ASTNode {
     
     var current:ASTNode?;
