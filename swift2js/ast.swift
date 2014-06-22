@@ -8,9 +8,17 @@
 
 import Foundation
 
+func tabulate(code: String) -> String {
+    var result = code.stringByReplacingOccurrencesOfString("\n", withString: "\n\t", options: nil, range: nil);
+    if result.hasSuffix("\t") {
+        result = result.substringToIndex(result.utf16count - 1);
+    }
+    result = "\t" + result;
+    return result;
+}
 
 @objc class ASTNode {
-     func toJS() -> String {
+    func toJS() -> String {
         return "";
     }
 }
