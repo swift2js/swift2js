@@ -311,6 +311,40 @@ func tabulate(code: String) -> String {
         return "return;"
     }
 }
+
+@objc class IfStatement: ASTNode {
+    let ifCondition:ASTNode;
+    let body:ASTNode?;
+    let elseClause:ASTNode?;
+    
+    init(ifCondition:ASTNode, body:ASTNode?, elseClause:ASTNode?) {
+        self.ifCondition = ifCondition;
+        self.body = body;
+        self.elseClause = elseClause;
+    }
+    
+    override func toJS() -> String {
+        var result = "if (";
+        result += ifCondition.toJS();
+        result += ") {\n";
+        if let statements = body {
+            result += tabulate(statements.toJS());
+        }
+        result += "}";
+        if let next = elseClause {
+            result += "\nelse "
+            if next is IfStatement { //nested if
+                 result += next.toJS();
+            }
+            else {
+                result += "{\n" + tabulate(next.toJS()) + "}";
+            }
+        }
+        return result;
+        
+    }
+}
+
 @objc class StatementsNode: ASTNode {
     
     var current:ASTNode?;

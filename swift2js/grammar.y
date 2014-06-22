@@ -456,12 +456,12 @@ branch_statement :  switch_statement		 { printf("branch_statement (0)\n"); }
 
 // GRAMMAR OF AN IF STATEMENT
 
-if_statement :  "if" if_condition code_block else_clause_opt		 { printf("if_statement (0)\n"); }
+if_statement :  "if" if_condition code_block else_clause_opt		 {$$ = [[IfStatement alloc] initWithIfCondition:$2 body:$3 elseClause:$4]; printf("if_statement (0)\n"); }
 else_clause_opt:  | else_clause		 { printf("else_clause_opt\n"); }
 if_condition :  expression		 { printf("if_condition (0)\n"); }
 | declaration		 { printf("if_condition (1)\n"); }
-else_clause :  "else" code_block		 { printf("else_clause (0)\n"); }
-| "else" if_statement		 { printf("else_clause (1)\n"); }
+else_clause :  "else" code_block		 {$$ = $2; printf("else_clause (0)\n"); }
+| "else" if_statement		 {$$ = $2; printf("else_clause (1)\n"); }
 
 // GRAMMAR OF A SWITCH STATEMENT
 
