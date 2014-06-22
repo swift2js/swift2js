@@ -409,7 +409,7 @@ program: statements {ast = $1; printf("ederr %p", $1);}
 
 // GRAMMAR OF A STATEMENT
 
-statement :  expression semicolon_opt		 { printf("statement (0)\n"); }
+statement :  expression semicolon_opt		 { $$ = [[StatementNode alloc] initWithStatement:$1]; printf("statement (0)\n"); }
 semicolon_opt:  | ";"		 { printf("semicolon_opt\n"); }
 statement :  declaration semicolon_opt		 { printf("statement (0)\n"); }
 statement :  loop_statement semicolon_opt		 { printf("statement (0)\n"); }

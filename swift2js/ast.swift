@@ -195,7 +195,7 @@ func tabulate(code: String) -> String {
     }
     
     override func toJS() -> String {
-        return "var " + initializer.toJS();
+        return "var " + initializer.toJS() + ";";
     }
 }
 
@@ -305,7 +305,7 @@ func tabulate(code: String) -> String {
     
     override func toJS() -> String {
         if let expr = returnExpr {
-            return "return " + expr.toJS();
+            return "return " + expr.toJS() + ";";
         }
         
         return "return;"
@@ -345,6 +345,17 @@ func tabulate(code: String) -> String {
     }
 }
 
+@objc class StatementNode: ASTNode {
+    let statement:ASTNode;
+    init(statement:ASTNode) {
+        self.statement = statement;
+    }
+    
+    override func toJS() -> String {
+        return statement.toJS() + ";";
+    }
+}
+
 @objc class StatementsNode: ASTNode {
     
     var current:ASTNode?;
@@ -362,7 +373,7 @@ func tabulate(code: String) -> String {
     override func toJS() -> String {
         var result = "";
         if let currentStatement = current {
-            result+=currentStatement.toJS() + ";\n";
+            result+=currentStatement.toJS() + "\n";
         }
         if let nextStatements = next {
             result += nextStatements.toJS();
