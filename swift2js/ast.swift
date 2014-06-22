@@ -199,6 +199,22 @@ func tabulate(code: String) -> String {
     }
 }
 
+@objc class ArrayLiteral: ASTNode {
+    let items: ASTNode?;
+    
+    init(items:ASTNode?){
+        self.items = items;
+    }
+    
+    override func toJS() -> String {
+        var result = "[";
+        if let data = items {
+            result+=data.toJS();
+        }
+        result+="]";
+        return result;
+    }
+}
 @objc class StatementsNode: ASTNode {
     
     var current:ASTNode?;

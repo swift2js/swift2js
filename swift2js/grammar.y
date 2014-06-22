@@ -913,10 +913,10 @@ literal_expression :  "__FILE__"		 { printf("literal_expression (0)\n"); }
 | "__LINE__"		 { printf("literal_expression (1)\n"); }
 | "__COLUMN__"		 { printf("literal_expression (2)\n"); }
 | "__FUNCTION__"		 { printf("literal_expression (3)\n"); }
-array_literal :  "[" array_literal_items_opt "]"		 { printf("array_literal (0)\n"); }
+array_literal :  "[" array_literal_items_opt "]"		 {$$ = [[ArrayLiteral alloc] initWithItems:$2]; printf("array_literal (0)\n"); }
 array_literal_items_opt:  | array_literal_items		 { printf("array_literal_items_opt\n"); }
-array_literal_items :  array_literal_item comma_opt		 { printf("array_literal_items (0)\n"); }
-| array_literal_item "," array_literal_items		 { printf("array_literal_items (1)\n"); }
+array_literal_items :  array_literal_item comma_opt		 { $$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; printf("array_literal_items (0)\n"); }
+| array_literal_item "," array_literal_items		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; printf("array_literal_items (1)\n"); }
 comma_opt:  | ","		 { printf("comma_opt\n"); }
 array_literal_item :  expression		 { printf("array_literal_item (0)\n"); }
 dictionary_literal :  "[" dictionary_literal_items "]"		 { printf("dictionary_literal (0)\n"); }
