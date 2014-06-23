@@ -437,9 +437,6 @@ class TokenData {
             
             index++;
         }
-        
-        println("Mangu \(String(TOKEN.QUESTION.toRaw()))");
-        
     }
 
     
