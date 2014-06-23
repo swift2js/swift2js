@@ -416,7 +416,7 @@ program: statements {ast = $1;}
 
 statement :  expression semicolon_opt		 { $$ = [[StatementNode alloc] initWithStatement:$1]; LOG("statement (0)\n"); }
 semicolon_opt:  | ";"		 { LOG("semicolon_opt\n"); }
-statement :  declaration semicolon_opt		 { LOG("statement (0)\n"); }
+statement :  declaration semicolon_opt		 { $$ = [[StatementNode alloc] initWithStatement:$1]; LOG("statement (0)\n"); }
 statement :  loop_statement semicolon_opt		 { LOG("statement (0)\n"); }
 statement :  branch_statement semicolon_opt		 { LOG("statement (0)\n"); }
 statement :  labeled_statement		 { LOG("statement (0)\n"); }

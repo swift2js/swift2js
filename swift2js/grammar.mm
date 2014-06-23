@@ -2388,7 +2388,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 6:
 #line 419 "grammar.y"
-    { LOG("statement (0)\n"); ;}
+    { ((*yyvalp).node) = [[StatementNode alloc] initWithStatement:(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.node)]; LOG("statement (0)\n"); ;}
     break;
 
   case 7:

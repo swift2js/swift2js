@@ -195,7 +195,7 @@ func tabulate(code: String) -> String {
     }
     
     override func toJS() -> String {
-        return "var " + initializer.toJS() + ";";
+        return "var " + initializer.toJS();
     }
 }
 
@@ -316,6 +316,7 @@ func tabulate(code: String) -> String {
     let ifCondition:ASTNode;
     let body:ASTNode?;
     let elseClause:ASTNode?;
+    var mustCheckDeclarations = true;
     
     init(ifCondition:ASTNode, body:ASTNode?, elseClause:ASTNode?) {
         self.ifCondition = ifCondition;
@@ -323,9 +324,63 @@ func tabulate(code: String) -> String {
         self.elseClause = elseClause;
     }
     
+    func checkDeclarations() -> String? {
+        
+        if !mustCheckDeclarations {
+            return nil;
+        }
+        
+        var variables:String[] = [];
+        
+        //Check declarations inside if conditions
+        //JavaScript doesn't allow them...
+        var node:IfStatement = self;
+        while true {
+            if let declaration = node.ifCondition as? DeclarationStatement {
+                var str:String = declaration.toJS();
+                let regex = Regex("var [\\w]+");
+                if var variable = regex.firstMatch(str) {
+                    variable = variable.substringFromIndex(4);
+                    if !find(variables, variable) {
+                        variables.append(variable);
+                    }
+                }
+            }
+            if let nextNode = node.elseClause as? IfStatement {
+                node = nextNode;
+                node.mustCheckDeclarations = false;
+            }
+            else {
+                break;
+            }
+        }
+        
+        var result = "";
+        if variables.count > 0 {
+            result += "var ";
+            for variable in variables {
+                result += variable + ",";
+            }
+            result = result.substringToIndex(result.utf16count - 1) + ";\n";
+        }
+        return result;
+    }
+    
     override func toJS() -> String {
-        var result = "if (";
-        result += ifCondition.toJS();
+        
+        var result = "";
+        
+        if let declarations = checkDeclarations() {
+            result += declarations;
+        }
+        
+        result += "if (";
+        if ifCondition is DeclarationStatement {
+            result += ifCondition.toJS().substringFromIndex(4); //remove var
+        }
+        else {
+            result += ifCondition.toJS();
+        }
         result += ") {\n";
         if let statements = body {
             result += tabulate(statements.toJS());
