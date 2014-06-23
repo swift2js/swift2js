@@ -144,9 +144,9 @@
 %type <node> expression_opt
 %type <node> for_init
 %type <node> for_in_statement
-%type <node> while_statement
-%type <node> while_condition
-%type <node> do_while_statement
+%type <str> while_statement
+%type <str> while_condition
+%type <str> do_while_statement
 %type <node> branch_statement
 %type <node> if_statement
 %type <node> else_clause_opt
@@ -446,7 +446,7 @@ for_in_statement :  "for" pattern "in" expression code_block		 { LOG("for_in_sta
 
 // GRAMMAR OF A WHILE STATEMENT
 
-while_statement :  "while" while_condition code_block		 { LOG("while_statement (0)\n"); }
+while_statement :  "while" while_condition code_block		 {$$ = [[WhileStatement alloc] while_condition:$1 code_block:$2];  LOG("while_statement (0)\n"); }
 while_condition :  expression		 { LOG("while_condition (0)\n"); }
 | declaration		 { LOG("while_condition (1)\n"); }
 

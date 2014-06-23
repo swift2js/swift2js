@@ -15,6 +15,11 @@ func mortimer(let yehaaa javi:String,karliky:Int) -> Dictionary<String,Int > {
         return ["Higuita":80, "Buffon":90, "Chilavert":80]
     }
     
+    var counter = 0;
+    while counter < 10 {
+        counter++;
+    }
+    
     return index < 0 ? [:] : ["Puskas":95, "Romario":95, "Torres":10]
 }
 

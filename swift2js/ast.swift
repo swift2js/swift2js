@@ -312,6 +312,20 @@ func tabulate(code: String) -> String {
     }
 }
 
+@objc class WhileStatement: ASTNode {
+    let WhileCondition: ASTNode;
+    let CodeBlock: ASTNode;
+
+    init(WhileCondition:ASTNode, CodeBlock:ASTNode) {
+        self.WhileCondition = WhileCondition;
+        self.CodeBlock = WhileCondition;
+    }
+    
+    override func toJS() -> String {
+        return "while " + WhileCondition.toJS() + CodeBlock.toJS();
+    }
+}
+
 @objc class IfStatement: ASTNode {
     let ifCondition:ASTNode;
     let body:ASTNode?;
