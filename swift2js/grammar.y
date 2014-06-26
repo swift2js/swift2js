@@ -14,6 +14,9 @@
     static bool debugRules = false;
     
     #define LOG(...) if (debugRules)printf(__VA_ARGS__);
+    
+    union YYSTYPE;
+    static ASTNode * statementsMerge(YYSTYPE & a, YYSTYPE & b);
 %}
 
 %glr-parser
@@ -421,8 +424,8 @@ statement :  loop_statement semicolon_opt		 { LOG("statement (0)\n"); }
 statement :  branch_statement semicolon_opt		 { LOG("statement (0)\n"); }
 statement :  labeled_statement		 { LOG("statement (0)\n"); }
 statement :  control_transfer_statement semicolon_opt		 { LOG("statement (0)\n"); }
-statements :  statement %dprec 2   {$$ = [[StatementsNode alloc] initWithCurrent:$1]; }
-|  statement statements %dprec 1 {$$ = [[StatementsNode alloc] initWithCurrent:$1 next:(StatementsNode*)$2]; }
+statements :  statement %merge <statementsMerge> {$$ = [[StatementsNode alloc] initWithCurrent:$1]; }
+|  statement statements %merge <statementsMerge> {$$ = [[StatementsNode alloc] initWithCurrent:$1 next:(StatementsNode*)$2]; }
 
 // GRAMMAR OF A LOOP STATEMENT
 
@@ -1144,6 +1147,14 @@ type_inheritance_list :  type_identifier		 { LOG("type_inheritance_list (0)\n");
 | type_identifier "," type_inheritance_list		 { LOG("type_inheritance_list (1)\n"); }
 
 %%
+
+
+static ASTNode * statementsMerge(YYSTYPE & a, YYSTYPE & b)
+{
+    // Resolves function call ambiguity (2 expressios vs function call)
+    // Always choose function call.
+    return b.node;
+}
 
 static const char * lastError = NULL;
 
