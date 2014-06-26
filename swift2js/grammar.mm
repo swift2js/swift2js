@@ -257,7 +257,7 @@ static YYSTYPE yyval_default;
 #include <stdarg.h>
 
 #ifndef YY_
-# if defined YYENABLE_NLS && YYENABLE_NLS
+# if YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
@@ -2478,7 +2478,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 26:
 #line 449 "grammar.y"
-    { LOG("while_statement (0)\n"); ;}
+    {((*yyvalp).node) = [[WhileStatement alloc] initWithWhileCondition:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.node) codeBlock:(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.node)];  LOG("while_statement (0)\n"); ;}
     break;
 
   case 27:
@@ -2648,7 +2648,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 63:
 #line 504 "grammar.y"
-    { LOG("break_statement (0)\n"); ;}
+    { ((*yyvalp).node) = [[BreakStatement alloc] initWithBreakExpr:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.node)]; LOG("break_statement (0)\n"); ;}
     break;
 
   case 65:

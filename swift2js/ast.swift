@@ -312,17 +312,35 @@ func tabulate(code: String) -> String {
     }
 }
 
-@objc class WhileStatement: ASTNode {
-    let WhileCondition: ASTNode;
-    let CodeBlock: ASTNode?;
+@objc class BreakStatement: ASTNode {
+    let breakExpr: ASTNode?;
+    
+    init(breakExpr: ASTNode?) {
+        self.breakExpr = breakExpr;
+    }
+    
+    override func toJS() -> String {
+        return "break;"
+    }
+}
 
-    init(WhileCondition:ASTNode, CodeBlock:ASTNode?) {
-        self.WhileCondition = WhileCondition;
-        self.CodeBlock = CodeBlock;
+@objc class WhileStatement: ASTNode {
+    let whileCondition: ASTNode;
+    let codeBlock: ASTNode?;
+
+    init(whileCondition:ASTNode, codeBlock:ASTNode?) {
+        self.whileCondition = whileCondition;
+        self.codeBlock = codeBlock;
     }
 
     override func toJS() -> String {
-        return "whileeeeeeeee";
+        var result = "while";
+        result += "(" + whileCondition.toJS() + "){ \n";
+        if let statements = codeBlock {
+            result += tabulate(statements.toJS());
+        }
+        result += "}";
+        return result;
     }
 }
 
