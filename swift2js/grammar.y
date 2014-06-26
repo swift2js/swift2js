@@ -14,6 +14,9 @@
     static bool debugRules = false;
     
     #define LOG(...) if (debugRules)printf(__VA_ARGS__);
+    
+    union YYSTYPE;
+    static ASTNode * statementsMerge(YYSTYPE & a, YYSTYPE & b);
 %}
 
 %glr-parser
@@ -415,14 +418,14 @@ program: statements {ast = $1;}
 // GRAMMAR OF A STATEMENT
 
 statement :  expression semicolon_opt		 { $$ = [[StatementNode alloc] initWithStatement:$1]; LOG("statement (0)\n"); }
-semicolon_opt:  | ";"		 { LOG("semicolon_opt\n"); }
+semicolon_opt: {} | ";"		 { LOG("semicolon_opt\n"); }
 statement :  declaration semicolon_opt		 { $$ = [[StatementNode alloc] initWithStatement:$1]; LOG("statement (0)\n"); }
 statement :  loop_statement semicolon_opt		 { LOG("statement (0)\n"); }
 statement :  branch_statement semicolon_opt		 { LOG("statement (0)\n"); }
 statement :  labeled_statement		 { LOG("statement (0)\n"); }
 statement :  control_transfer_statement semicolon_opt		 { LOG("statement (0)\n"); }
-statements :  statement %dprec 2   {$$ = [[StatementsNode alloc] initWithCurrent:$1]; }
-|  statement statements %dprec 1 {$$ = [[StatementsNode alloc] initWithCurrent:$1 next:(StatementsNode*)$2]; }
+statements :  statement %merge <statementsMerge> {$$ = [[StatementsNode alloc] initWithCurrent:$1]; }
+|  statement statements %merge <statementsMerge> {$$ = [[StatementsNode alloc] initWithCurrent:$1 next:(StatementsNode*)$2]; }
 
 // GRAMMAR OF A LOOP STATEMENT
 
@@ -434,8 +437,8 @@ loop_statement :  do_while_statement		 { LOG("loop_statement (0)\n"); }
 // GRAMMAR OF A FOR STATEMENT
 
 for_statement :  "for" for_init_opt ";" expression_opt ";" expression_opt code_block		 { LOG("for_statement (0)\n"); }
-for_init_opt:  | for_init		 { LOG("for_init_opt\n"); }
-expression_opt:  | expression		 { LOG("expression_opt\n"); }
+for_init_opt: {} | for_init		 { LOG("for_init_opt\n"); }
+expression_opt: {} | expression		 { LOG("expression_opt\n"); }
 for_statement :  "for" "(" for_init_opt ";" expression_opt ";" expression_opt ")" code_block		 { LOG("for_statement (0)\n"); }
 for_init :  variable_declaration		 { LOG("for_init (0)\n"); }
 | expression_list		 { LOG("for_init (1)\n"); }
@@ -462,7 +465,7 @@ branch_statement :  switch_statement		 { LOG("branch_statement (0)\n"); }
 // GRAMMAR OF AN IF STATEMENT
 
 if_statement :  "if" if_condition code_block else_clause_opt		 {$$ = [[IfStatement alloc] initWithIfCondition:$2 body:$3 elseClause:$4]; LOG("if_statement (0)\n"); }
-else_clause_opt:  | else_clause		 { LOG("else_clause_opt\n"); }
+else_clause_opt: {} | else_clause		 { LOG("else_clause_opt\n"); }
 if_condition :  expression		 { LOG("if_condition (0)\n"); }
 | declaration		 { LOG("if_condition (1)\n"); }
 else_clause :  "else" code_block		 {$$ = $2; LOG("else_clause (0)\n"); }
@@ -471,7 +474,7 @@ else_clause :  "else" code_block		 {$$ = $2; LOG("else_clause (0)\n"); }
 // GRAMMAR OF A SWITCH STATEMENT
 
 switch_statement :  "switch" expression "{" switch_cases_opt "}"		 { LOG("switch_statement (0)\n"); }
-switch_cases_opt:  | switch_cases		 { LOG("switch_cases_opt\n"); }
+switch_cases_opt: {} | switch_cases		 { LOG("switch_cases_opt\n"); }
 switch_cases :  switch_case switch_cases_opt		 { LOG("switch_cases (0)\n"); }
 switch_case :  case_label statements		 { LOG("switch_case (0)\n"); }
 | default_label statements		 { LOG("switch_case (1)\n"); }
@@ -480,7 +483,7 @@ switch_case :  case_label ";"		 { LOG("switch_case (0)\n"); }
 case_label :  "case" case_item_list ":"		 { LOG("case_label (0)\n"); }
 case_item_list :  pattern guard_clause_opt		 { LOG("case_item_list (0)\n"); }
 | pattern guard_clause_opt "," case_item_list		 { LOG("case_item_list (1)\n"); }
-guard_clause_opt:  | guard_clause		 { LOG("guard_clause_opt\n"); }
+guard_clause_opt: {} | guard_clause		 { LOG("guard_clause_opt\n"); }
 default_label :  "default" ":"		 { LOG("default_label (0)\n"); }
 guard_clause :  "where" guard_expression		 { LOG("guard_clause (0)\n"); }
 guard_expression :  expression		 { LOG("guard_expression (0)\n"); }
@@ -502,7 +505,7 @@ control_transfer_statement :  return_statement		 { LOG("control_transfer_stateme
 // GRAMMAR OF A BREAK STATEMENT
 
 break_statement :  "break" label_name_opt		 { LOG("break_statement (0)\n"); }
-label_name_opt:  | label_name		 { LOG("label_name_opt\n"); }
+label_name_opt: {} | label_name		 { LOG("label_name_opt\n"); }
 
 // GRAMMAR OF A CONTINUE STATEMENT
 
@@ -522,7 +525,7 @@ return_statement :  "return" expression_opt		 {$$ = [[ReturnStatement alloc] ini
 // GRAMMAR OF A GENERIC PARAMETER CLAUSE
 
 generic_parameter_clause :  "<" generic_parameter_list requirement_clause_opt ">"		 { LOG("generic_parameter_clause (0)\n"); }
-requirement_clause_opt:  | requirement_clause		 { LOG("requirement_clause_opt\n"); }
+requirement_clause_opt: {} | requirement_clause		 { LOG("requirement_clause_opt\n"); }
 generic_parameter_list :  generic_parameter		 { LOG("generic_parameter_list (0)\n"); }
 | generic_parameter "," generic_parameter_list		 { LOG("generic_parameter_list (1)\n"); }
 generic_parameter :  type_name		 { LOG("generic_parameter (0)\n"); }
@@ -564,9 +567,9 @@ declaration :  extension_declaration		 { LOG("declaration (0)\n"); }
 declaration :  subscript_declaration		 { LOG("declaration (0)\n"); }
 declaration :  operator_declaration		 { LOG("declaration (0)\n"); }
 declarations :  declaration declarations_opt		 { LOG("declarations (0)\n"); }
-declarations_opt:  | declarations		 { LOG("declarations_opt\n"); }
+declarations_opt: {} | declarations		 { LOG("declarations_opt\n"); }
 declaration_specifiers :  declaration_specifier declaration_specifiers_opt		 { LOG("declaration_specifiers (0)\n"); }
-declaration_specifiers_opt:  | declaration_specifiers		 { LOG("declaration_specifiers_opt\n"); }
+declaration_specifiers_opt: {} | declaration_specifiers		 { LOG("declaration_specifiers_opt\n"); }
 declaration_specifier :  "class"		 { LOG("declaration_specifier (0)\n"); }
 | "mutating"		 { LOG("declaration_specifier (1)\n"); }
 | "nonmutating"		 { LOG("declaration_specifier (2)\n"); }
@@ -585,8 +588,8 @@ code_block :  "{" statements "}"		 {$$ = $2; LOG("code_block (0)\n"); }
 // GRAMMAR OF AN IMPORT DECLARATION
 
 import_declaration :  attributes_opt "import" import_kind_opt import_path		 { LOG("import_declaration (0)\n"); }
-attributes_opt:  | attributes		 { LOG("attributes_opt\n"); }
-import_kind_opt:  | import_kind		 { LOG("import_kind_opt\n"); }
+attributes_opt: {} | attributes		 { LOG("attributes_opt\n"); }
+import_kind_opt: {} | import_kind		 { LOG("import_kind_opt\n"); }
 import_kind :  "typealias"		 { LOG("import_kind (0)\n"); }
 | "struct"		 { LOG("import_kind (1)\n"); }
 | "class"		 { LOG("import_kind (2)\n"); }
@@ -606,7 +609,7 @@ pattern_initializer_list :  pattern_initializer		 {$$=[[ExpressionList alloc] in
 | pattern_initializer "," pattern_initializer_list		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; LOG("pattern_initializer_list (1)\n"); }
 pattern_initializer :  pattern initializer %dprec 1         {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:[[BinaryExpression alloc] initWithExpression:$2 next:nil]]; LOG("pattern_initializer (0)\n"); }
 | pattern %dprec 2                                          { LOG("pattern_initializer (1)\n"); }
-initializer_opt:  | initializer		 { LOG("initializer_opt\n"); }
+initializer_opt: {} | initializer		 { LOG("initializer_opt\n"); }
 initializer :  "=" expression		 {$$ = [[AssignmentOperator alloc] initWithRightOperand:$2];  LOG("initializer (0)\n"); }
 
 // GRAMMAR OF A VARIABLE DECLARATION
@@ -619,19 +622,19 @@ variable_declaration :  variable_declaration_head variable_name type_annotation 
 variable_declaration_head :  attributes_opt declaration_specifiers_opt "var"		 { LOG("variable_declaration_head (0)\n"); }
 variable_name :  identifier		 { LOG("variable_name (0)\n"); }
 getter_setter_block :  "{" getter_clause setter_clause_opt "}"		 { LOG("getter_setter_block (0)\n"); }
-setter_clause_opt:  | setter_clause		 { LOG("setter_clause_opt\n"); }
+setter_clause_opt: {} | setter_clause		 { LOG("setter_clause_opt\n"); }
 getter_setter_block :  "{" setter_clause getter_clause "}"		 { LOG("getter_setter_block (0)\n"); }
 getter_clause :  attributes_opt "get" code_block		 { LOG("getter_clause (0)\n"); }
 setter_clause :  attributes_opt "set" setter_name_opt code_block		 { LOG("setter_clause (0)\n"); }
-setter_name_opt:  | setter_name		 { LOG("setter_name_opt\n"); }
+setter_name_opt: {} | setter_name		 { LOG("setter_name_opt\n"); }
 setter_name :  "(" identifier ")"		 { LOG("setter_name (0)\n"); }
 getter_setter_keyword_block :  "{" getter_keyword_clause setter_keyword_clause_opt "}"		 { LOG("getter_setter_keyword_block (0)\n"); }
-setter_keyword_clause_opt:  | setter_keyword_clause		 { LOG("setter_keyword_clause_opt\n"); }
+setter_keyword_clause_opt: {} | setter_keyword_clause		 { LOG("setter_keyword_clause_opt\n"); }
 getter_setter_keyword_block :  "{" setter_keyword_clause getter_keyword_clause "}"		 { LOG("getter_setter_keyword_block (0)\n"); }
 getter_keyword_clause :  attributes_opt "get"		 { LOG("getter_keyword_clause (0)\n"); }
 setter_keyword_clause :  attributes_opt "set"		 { LOG("setter_keyword_clause (0)\n"); }
 willSet_didSet_block :  "{" willSet_clause didSet_clause_opt "}"		 { LOG("willSet_didSet_block (0)\n"); }
-didSet_clause_opt:  | didSet_clause		 { LOG("didSet_clause_opt\n"); }
+didSet_clause_opt: {} | didSet_clause		 { LOG("didSet_clause_opt\n"); }
 willSet_didSet_block :  "{" didSet_clause willSet_clause "}"		 { LOG("willSet_didSet_block (0)\n"); }
 willSet_clause :  attributes_opt "willSet" setter_name_opt code_block		 { LOG("willSet_clause (0)\n"); }
 didSet_clause :  attributes_opt "didSet" setter_name_opt code_block		 { LOG("didSet_clause (0)\n"); }
@@ -649,30 +652,30 @@ function_declaration :  function_head function_name generic_parameter_clause_opt
     $$ = [[FunctionDeclaration alloc] initWithName:toSwift($2) signature:$4 body:$5];
     LOG("function_declaration (0)\n");
 }
-generic_parameter_clause_opt:  | generic_parameter_clause		 { LOG("generic_parameter_clause_opt\n"); }
+generic_parameter_clause_opt: {} | generic_parameter_clause		 { LOG("generic_parameter_clause_opt\n"); }
 function_head :  attributes_opt declaration_specifiers_opt "func"		 { LOG("function_head (0)\n"); }
 function_name :  identifier		 { LOG("function_name (0)\n"); }
 | operator		 { LOG("function_name (1)\n"); }
 function_signature :  parameter_clauses function_result_opt		 {$$ = $1; LOG("function_signature (0)\n"); }
-function_result_opt:  | function_result		 { LOG("function_result_opt\n"); }
+function_result_opt: {} | function_result		 { LOG("function_result_opt\n"); }
 function_result :  "->" attributes_opt type		 { LOG("function_result (0)\n"); }
 function_body :  code_block		 { LOG("function_body (0)\n"); }
 parameter_clauses :  parameter_clause parameter_clauses_opt		 { LOG("parameter_clauses (0)\n"); }
-parameter_clauses_opt:  | parameter_clauses		 { LOG("parameter_clauses_opt\n"); }
+parameter_clauses_opt: {} | parameter_clauses		 { LOG("parameter_clauses_opt\n"); }
 parameter_clause :  "(" ")"		 {$$ = NULL; LOG("parameter_clause (0)\n"); }
 | "(" parameter_list tripledot_opt ")"		 {$$ = $2; LOG("parameter_clause (1)\n"); }
-tripledot_opt:  | "..."		 { LOG("tripledot_opt\n"); }
+tripledot_opt: {} | "..."		 { LOG("tripledot_opt\n"); }
 parameter_list :  parameter		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; LOG("parameter_list (0)\n"); }
 | parameter "," parameter_list		 { $$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3];LOG("parameter_list (1)\n"); }
 parameter :  inout_opt let_opt hash_opt parameter_name local_parameter_name_opt type_annotation default_argument_clause_opt		 {
     $$ = [[FunctionParameter alloc] initWithInoutVal:!!$1 letVal:!!$2 hashVal:!!$3 external:toSwift($4) local:toSwift($5) defVal:$6];
     LOG("parameter (0)\n");
 }
-inout_opt:  | "inout"		 { LOG("inout_opt\n"); }
-let_opt:  | "let"		 { LOG("let_opt\n"); }
-hash_opt:  | "#"		 { LOG("hash_opt\n"); }
-local_parameter_name_opt:  | local_parameter_name		 { LOG("local_parameter_name_opt\n"); }
-default_argument_clause_opt:  | default_argument_clause		 { LOG("default_argument_clause_opt\n"); }
+inout_opt: {} | "inout"		 { LOG("inout_opt\n"); }
+let_opt: {} | "let"		 { LOG("let_opt\n"); }
+hash_opt: {} | "#"		 { LOG("hash_opt\n"); }
+local_parameter_name_opt: {} | local_parameter_name		 { LOG("local_parameter_name_opt\n"); }
+default_argument_clause_opt: {} | default_argument_clause		 { LOG("default_argument_clause_opt\n"); }
 parameter :  inout_opt "var" hash_opt parameter_name local_parameter_name_opt type_annotation default_argument_clause_opt		 { LOG("parameter (0)\n"); }
 parameter :  attributes_opt type		 { LOG("parameter (0)\n"); }
 parameter_name :  identifier		 { LOG("parameter_name (0)\n"); }
@@ -686,7 +689,7 @@ default_argument_clause :  "=" expression		 {$$ = $2; LOG("default_argument_clau
 enum_declaration :  attributes_opt union_style_enum		 { LOG("enum_declaration (0)\n"); }
 | attributes_opt raw_value_style_enum		 { LOG("enum_declaration (1)\n"); }
 union_style_enum :  enum_name generic_parameter_clause_opt "{" union_style_enum_members_opt "}"		 { LOG("union_style_enum (0)\n"); }
-union_style_enum_members_opt:  | union_style_enum_members		 { LOG("union_style_enum_members_opt\n"); }
+union_style_enum_members_opt: {} | union_style_enum_members		 { LOG("union_style_enum_members_opt\n"); }
 union_style_enum_members :  union_style_enum_member union_style_enum_members_opt		 { LOG("union_style_enum_members (0)\n"); }
 union_style_enum_member :  declaration		 { LOG("union_style_enum_member (0)\n"); }
 | union_style_enum_case_clause		 { LOG("union_style_enum_member (1)\n"); }
@@ -694,11 +697,11 @@ union_style_enum_case_clause :  attributes_opt "case" union_style_enum_case_list
 union_style_enum_case_list :  union_style_enum_case		 { LOG("union_style_enum_case_list (0)\n"); }
 | union_style_enum_case "," union_style_enum_case_list		 { LOG("union_style_enum_case_list (1)\n"); }
 union_style_enum_case :  enum_case_name tuple_type_opt		 { LOG("union_style_enum_case (0)\n"); }
-tuple_type_opt:  | tuple_type		 { LOG("tuple_type_opt\n"); }
+tuple_type_opt: {} | tuple_type		 { LOG("tuple_type_opt\n"); }
 enum_name :  identifier		 { LOG("enum_name (0)\n"); }
 enum_case_name :  identifier		 { LOG("enum_case_name (0)\n"); }
 raw_value_style_enum :  enum_name generic_parameter_clause_opt ":" type_identifier "{" raw_value_style_enum_members_opt "}"		 { LOG("raw_value_style_enum (0)\n"); }
-raw_value_style_enum_members_opt:  | raw_value_style_enum_members		 { LOG("raw_value_style_enum_members_opt\n"); }
+raw_value_style_enum_members_opt: {} | raw_value_style_enum_members		 { LOG("raw_value_style_enum_members_opt\n"); }
 raw_value_style_enum_members :  raw_value_style_enum_member raw_value_style_enum_members_opt		 { LOG("raw_value_style_enum_members (0)\n"); }
 raw_value_style_enum_member :  declaration		 { LOG("raw_value_style_enum_member (0)\n"); }
 | raw_value_style_enum_case_clause		 { LOG("raw_value_style_enum_member (1)\n"); }
@@ -706,13 +709,13 @@ raw_value_style_enum_case_clause :  attributes_opt "case" raw_value_style_enum_c
 raw_value_style_enum_case_list :  raw_value_style_enum_case		 { LOG("raw_value_style_enum_case_list (0)\n"); }
 | raw_value_style_enum_case "," raw_value_style_enum_case_list		 { LOG("raw_value_style_enum_case_list (1)\n"); }
 raw_value_style_enum_case :  enum_case_name raw_value_assignment_opt		 { LOG("raw_value_style_enum_case (0)\n"); }
-raw_value_assignment_opt:  | raw_value_assignment		 { LOG("raw_value_assignment_opt\n"); }
+raw_value_assignment_opt: {} | raw_value_assignment		 { LOG("raw_value_assignment_opt\n"); }
 raw_value_assignment :  "=" literal		 { LOG("raw_value_assignment (0)\n"); }
 
 // GRAMMAR OF A STRUCTURE DECLARATION
 
 struct_declaration :  attributes_opt "struct" struct_name generic_parameter_clause_opt type_inheritance_clause_opt struct_body		 { LOG("struct_declaration (0)\n"); }
-type_inheritance_clause_opt:  | type_inheritance_clause		 { LOG("type_inheritance_clause_opt\n"); }
+type_inheritance_clause_opt: {} | type_inheritance_clause		 { LOG("type_inheritance_clause_opt\n"); }
 struct_name :  identifier		 { LOG("struct_name (0)\n"); }
 struct_body :  "{" declarations_opt "}"		 { LOG("struct_body (0)\n"); }
 
@@ -727,7 +730,7 @@ class_body :  "{" declarations_opt "}"		 { LOG("class_body (0)\n"); }
 protocol_declaration :  attributes_opt "protocol" protocol_name type_inheritance_clause_opt protocol_body		 { LOG("protocol_declaration (0)\n"); }
 protocol_name :  identifier		 { LOG("protocol_name (0)\n"); }
 protocol_body :  "{" protocol_member_declarations_opt "}"		 { LOG("protocol_body (0)\n"); }
-protocol_member_declarations_opt:  | protocol_member_declarations		 { LOG("protocol_member_declarations_opt\n"); }
+protocol_member_declarations_opt: {} | protocol_member_declarations		 { LOG("protocol_member_declarations_opt\n"); }
 protocol_member_declaration :  protocol_property_declaration		 { LOG("protocol_member_declaration (0)\n"); }
 protocol_member_declaration :  protocol_method_declaration		 { LOG("protocol_member_declaration (0)\n"); }
 protocol_member_declaration :  protocol_initializer_declaration		 { LOG("protocol_member_declaration (0)\n"); }
@@ -754,13 +757,13 @@ protocol_subscript_declaration :  subscript_head subscript_result getter_setter_
 // GRAMMAR OF A PROTOCOL ASSOCIATED TYPE DECLARATION
 
 protocol_associated_type_declaration :  typealias_head type_inheritance_clause_opt typealias_assignment_opt		 { LOG("protocol_associated_type_declaration (0)\n"); }
-typealias_assignment_opt:  | typealias_assignment		 { LOG("typealias_assignment_opt\n"); }
+typealias_assignment_opt: {} | typealias_assignment		 { LOG("typealias_assignment_opt\n"); }
 
 // GRAMMAR OF AN INITIALIZER DECLARATION
 
 initializer_declaration :  initializer_head generic_parameter_clause_opt parameter_clause initializer_body		 { LOG("initializer_declaration (0)\n"); }
 initializer_head :  attributes_opt convenience_opt "init"		 { LOG("initializer_head (0)\n"); }
-convenience_opt:  | "convenience"		 { LOG("convenience_opt\n"); }
+convenience_opt: {} | "convenience"		 { LOG("convenience_opt\n"); }
 initializer_body :  code_block		 { LOG("initializer_body (0)\n"); }
 
 // GRAMMAR OF A DEINITIALIZER DECLARATION
@@ -788,10 +791,10 @@ operator_declaration :  prefix_operator_declaration		 { LOG("operator_declaratio
 prefix_operator_declaration :  "operator" "prefix" operator "{" "}"		 { LOG("prefix_operator_declaration (0)\n"); }
 postfix_operator_declaration :  "operator" "postfix" operator "{" "}"		 { LOG("postfix_operator_declaration (0)\n"); }
 infix_operator_declaration :  "operator" "infix" operator "{" infix_operator_attributes_opt "}"		 { LOG("infix_operator_declaration (0)\n"); }
-infix_operator_attributes_opt:  | infix_operator_attributes		 { LOG("infix_operator_attributes_opt\n"); }
+infix_operator_attributes_opt: {} | infix_operator_attributes		 { LOG("infix_operator_attributes_opt\n"); }
 infix_operator_attributes :  precedence_clause_opt associativity_clause_opt		 { LOG("infix_operator_attributes (0)\n"); }
-precedence_clause_opt:  | precedence_clause		 { LOG("precedence_clause_opt\n"); }
-associativity_clause_opt:  | associativity_clause		 { LOG("associativity_clause_opt\n"); }
+precedence_clause_opt: {} | precedence_clause		 { LOG("precedence_clause_opt\n"); }
+associativity_clause_opt: {} | associativity_clause		 { LOG("associativity_clause_opt\n"); }
 precedence_clause :  "precedence" precedence_level		 { LOG("precedence_clause (0)\n"); }
 precedence_level : 		 { LOG("precedence_level (0)\n"); }
 associativity_clause :  "associativity" associativity		 { LOG("associativity_clause (0)\n"); }
@@ -805,7 +808,7 @@ associativity :  "left"		 { LOG("associativity (0)\n"); }
 // GRAMMAR OF A PATTERN
 
 pattern :  wildcard_pattern type_annotation_opt		 { LOG("pattern (0)\n"); }
-type_annotation_opt:  | type_annotation		 { LOG("type_annotation_opt\n"); }
+type_annotation_opt: {} | type_annotation		 { LOG("type_annotation_opt\n"); }
 pattern :  identifier_pattern type_annotation_opt %dprec 1		 {$$ = [[LiteralExpression alloc] init:toSwift($1)]; LOG("pattern (1)\n"); }
 pattern :  value_binding_pattern		 { LOG("pattern (3)\n"); }
 pattern :  tuple_pattern type_annotation_opt		 { LOG("pattern (4)\n"); }
@@ -829,7 +832,7 @@ value_binding_pattern :  "var" pattern		 { LOG("value_binding_pattern (0)\n"); }
 // GRAMMAR OF A TUPLE PATTERN
 
 tuple_pattern :  "(" tuple_pattern_element_list_opt ")"		 { LOG("tuple_pattern (0)\n"); }
-tuple_pattern_element_list_opt:  | tuple_pattern_element_list		 { LOG("tuple_pattern_element_list_opt\n"); }
+tuple_pattern_element_list_opt: {} | tuple_pattern_element_list		 { LOG("tuple_pattern_element_list_opt\n"); }
 tuple_pattern_element_list :  tuple_pattern_element		 { LOG("tuple_pattern_element_list (0)\n"); }
 | tuple_pattern_element "," tuple_pattern_element_list		 { LOG("tuple_pattern_element_list (1)\n"); }
 tuple_pattern_element :  pattern		 { LOG("tuple_pattern_element (0)\n"); }
@@ -837,8 +840,8 @@ tuple_pattern_element :  pattern		 { LOG("tuple_pattern_element (0)\n"); }
 // GRAMMAR OF AN ENUMERATION CASE PATTERN
 
 enum_case_pattern :  type_identifier_opt "." enum_case_name tuple_pattern_opt		 { LOG("enum_case_pattern (0)\n"); }
-type_identifier_opt:  | type_identifier		 { LOG("type_identifier_opt\n"); }
-tuple_pattern_opt:  | tuple_pattern		 { LOG("tuple_pattern_opt\n"); }
+type_identifier_opt: {} | type_identifier		 { LOG("type_identifier_opt\n"); }
+tuple_pattern_opt: {} | tuple_pattern		 { LOG("tuple_pattern_opt\n"); }
 
 // GRAMMAR OF A TYPE CASTING PATTERN
 
@@ -857,10 +860,10 @@ expression_pattern :  expression		 { LOG("expression_pattern (0)\n"); }
 // GRAMMAR OF AN ATTRIBUTE
 
 attribute :  "@" attribute_name attribute_argument_clause_opt		 { LOG("attribute (0)\n"); }
-attribute_argument_clause_opt:  | attribute_argument_clause		 { LOG("attribute_argument_clause_opt\n"); }
+attribute_argument_clause_opt: {} | attribute_argument_clause		 { LOG("attribute_argument_clause_opt\n"); }
 attribute_name :  identifier		 { LOG("attribute_name (0)\n"); }
 attribute_argument_clause :  "(" balanced_tokens_opt ")"		 { LOG("attribute_argument_clause (0)\n"); }
-balanced_tokens_opt:  | balanced_tokens		 { LOG("balanced_tokens_opt\n"); }
+balanced_tokens_opt: {} | balanced_tokens		 { LOG("balanced_tokens_opt\n"); }
 attributes :  attribute attributes_opt		 { LOG("attributes (0)\n"); }
 balanced_tokens :  balanced_token balanced_tokens_opt		 { LOG("balanced_tokens (0)\n"); }
 balanced_token :  "(" balanced_tokens_opt ")"		 { LOG("balanced_token (0)\n"); }
@@ -901,12 +904,12 @@ binary_expressions :  binary_expression 		 {$$ = [[BinaryExpression alloc] initW
 
 type_casting_operator :  "is" type		 { LOG("type_casting_operator (0)\n"); }
 | "as" question_opt type		 { LOG("type_casting_operator (1)\n"); }
-question_opt:  | "?"		 { LOG("question_opt\n"); }
+question_opt: {} | "?"		 { LOG("question_opt\n"); }
 
 // GRAMMAR OF A PRIMARY EXPRESSION
 
 primary_expression :  identifier generic_argument_clause_opt		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; LOG("primary_expression (1)\n"); }
-generic_argument_clause_opt:  | generic_argument_clause		 { LOG("generic_argument_clause_opt\n"); }
+generic_argument_clause_opt: {} | generic_argument_clause		 { LOG("generic_argument_clause_opt\n"); }
 primary_expression :  literal_expression		 { LOG("primary_expression (2)\n"); }
 primary_expression :  self_expression		 { LOG("primary_expression (3)\n"); }
 primary_expression :  superclass_expression		 { LOG("primary_expression (4)\n"); }
@@ -925,10 +928,10 @@ literal_expression :  "__FILE__"		 { LOG("literal_expression (0)\n"); }
 | "__COLUMN__"		 { LOG("literal_expression (2)\n"); }
 | "__FUNCTION__"		 { LOG("literal_expression (3)\n"); }
 array_literal :  "[" array_literal_items_opt "]"		 {$$ = [[ArrayLiteral alloc] initWithItems:$2]; LOG("array_literal (0)\n"); }
-array_literal_items_opt:  | array_literal_items		 { LOG("array_literal_items_opt\n"); }
+array_literal_items_opt: {} | array_literal_items		 { LOG("array_literal_items_opt\n"); }
 array_literal_items :  array_literal_item comma_opt		 { $$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; LOG("array_literal_items (0)\n"); }
 | array_literal_item "," array_literal_items		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; LOG("array_literal_items (1)\n"); }
-comma_opt:  | ","		 { LOG("comma_opt\n"); }
+comma_opt: {} | ","		 { LOG("comma_opt\n"); }
 array_literal_item :  expression		 { LOG("array_literal_item (0)\n"); }
 dictionary_literal :  "[" dictionary_literal_items "]"		 {$$ = [[DictionaryLiteral alloc] initWithPairs:$2]; LOG("array_literal (0)\n"); LOG("dictionary_literal (0)\n"); }
 | "[" ":" "]"		 {$$ = [[DictionaryLiteral alloc] initWithPairs:nil];  LOG("dictionary_literal (1)\n"); }
@@ -955,7 +958,7 @@ superclass_initializer_expression :  "super" "." "init"		 { LOG("superclass_init
 // GRAMMAR OF A CLOSURE EXPRESSION
 
 closure_expression :  "{" closure_signature_opt statements "}"		 { LOG("closure_expression (0)\n"); }
-closure_signature_opt:  | closure_signature		 { LOG("closure_signature_opt\n"); }
+closure_signature_opt: {} | closure_signature		 { LOG("closure_signature_opt\n"); }
 closure_signature :  parameter_clause function_result_opt "in"		 { LOG("closure_signature (0)\n"); }
 closure_signature :  identifier_list function_result_opt "in"		 { LOG("closure_signature (0)\n"); }
 closure_signature :  capture_list parameter_clause function_result_opt "in"		 { LOG("closure_signature (0)\n"); }
@@ -1001,7 +1004,7 @@ postfix_expression :  optional_chaining_expression		 { LOG("postfix_expression (
 
 function_call_expression :  postfix_expression parenthesized_expression		 {$$ = [[FunctionCallExpression alloc] initWithFunction:$1 parenthesized:$2]; LOG("function_call_expression (0)\n"); }
 function_call_expression :  postfix_expression parenthesized_expression_opt trailing_closure		 { LOG("function_call_expression (0)\n"); }
-parenthesized_expression_opt:  | parenthesized_expression		 { LOG("parenthesized_expression_opt\n"); }
+parenthesized_expression_opt: {} | parenthesized_expression		 { LOG("parenthesized_expression_opt\n"); }
 trailing_closure :  closure_expression		 { LOG("trailing_closure (0)\n"); }
 
 // GRAMMAR OF AN INITIALIZER EXPRESSION
@@ -1099,7 +1102,7 @@ type_name :  identifier		 { LOG("type_name (0)\n"); }
 // GRAMMAR OF A TUPLE TYPE
 
 tuple_type :  "(" tuple_type_body_opt ")"		 { LOG("tuple_type (0)\n"); }
-tuple_type_body_opt:  | tuple_type_body		 { LOG("tuple_type_body_opt\n"); }
+tuple_type_body_opt: {} | tuple_type_body		 { LOG("tuple_type_body_opt\n"); }
 tuple_type_body :  tuple_type_element_list tripledot_opt		 { LOG("tuple_type_body (0)\n"); }
 tuple_type_element_list :  tuple_type_element		 { LOG("tuple_type_element_list (0)\n"); }
 | tuple_type_element "," tuple_type_element_list		 { LOG("tuple_type_element_list (1)\n"); }
@@ -1127,7 +1130,7 @@ implicitly_unwrapped_optional_type :  type "!"		 { LOG("implicitly_unwrapped_opt
 // GRAMMAR OF A PROTOCOL COMPOSITION TYPE
 
 protocol_composition_type :  "protocol" "<" protocol_identifier_list_opt ">"		 { LOG("protocol_composition_type (0)\n"); }
-protocol_identifier_list_opt:  | protocol_identifier_list		 { LOG("protocol_identifier_list_opt\n"); }
+protocol_identifier_list_opt: {} | protocol_identifier_list		 { LOG("protocol_identifier_list_opt\n"); }
 protocol_identifier_list :  protocol_identifier		 { LOG("protocol_identifier_list (0)\n"); }
 | protocol_identifier "," protocol_identifier_list		 { LOG("protocol_identifier_list (1)\n"); }
 protocol_identifier :  type_identifier		 { LOG("protocol_identifier (0)\n"); }
@@ -1144,6 +1147,14 @@ type_inheritance_list :  type_identifier		 { LOG("type_inheritance_list (0)\n");
 | type_identifier "," type_inheritance_list		 { LOG("type_inheritance_list (1)\n"); }
 
 %%
+
+
+static ASTNode * statementsMerge(YYSTYPE & a, YYSTYPE & b)
+{
+    // Resolves function call ambiguity (2 expressios vs function call)
+    // Always choose function call.
+    return b.node;
+}
 
 static const char * lastError = NULL;
 
