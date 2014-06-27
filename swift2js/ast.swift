@@ -379,63 +379,9 @@ var ctx = ASTContext();
         self.elseClause = elseClause;
     }
     
-    func checkDeclarations() -> String? {
-        
-        if !mustCheckDeclarations {
-            return nil;
-        }
-        
-        var variables:String[] = [];
-        
-        //Check declarations inside if conditions
-        //JavaScript doesn't allow them...
-        var node:IfStatement = self;
-        while true {
-            if let declaration = node.ifCondition as? DeclarationStatement {
-                var str:String = declaration.toJS();
-                let regex = Regex("var [\\w]+");
-                if var variable = regex.firstMatch(str) {
-                    variable = variable.substringFromIndex(4);
-                    if !find(variables, variable) {
-                        variables.append(variable);
-                    }
-                }
-            }
-            if let nextNode = node.elseClause as? IfStatement {
-                node = nextNode;
-                node.mustCheckDeclarations = false;
-            }
-            else {
-                break;
-            }
-        }
-        
-        var result = "";
-        if variables.count > 0 {
-            result += "var ";
-            for variable in variables {
-                result += variable + ",";
-            }
-            result = result.substringToIndex(result.utf16count - 1) + ";\n";
-        }
-        return result;
-    }
-    
     override func toJS() -> String {
-        
-        var result = "";
-        
-        if let declarations = checkDeclarations() {
-            result += declarations;
-        }
-        
-        result += "if (";
-        if ifCondition is DeclarationStatement {
-            result += ifCondition.toJS().substringFromIndex(4); //remove var
-        }
-        else {
+        var result = "if (";
             result += ifCondition.toJS();
-        }
         result += ") {\n";
         if let statements = body {
             result += tabulate(statements.toJS());
@@ -483,7 +429,13 @@ var ctx = ASTContext();
     override func toJS() -> String {
         var result = "";
         if let currentStatement = current {
-            result+=currentStatement.toJS() + "\n";
+            ctx.save();
+            var tmp = currentStatement.toJS() + "\n";
+            if let exported = ctx.getExportedVars() {
+                result += exported;
+            }
+            result += tmp;
+            ctx.restore();
         }
         if let nextStatements = next {
             result += nextStatements.toJS();
