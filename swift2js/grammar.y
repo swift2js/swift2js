@@ -972,7 +972,7 @@ capture_specifier :  "weak"		 { LOG("capture_specifier (0)\n"); }
 
 // GRAMMAR OF A IMPLICIT MEMBER EXPRESSION
 
-implicit_member_expression :  "." identifier		 { LOG("implicit_member_expression (0)\n"); }
+implicit_member_expression :  "." identifier { $$ = [[LiteralExpression alloc] init:toSwift($1)];  LOG("implicit_member_expression (0)\n"); }
 
 // GRAMMAR OF A PARENTHESIZED EXPRESSION
 

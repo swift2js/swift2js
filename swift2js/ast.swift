@@ -93,8 +93,17 @@ var ctx = ASTContext();
     }
     
     override func toJS() -> String {
+        if binaryOperator == "." {
+            var right = rightOperand.toJS();
+            if let index = right.toInt() {
+                return "[\(index)]";
+            }
+            return binaryOperator + right;
+        }
+        else {
         return " " + binaryOperator + " " + rightOperand.toJS();
     }
+}
 }
 
 @objc class AssignmentOperator: ASTNode {
