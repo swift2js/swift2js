@@ -949,7 +949,7 @@ static const unsigned char yydprec[] =
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     1,     2,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
@@ -2396,7 +2396,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 6:
 #line 422 "grammar.y"
-    { ((*yyvalp).node) = [[StatementNode alloc] initWithStatement:(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.node)]; LOG("statement (0)\n"); ;}
+    { ((*yyvalp).node) = [[DeclarationStatement alloc] initWithDeclaration:(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.node)]; LOG("statement (0)\n"); ;}
     break;
 
   case 7:
@@ -3046,7 +3046,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 136:
 #line 607 "grammar.y"
-    {((*yyvalp).node) = [[DeclarationStatement alloc] initWithInitializer:(((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.node)]; LOG("constant_declaration (0)\n"); ;}
+    {((*yyvalp).node) = [[VariableDeclaration alloc] initWithInitializer:(ExpressionList*)(((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.node)]; LOG("constant_declaration (0)\n"); ;}
     break;
 
   case 137:
@@ -3086,7 +3086,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 144:
 #line 617 "grammar.y"
-    {((*yyvalp).node) = [[DeclarationStatement alloc] initWithInitializer:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.node)]; LOG("variable_declaration (0)\n"); ;}
+    {((*yyvalp).node) = [[VariableDeclaration alloc] initWithInitializer:(ExpressionList*)(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.node)]; LOG("variable_declaration (0)\n"); ;}
     break;
 
   case 145:
@@ -4452,7 +4452,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 416:
 #line 975 "grammar.y"
-    { LOG("implicit_member_expression (0)\n"); ;}
+    { ((*yyvalp).node) = [[LiteralExpression alloc] init:toSwift((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.str))];  LOG("implicit_member_expression (0)\n"); ;}
     break;
 
   case 417:
@@ -4487,7 +4487,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 423:
 #line 984 "grammar.y"
-    { ((*yyvalp).node) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.node); LOG("expression_element (1)\n"); ;}
+    { ((*yyvalp).node) = [[NamedExpression alloc] initWithName:toSwift((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.str)) expr:(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.node)]; LOG("expression_element (1)\n"); ;}
     break;
 
   case 424:
@@ -4547,7 +4547,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 435:
 #line 1005 "grammar.y"
-    {((*yyvalp).node) = [[FunctionCallExpression alloc] initWithFunction:(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.node) parenthesized:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.node)]; LOG("function_call_expression (0)\n"); ;}
+    {((*yyvalp).node) = [[FunctionCallExpression alloc] initWithFunction:(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.node) parenthesized:(ParenthesizedExpression*)(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.node)]; LOG("function_call_expression (0)\n"); ;}
     break;
 
   case 436:

@@ -419,7 +419,7 @@ program: statements {ast = $1;}
 
 statement :  expression semicolon_opt		 { $$ = [[StatementNode alloc] initWithStatement:$1]; LOG("statement (0)\n"); }
 semicolon_opt: {} | ";"		 { LOG("semicolon_opt\n"); }
-statement :  declaration semicolon_opt		 { $$ = [[StatementNode alloc] initWithStatement:$1]; LOG("statement (0)\n"); }
+statement :  declaration semicolon_opt		 { $$ = [[DeclarationStatement alloc] initWithDeclaration:$1]; LOG("statement (0)\n"); }
 statement :  loop_statement semicolon_opt		 { LOG("statement (0)\n"); }
 statement :  branch_statement semicolon_opt		 { LOG("statement (0)\n"); }
 statement :  labeled_statement		 { LOG("statement (0)\n"); }
@@ -604,7 +604,7 @@ import_path_identifier :  identifier		 { LOG("import_path_identifier (0)\n"); }
 
 // GRAMMAR OF A CONSTANT DECLARATION
 
-constant_declaration :  attributes_opt declaration_specifiers_opt "let" pattern_initializer_list		 {$$ = [[DeclarationStatement alloc] initWithInitializer:$4]; LOG("constant_declaration (0)\n"); }
+constant_declaration :  attributes_opt declaration_specifiers_opt "let" pattern_initializer_list		 {$$ = [[VariableDeclaration alloc] initWithInitializer:(ExpressionList*)$4]; LOG("constant_declaration (0)\n"); }
 pattern_initializer_list :  pattern_initializer		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil];  LOG("pattern_initializer_list (0)\n"); }
 | pattern_initializer "," pattern_initializer_list		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; LOG("pattern_initializer_list (1)\n"); }
 pattern_initializer :  pattern initializer %dprec 1         {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:[[BinaryExpression alloc] initWithExpression:$2 next:nil]]; LOG("pattern_initializer (0)\n"); }
@@ -614,7 +614,7 @@ initializer :  "=" expression		 {$$ = [[AssignmentOperator alloc] initWithRightO
 
 // GRAMMAR OF A VARIABLE DECLARATION
 
-variable_declaration :  variable_declaration_head pattern_initializer_list 		 {$$ = [[DeclarationStatement alloc] initWithInitializer:$2]; LOG("variable_declaration (0)\n"); }
+variable_declaration :  variable_declaration_head pattern_initializer_list 		 {$$ = [[VariableDeclaration alloc] initWithInitializer:(ExpressionList*)$2]; LOG("variable_declaration (0)\n"); }
 variable_declaration :  variable_declaration_head variable_name type_annotation code_block		 { LOG("variable_declaration (0)\n"); }
 variable_declaration :  variable_declaration_head variable_name type_annotation getter_setter_block		 { LOG("variable_declaration (0)\n"); }
 variable_declaration :  variable_declaration_head variable_name type_annotation getter_setter_keyword_block		 { LOG("variable_declaration (0)\n"); }
@@ -877,8 +877,8 @@ balanced_token : 		 { LOG("balanced_token (0)\n"); }
 
 // GRAMMAR OF AN EXPRESSION
 
-expression :  prefix_expression		 {LOG("expression (0)\n"); }
-| prefix_expression binary_expressions {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:(BinaryExpression*)$2];}
+expression :  prefix_expression	%dprec 1 {LOG("expression (0)\n"); }
+| prefix_expression binary_expressions %dprec 2 {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:(BinaryExpression*)$2];}
 expression_list :  expression		 { LOG("expression_list (0)\n"); }
 | expression "," expression_list		 { LOG("expression_list (1)\n"); }
 
@@ -972,7 +972,7 @@ capture_specifier :  "weak"		 { LOG("capture_specifier (0)\n"); }
 
 // GRAMMAR OF A IMPLICIT MEMBER EXPRESSION
 
-implicit_member_expression :  "." identifier		 { LOG("implicit_member_expression (0)\n"); }
+implicit_member_expression :  "." identifier { $$ = [[LiteralExpression alloc] init:toSwift($1)];  LOG("implicit_member_expression (0)\n"); }
 
 // GRAMMAR OF A PARENTHESIZED EXPRESSION
 
@@ -981,7 +981,7 @@ expression_element_list_opt: {$$ = NULL}  | expression_element_list		 { $$ = $1;
 expression_element_list :  expression_element   {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; LOG("expression_element_list (0)\n"); }
 | expression_element "," expression_element_list   {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; LOG("expression_element_list (1)\n"); }
 expression_element :  expression		 { LOG("expression_element (0)\n"); }
-| identifier ":" expression		 { $$ = $3; LOG("expression_element (1)\n"); }
+| identifier ":" expression		 { $$ = [[NamedExpression alloc] initWithName:toSwift($1) expr:$3]; LOG("expression_element (1)\n"); }
 
 // GRAMMAR OF A WILDCARD EXPRESSION
 
@@ -1002,7 +1002,7 @@ postfix_expression :  optional_chaining_expression		 { LOG("postfix_expression (
 
 // GRAMMAR OF A FUNCTION CALL EXPRESSION
 
-function_call_expression :  postfix_expression parenthesized_expression		 {$$ = [[FunctionCallExpression alloc] initWithFunction:$1 parenthesized:$2]; LOG("function_call_expression (0)\n"); }
+function_call_expression :  postfix_expression parenthesized_expression		 {$$ = [[FunctionCallExpression alloc] initWithFunction:$1 parenthesized:(ParenthesizedExpression*)$2]; LOG("function_call_expression (0)\n"); }
 function_call_expression :  postfix_expression parenthesized_expression_opt trailing_closure		 { LOG("function_call_expression (0)\n"); }
 parenthesized_expression_opt: {} | parenthesized_expression		 { LOG("parenthesized_expression_opt\n"); }
 trailing_closure :  closure_expression		 { LOG("trailing_closure (0)\n"); }
