@@ -17,6 +17,52 @@ func tabulate(code: String) -> String {
     return result;
 }
 
+class ASTContext {
+    
+    var exportedVars:String[][] = [[]];
+    var ctx = 0;
+    var generateIDIndex = 0;
+    
+    func generateID() -> String {
+        return "_ref\(generateIDIndex++)";
+    }
+    
+    func exportVar(name:String) {
+        if !find(exportedVars[ctx], name) {
+            exportedVars[ctx].append(name);
+        }
+    }
+    
+    func getExportedVars() ->String? {
+        if exportedVars[ctx].count > 0 {
+            var result = "";
+            result += "var ";
+            for variable in exportedVars[ctx] {
+                result += variable + ",";
+            }
+            result = result.substringToIndex(result.utf16count - 1) + ";\n";
+            return result;
+        }
+        
+        return nil;
+    }
+    
+    func save() {
+        ctx++;
+        exportedVars.append([]);
+    }
+    
+    func restore() {
+        if ctx > 0 {
+            exportedVars.removeLast();
+            ctx--;
+        }
+    }
+}
+
+var ctx = ASTContext();
+
+
 @objc class ASTNode {
     func toJS() -> String {
         return "";
