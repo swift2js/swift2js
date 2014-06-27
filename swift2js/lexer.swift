@@ -60,7 +60,7 @@ class TokenData {
     let binaryNumberRegex = Regex("^0b[01]+");
     let octalNumberRegex = Regex("^0o[0-7]+");
     let hexNumberRegex = Regex("^0x[\\da-f]+");
-    let decimalNumberRegex = Regex("^\\d*\\.?\\d+(?:e[+-]?\\d+)?");
+    let decimalNumberRegex = Regex("^\\d+\\.?\\d*(?:e[+-]?\\d+)?");
     
     let booleanRegex = Regex("^true|^false");
     let stringRegex = Regex("^\"[^\"]*(?:\\[\\s\\S][^\"]*)*\"");
