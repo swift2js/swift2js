@@ -260,7 +260,7 @@ static YYSTYPE yyval_default;
 #include <stdarg.h>
 
 #ifndef YY_
-# if defined YYENABLE_NLS && YYENABLE_NLS
+# if YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
@@ -2496,7 +2496,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 26:
 #line 452 "grammar.y"
-    { LOG("while_statement (0)\n"); ;}
+    { ((*yyvalp).node) = [[WhileStatement alloc] initWithWhileCondition:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.node) codeBlock:(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.node)]; LOG("while_statement (0)\n"); ;}
     break;
 
   case 27:
@@ -2641,7 +2641,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 55:
 #line 493 "grammar.y"
-    { LOG("labeled_statement (0)\n"); ;}
+    { ((*yyvalp).node) = [[LabelStatement alloc] initWithReturnExpr:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.node)]; LOG("labeled_statement (0)\n"); ;}
     break;
 
   case 56:
@@ -2681,7 +2681,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 63:
 #line 507 "grammar.y"
-    { LOG("break_statement (0)\n"); ;}
+    {((*yyvalp).node) = [[BreakStatement alloc] initWithReturnExpr:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.node)]; LOG("break_statement (0)\n"); ;}
     break;
 
   case 64:
@@ -2691,7 +2691,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 65:
 #line 508 "grammar.y"
-    { LOG("label_name_opt\n"); ;}
+    { ((*yyvalp).node) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.node); LOG("label_name_opt\n"); ;}
     break;
 
   case 66:

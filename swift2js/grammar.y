@@ -449,7 +449,7 @@ for_in_statement :  "for" pattern "in" expression code_block		 { LOG("for_in_sta
 
 // GRAMMAR OF A WHILE STATEMENT
 
-while_statement :  "while" while_condition code_block		 { LOG("while_statement (0)\n"); }
+while_statement :  "while" while_condition code_block		 { $$ = [[WhileStatement alloc] initWithWhileCondition:$2 codeBlock:$3]; LOG("while_statement (0)\n"); }
 while_condition :  expression		 { LOG("while_condition (0)\n"); }
 | declaration		 { LOG("while_condition (1)\n"); }
 
@@ -490,7 +490,7 @@ guard_expression :  expression		 { LOG("guard_expression (0)\n"); }
 
 // GRAMMAR OF A LABELED STATEMENT
 
-labeled_statement :  statement_label loop_statement		 { LOG("labeled_statement (0)\n"); }
+labeled_statement :  statement_label loop_statement		 { $$ = [[LabelStatement alloc] initWithReturnExpr:$2]; LOG("labeled_statement (0)\n"); }
 | statement_label switch_statement		 { LOG("labeled_statement (1)\n"); }
 statement_label :  label_name ":"		 { LOG("statement_label (0)\n"); }
 label_name :  identifier		 { LOG("label_name (0)\n"); }
@@ -504,8 +504,8 @@ control_transfer_statement :  return_statement		 { LOG("control_transfer_stateme
 
 // GRAMMAR OF A BREAK STATEMENT
 
-break_statement :  "break" label_name_opt		 { LOG("break_statement (0)\n"); }
-label_name_opt: {} | label_name		 { LOG("label_name_opt\n"); }
+break_statement :  "break" label_name_opt		 {$$ = [[BreakStatement alloc] initWithReturnExpr:$2]; LOG("break_statement (0)\n"); }
+label_name_opt: {} | label_name		 { $$ = $1; LOG("label_name_opt\n"); }
 
 // GRAMMAR OF A CONTINUE STATEMENT
 

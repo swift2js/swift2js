@@ -512,6 +512,58 @@ var ctx = ASTContext();
     }
 }
 
+
+@objc class WhileStatement: ASTNode {
+    let whileCondition: ASTNode;
+    let codeBlock: ASTNode?;
+    
+    init(whileCondition:ASTNode, codeBlock:ASTNode?) {
+        self.whileCondition = whileCondition;
+        self.codeBlock = codeBlock;
+    }
+    
+    override func toJS() -> String {
+        var result = "while";
+        result += "(" + whileCondition.toJS() + "){ \n";
+        if let statements = codeBlock {
+            result += tabulate(statements.toJS());
+        }
+        result += "}";
+        return result;
+    }
+
+}
+
+@objc class LabelStatement: ASTNode {
+    let returnExpr: ASTNode?;
+    
+    init(returnExpr: ASTNode?) {
+        self.returnExpr = returnExpr;
+    }
+    
+    override func toJS() -> String {
+        if let expr = returnExpr {
+            return "identifier:\n" + expr.toJS();
+        }
+        
+        return "identifier:"
+    }
+}
+
+
+@objc class BreakStatement: ASTNode {
+    let returnExpr: ASTNode?;
+    
+    init(returnExpr: ASTNode?) {
+        self.returnExpr = returnExpr;
+    }
+    
+    override func toJS() -> String {
+        return "break;"
+    }
+}
+
+
 @objc class ReturnStatement: ASTNode {
     let returnExpr: ASTNode?;
     
