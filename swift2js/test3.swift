@@ -17,3 +17,5 @@ if let (a,b,c) = (true,true,true) {
 if let (d,e,f) = obj2 {
     println("expression tuple inside if");
 }
+
+mortimer.karliky;

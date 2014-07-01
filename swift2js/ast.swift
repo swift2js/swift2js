@@ -535,31 +535,32 @@ var ctx = ASTContext();
 }
 
 @objc class LabelStatement: ASTNode {
-    let returnExpr: ASTNode?;
+    let labelName: String;
+    let loop: ASTNode;
     
-    init(returnExpr: ASTNode?) {
-        self.returnExpr = returnExpr;
+    init(labelName:String, loop: ASTNode) {
+        self.labelName = labelName;
+        self.loop = loop;
     }
     
     override func toJS() -> String {
-        if let expr = returnExpr {
-            return "identifier:\n" + expr.toJS();
-        }
-        
-        return "identifier:"
+        return labelName + ":\n" + loop.toJS();
     }
 }
 
 
 @objc class BreakStatement: ASTNode {
-    let returnExpr: ASTNode?;
+    let labelName: String?;
     
-    init(returnExpr: ASTNode?) {
-        self.returnExpr = returnExpr;
+    init(labelId: String?) {
+        self.labelName = labelId;
     }
     
     override func toJS() -> String {
-        return "break;"
+        if let identifier = labelName{
+            return "break " + identifier + ";";
+        }
+        return "break;";
     }
 }
 

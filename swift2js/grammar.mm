@@ -260,7 +260,7 @@ static YYSTYPE yyval_default;
 #include <stdarg.h>
 
 #ifndef YY_
-# if YYENABLE_NLS
+# if defined YYENABLE_NLS && YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
@@ -2641,12 +2641,12 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 55:
 #line 493 "grammar.y"
-    { ((*yyvalp).node) = [[LabelStatement alloc] initWithReturnExpr:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.node)]; LOG("labeled_statement (0)\n"); ;}
+    { ((*yyvalp).node) = [[LabelStatement alloc] initWithLabelName:toSwift((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.str)) loop:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.node)]; LOG("labeled_statement (0)\n"); ;}
     break;
 
   case 56:
 #line 494 "grammar.y"
-    { LOG("labeled_statement (1)\n"); ;}
+    { ((*yyvalp).node) = NULL; LOG("labeled_statement (1)\n"); ;}
     break;
 
   case 57:
@@ -2681,7 +2681,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 63:
 #line 507 "grammar.y"
-    {((*yyvalp).node) = [[BreakStatement alloc] initWithReturnExpr:(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.node)]; LOG("break_statement (0)\n"); ;}
+    {((*yyvalp).node) = [[BreakStatement alloc] initWithLabelId:toSwift((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.str))]; LOG("break_statement (0)\n"); ;}
     break;
 
   case 64:
@@ -2691,7 +2691,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 65:
 #line 508 "grammar.y"
-    { ((*yyvalp).node) = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.node); LOG("label_name_opt\n"); ;}
+    {  LOG("label_name_opt\n"); ;}
     break;
 
   case 66:

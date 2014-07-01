@@ -16,7 +16,7 @@ func mortimer(let yehaaa javi:String,karliky:Int) -> Dictionary<String,Int > {
     }
     
     myLabel:
-    while true {
+    while let (aa,bb) = (true, false) {
         index = 0;
         break myLabel;
     }

@@ -166,11 +166,11 @@
 %type <node> guard_clause
 %type <node> guard_expression
 %type <node> labeled_statement
-%type <node> statement_label
-%type <node> label_name
+%type <str> statement_label
+%type <str> label_name
 %type <node> control_transfer_statement
 %type <node> break_statement
-%type <node> label_name_opt
+%type <str> label_name_opt
 %type <node> continue_statement
 %type <node> fallthrough_statement
 %type <node> return_statement
@@ -490,8 +490,8 @@ guard_expression :  expression		 { LOG("guard_expression (0)\n"); }
 
 // GRAMMAR OF A LABELED STATEMENT
 
-labeled_statement :  statement_label loop_statement		 { $$ = [[LabelStatement alloc] initWithReturnExpr:$2]; LOG("labeled_statement (0)\n"); }
-| statement_label switch_statement		 { LOG("labeled_statement (1)\n"); }
+labeled_statement :  statement_label loop_statement		 { $$ = [[LabelStatement alloc] initWithLabelName:toSwift($1) loop:$2]; LOG("labeled_statement (0)\n"); }
+| statement_label switch_statement		 { $$ = NULL; LOG("labeled_statement (1)\n"); }
 statement_label :  label_name ":"		 { LOG("statement_label (0)\n"); }
 label_name :  identifier		 { LOG("label_name (0)\n"); }
 
@@ -504,8 +504,8 @@ control_transfer_statement :  return_statement		 { LOG("control_transfer_stateme
 
 // GRAMMAR OF A BREAK STATEMENT
 
-break_statement :  "break" label_name_opt		 {$$ = [[BreakStatement alloc] initWithReturnExpr:$2]; LOG("break_statement (0)\n"); }
-label_name_opt: {} | label_name		 { $$ = $1; LOG("label_name_opt\n"); }
+break_statement :  "break" label_name_opt		 {$$ = [[BreakStatement alloc] initWithLabelId:toSwift($2)]; LOG("break_statement (0)\n"); }
+label_name_opt: {} | label_name		 {  LOG("label_name_opt\n"); }
 
 // GRAMMAR OF A CONTINUE STATEMENT
 
