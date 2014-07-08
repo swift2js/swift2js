@@ -581,6 +581,21 @@ var ctx = ASTContext();
     }
 }
 
+@objc class OptionalChainExprStatement: ASTNode {
+    let optChainExpr: ASTNode?;
+    
+    init(optChainExpr: ASTNode?) {
+        self.optChainExpr = optChainExpr;
+    }
+    
+    override func toJS() -> String {
+        if let expr = optChainExpr {
+            return expr.toJS();
+        }
+        return "";
+    }
+}
+
 @objc class IfStatement: ASTNode {
     let ifCondition:ASTNode;
     let body:ASTNode?;

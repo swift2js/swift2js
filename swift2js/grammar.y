@@ -877,8 +877,8 @@ balanced_token : 		 { LOG("balanced_token (0)\n"); }
 
 // GRAMMAR OF AN EXPRESSION
 
-expression :  prefix_expression	%dprec 1 {LOG("expression (0)\n"); }
-| prefix_expression binary_expressions %dprec 2 {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:(BinaryExpression*)$2];}
+expression :  prefix_expression	%merge <statementsMerge> {LOG("expression (0)\n"); }
+| prefix_expression binary_expressions %merge <statementsMerge> {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:(BinaryExpression*)$2];}
 expression_list :  expression		 { LOG("expression_list (0)\n"); }
 | expression "," expression_list		 { LOG("expression_list (1)\n"); }
 
@@ -1034,7 +1034,7 @@ forced_value_expression :  postfix_expression "!"		 { LOG("forced_value_expressi
 
 // GRAMMAR OF AN OPTIONAL_CHAINING EXPRESSION
 
-optional_chaining_expression :  postfix_expression "?"		 { LOG("optional_chaining_expression (0)\n"); }
+optional_chaining_expression :  postfix_expression "?"		 { $$ = [[OptionalChainExprStatement alloc] initWithOptChainExpr:$1]; LOG("optional_chaining_expression (0)\n"); }
 
 /******* LEXICAL STRUCTURE *******/
 
@@ -1065,7 +1065,6 @@ binary_operator :  "/" | "/="
 | "|" | "||"
 | "^" | "^="
 | "~" | "~="
-| "."
 prefix_operator : PREFIX_OPERATOR "++" {$$ = $2}
 | PREFIX_OPERATOR "--" {$$ = $2}
 | PREFIX_OPERATOR "!" {$$ = $2}
