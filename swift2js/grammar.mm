@@ -4201,7 +4201,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 363:
 #line 911 "grammar.y"
-    { ((*yyvalp).node) = [[LiteralExpression alloc] init:toSwift((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.str))]; LOG("primary_expression (1)\n"); ;}
+    { ((*yyvalp).node) = [[IdentifierExpression alloc] init:toSwift((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.str))]; LOG("primary_expression (1)\n"); ;}
     break;
 
   case 364:
@@ -6525,9 +6525,9 @@ yypdumpstack (yyGLRStack* yystackp)
 
 static ASTNode * statementsMerge(YYSTYPE & a, YYSTYPE & b)
 {
-    // Resolves function call ambiguity (2 expressios vs function call)
-    // Always choose function call.
-    return b.node;
+    // Resolves function call ambiguity (2 expressios vs function call) and others
+    // Prefer node with less statements
+    return [(StatementsNode*)a.node getStatementsCount] > [(StatementsNode*)b.node getStatementsCount] ? b.node : a.node;
 }
 
 static const char * lastError = NULL;
