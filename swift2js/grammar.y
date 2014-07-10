@@ -1150,9 +1150,9 @@ type_inheritance_list :  type_identifier		 { LOG("type_inheritance_list (0)\n");
 
 static ASTNode * statementsMerge(YYSTYPE & a, YYSTYPE & b)
 {
-    // Resolves function call ambiguity (2 expressios vs function call)
-    // Always choose function call.
-    return b.node;
+    // Resolves function call ambiguity (2 expressios vs function call) and other ambiguities
+    // Prefer the node with less statements
+    return [(StatementsNode*)a.node getStatementsCount] > [(StatementsNode*)b.node getStatementsCount] ? b.node : a.node;
 }
 
 static const char * lastError = NULL;
