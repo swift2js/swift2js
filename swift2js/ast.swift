@@ -17,10 +17,17 @@ func tabulate(code: String) -> String {
     return result;
 }
 
+typealias ASTSymbolTable = Dictionary<String, GenericType>;
+
 class ASTContext {
     
+    //exported variable declarations
     var exportedVars:String[][] = [[]];
-    var ctx = 0;
+    var exportedIndex = 0;
+    //scoped symbols for type inference
+    var symbols: ASTSymbolTable[] = [];
+    var symbolsIndex = -1;
+    //index for IDS
     var generateIDIndex = 0;
     
     func generateID() -> String {
@@ -28,16 +35,16 @@ class ASTContext {
     }
     
     func exportVar(name:String) {
-        if !find(exportedVars[ctx], name) {
-            exportedVars[ctx].append(name);
+        if !find(exportedVars[exportedIndex], name) {
+            exportedVars[exportedIndex].append(name);
         }
     }
     
     func getExportedVars() ->String? {
-        if exportedVars[ctx].count > 0 {
+        if exportedVars[exportedIndex].count > 0 {
             var result = "";
             result += "var ";
-            for variable in exportedVars[ctx] {
+            for variable in exportedVars[exportedIndex] {
                 result += variable + ",";
             }
             result = result.substringToIndex(result.utf16count - 1) + ";\n";
@@ -47,16 +54,44 @@ class ASTContext {
         return nil;
     }
     
-    func save() {
-        ctx++;
+    //exported variable declarations
+    func saveExported() {
+        exportedIndex++;
         exportedVars.append([]);
     }
     
-    func restore() {
-        if ctx > 0 {
+    func restoreExported() {
+        if exportedIndex > 0 {
             exportedVars.removeLast();
-            ctx--;
+            exportedIndex--;
         }
+    }
+    
+    //scoped symbols for type inference
+    func saveSymbols() {
+        symbolsIndex++;
+        symbols.append(ASTSymbolTable());
+    }
+    
+    func restoreSymbols() {
+        if (symbolsIndex > 0) {
+            symbols.removeLast();
+            symbolsIndex--;
+        }
+    }
+    
+    func addSymbol(name:String, type:GenericType) {
+        symbols[symbolsIndex][name] = type;
+    }
+    
+    func inferSymbol(name: String) -> GenericType? {
+        //iterate from top scope to parent scopes
+        for var i = symbolsIndex ; i >= 0; --i {
+            if let type = symbols[i][name] {
+                return type;
+        }
+    }
+        return nil;
     }
 }
 
