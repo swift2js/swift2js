@@ -99,8 +99,24 @@ var ctx = ASTContext();
 
 
 @objc class ASTNode {
+    
+    var type: GenericType?;
+    
     func toJS() -> String {
         return "";
+    }
+    
+    func getType() -> GenericType
+    {
+        if let cached = type {
+            return cached;
+        }
+        type = inferType();
+        return type ? type! : GenericType(.UNKOWN);
+    }
+    
+    func inferType() -> GenericType? {
+        return nil;
     }
 }
 
