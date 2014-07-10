@@ -908,7 +908,7 @@ question_opt: {} | "?"		 { LOG("question_opt\n"); }
 
 // GRAMMAR OF A PRIMARY EXPRESSION
 
-primary_expression :  identifier generic_argument_clause_opt		 { $$ = [[LiteralExpression alloc] init:toSwift($1)]; LOG("primary_expression (1)\n"); }
+primary_expression :  identifier generic_argument_clause_opt		 { $$ = [[IdentifierExpression alloc] init:toSwift($1)]; LOG("primary_expression (1)\n"); }
 generic_argument_clause_opt: {} | generic_argument_clause		 { LOG("generic_argument_clause_opt\n"); }
 primary_expression :  literal_expression		 { LOG("primary_expression (2)\n"); }
 primary_expression :  self_expression		 { LOG("primary_expression (3)\n"); }

@@ -145,6 +145,23 @@ var ctx = ASTContext();
     }
 }
 
+@objc class IdentifierExpression: ASTNode {
+    
+    let name: String;
+    
+    init(_ identifier: String) {
+        self.name = identifier;
+    }
+    
+    override func toJS() -> String {
+        return name;
+    }
+    
+    override func inferType() -> GenericType? {
+        return ctx.inferSymbol(name);
+    }
+}
+
 @objc class BinaryOperator: ASTNode {
     
     let rightOperand: ASTNode;
@@ -283,6 +300,9 @@ var ctx = ASTContext();
         var tupleID = "";
         if let literal = right as? LiteralExpression {
             tupleID = literal.toJS();
+        }
+        else if let identifier = right as? IdentifierExpression {
+            tupleID = identifier.toJS();
         }
         else {
             tupleID = ctx.generateID();
