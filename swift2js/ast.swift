@@ -571,34 +571,48 @@ var ctx = ASTContext();
         self.initializer = initializer;
     }
     
-    func exportVars(expression:BinaryExpression) {
+    func exportSymbols(expression:BinaryExpression) {
         
+        //multiple var initiliazation via tuples
         if let tuple = expression.current as? ParenthesizedExpression {
             var names = tuple.toExpressionArray();
-            for name in names {
-                ctx.exportVar(name);
+            var types = tuple.toTypesArray();
+            for var i = 0; i < names.count; ++i {
+                if (exportVariables) {
+                    ctx.exportVar(names[i]);
                 }
+                ctx.addSymbol(names[i], type:types[i]);
             }
+            
+        } //single var initialization
         else if let expr = expression.current{
-            ctx.exportVar(expr.toJS())
+            var name = expr.toJS();
+            if exportVariables {
+                ctx.exportVar(name)
+            }
+            ctx.addSymbol(name, type: expr.getType());
         }
     }
     
     override func toJS() -> String {
-        if exportVariables {
+        
+        var result = initializer.toJS();
+
+        //export symbols and vars
         var node:ExpressionList? = initializer;
         while let item = node {
             if let expression = item.current as? BinaryExpression {
-                    exportVars(expression);
+                exportSymbols(expression);
             }
             node = item.next;
         }
         
-            var result = initializer.toJS();
+        //avoid var if exporting variables
+        if exportVariables {
             return result;
         }
         else {
-            return "var " + initializer.toJS();
+            return "var " + result;
         }
     }
 }
