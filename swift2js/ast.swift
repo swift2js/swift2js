@@ -308,11 +308,28 @@ var ctx = ASTContext();
             tupleID = ctx.generateID();
             ctx.exportVar(tupleID + " = " + right.toJS());
         }
+        
         let names = left.toExpressionArray();
         var result = "";
+        
+        if let tupleType = right.getType() as? TupleType {
+            //known tuple type
+            let tupleMembers = tupleType.names;
+            for var i = 0; i < names.count; ++i {
+                if let number = tupleMembers[i].toInt() {
+                    result += "\(names[i]) = \(tupleID)[\(number)], ";
+                }
+                else {
+                    result += "\(names[i]) = \(tupleID).\(tupleMembers[i]), ";
+                }
+            }
+        }
+        else {
+            //unkown tuple type
             for var i = 0; i < names.count; ++i {
                 result += "\(names[i]) = \(tupleID)[Object.keys(\(tupleID))[\(i)]], ";
             }
+        }
         
         result = result.substringToIndex(result.utf16count - 2); //remove last ", "
         
