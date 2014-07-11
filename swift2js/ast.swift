@@ -22,10 +22,10 @@ typealias ASTSymbolTable = Dictionary<String, GenericType>;
 class ASTContext {
     
     //exported variable declarations
-    var exportedVars:String[][] = [[]];
+    var exportedVars:[[String]] = [[]];
     var exportedIndex = 0;
     //scoped symbols for type inference
-    var symbols: ASTSymbolTable[] = [];
+    var symbols: [ASTSymbolTable] = [];
     var symbolsIndex = -1;
     //index for IDS
     var generateIDIndex = 0;
@@ -436,7 +436,7 @@ var ctx = ASTContext();
     }
     
     override func inferType() -> GenericType? {
-        var types:GenericType[] = [];
+        var types:[GenericType] = [];
         var item:ExpressionList? = self;
         //infere al the types of the list
         while let valid = item {

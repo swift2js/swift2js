@@ -65,12 +65,12 @@ class IndirectionType: GenericType
     
 }
 
-class TupleType: GenericType
+@objc class TupleType: GenericType
 {
-    var names:String[] = [];
-    var types:GenericType[] = [];
+    var names:[String] = [];
+    var types:[GenericType] = [];
     
-    init(list:ExpressionList)
+    init(list:ExpressionList?)
     {
         super.init(.TUPLE);
         
@@ -135,7 +135,7 @@ class DictionaryType: GenericType
 class FunctionType: GenericType
 {
     let returnType: GenericType;
-    let argumentTypes: GenericType[];
+    var argumentTypes: [GenericType] = [];
     
     init(argumentTypes: GenericType[], returnType: GenericType) {
         self.argumentTypes = argumentTypes;
