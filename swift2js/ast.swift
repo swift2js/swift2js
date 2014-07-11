@@ -619,26 +619,30 @@ class ASTNode: NSObject {
         self.initializer = initializer;
     }
     
-    func exportSymbols(expression:BinaryExpression) {
+    func exportSymbols(expression:ASTNode!) {
+        if (!expression) {
+            return;
+        }
         
         //multiple var initiliazation via tuples
-        if let tuple = expression.current as? ParenthesizedExpression {
+        if let tuple = expression as? ParenthesizedExpression {
             var names = tuple.toExpressionArray();
             var types = tuple.toTypesArray();
             for var i = 0; i < names.count; ++i {
+                var name = names[i].toJS();
                 if (exportVariables) {
-                    ctx.exportVar(names[i]);
+                    ctx.exportVar(name);
                 }
-                ctx.addSymbol(names[i], type:types[i]);
+                ctx.addSymbol(name, type:types[i]);
             }
             
         } //single var initialization
-        else if let expr = expression.current{
-            var name = expr.toJS();
+        else {
+            var name = expression.toJS();
             if exportVariables {
                 ctx.exportVar(name)
             }
-            ctx.addSymbol(name, type: expr.getType());
+            ctx.addSymbol(name, type: expression.getType());
         }
     }
     
@@ -649,8 +653,11 @@ class ASTNode: NSObject {
         //export symbols and vars
         var node:ExpressionList? = initializer;
         while let item = node {
-            if let expression = item.current as? BinaryExpression {
-                exportSymbols(expression);
+            if let binaryExpr = item.current as? BinaryExpression {
+                exportSymbols(binaryExpr.current);
+            }
+            else {
+                exportSymbols(item.current);
             }
             node = item.next;
         }
