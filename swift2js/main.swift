@@ -37,13 +37,12 @@ func swift2js(sourceCode: String, debug:Bool) -> (js:String?, error:String?) {
     return ("", error);
 }
 
-
 let debug = true;
 //Test files are copied automatically to tmp using xcode build phase
 //TODO: read files from args, from input stream, etc.
 let testFile = "test3.swift";
 
-var sourceCode: AnyObject? = NSString.stringWithContentsOfFile("/tmp/" + testFile);
+var sourceCode: AnyObject? = NSString.stringWithContentsOfFile("/tmp/" + testFile, encoding: NSUTF8StringEncoding, error: nil);
 
 if sourceCode {
     
