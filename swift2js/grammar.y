@@ -1118,6 +1118,7 @@ function_type :  type "->" type		 {$$ = [[FunctionType alloc] initWithArgsType:$
 
 array_type :  type "[" "]"		 {$$ = [[ArrayType alloc] initWithInnerType:$1]; LOG("array_type (0)\n"); }
 | array_type "[" "]"		 { $$ = [[ArrayType alloc] initWithInnerType:$1]; LOG("array_type (1)\n"); }
+| "[" type "]"               { $$ = [[ArrayType alloc] initWithInnerType:$2]; LOG("arry_type (2)\n");}
 
 // GRAMMAR OF AN OPTIONAL TYPE
 
