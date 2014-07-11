@@ -50,7 +50,7 @@ class TokenData {
     var code: String;
     var lastParsed = "";
     var consumed = 0;
-    var tokenStack:TokenData[] = [];
+    var tokenStack:[TokenData] = [];
     var debugYYLex = false;
     
     let cleanRegex = Regex("^[\\s\r\n]+");

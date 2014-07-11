@@ -17,10 +17,17 @@ func tabulate(code: String) -> String {
     return result;
 }
 
+typealias ASTSymbolTable = Dictionary<String, GenericType>;
+
 class ASTContext {
     
-    var exportedVars:String[][] = [[]];
-    var ctx = 0;
+    //exported variable declarations
+    var exportedVars:[[String]] = [[]];
+    var exportedIndex = 0;
+    //scoped symbols for type inference
+    var symbols: [ASTSymbolTable] = [];
+    var symbolsIndex = -1;
+    //index for IDS
     var generateIDIndex = 0;
     
     func generateID() -> String {
@@ -28,16 +35,16 @@ class ASTContext {
     }
     
     func exportVar(name:String) {
-        if !find(exportedVars[ctx], name) {
-            exportedVars[ctx].append(name);
+        if !find(exportedVars[exportedIndex], name) {
+            exportedVars[exportedIndex].append(name);
         }
     }
     
     func getExportedVars() ->String? {
-        if exportedVars[ctx].count > 0 {
+        if exportedVars[exportedIndex].count > 0 {
             var result = "";
             result += "var ";
-            for variable in exportedVars[ctx] {
+            for variable in exportedVars[exportedIndex] {
                 result += variable + ",";
             }
             result = result.substringToIndex(result.utf16count - 1) + ";\n";
@@ -47,25 +54,80 @@ class ASTContext {
         return nil;
     }
     
-    func save() {
-        ctx++;
+    //exported variable declarations
+    func saveExported() {
+        exportedIndex++;
         exportedVars.append([]);
     }
     
-    func restore() {
-        if ctx > 0 {
+    func restoreExported() {
+        if exportedIndex > 0 {
             exportedVars.removeLast();
-            ctx--;
+            exportedIndex--;
         }
+    }
+    
+    //scoped symbols for type inference
+    func saveSymbols() {
+        symbolsIndex++;
+        symbols.append(ASTSymbolTable());
+    }
+    
+    func restoreSymbols() {
+        if (symbolsIndex > 0) {
+            symbols.removeLast();
+            symbolsIndex--;
+        }
+    }
+    
+    func addSymbol(name:String, type:GenericType) {
+        symbols[symbolsIndex][name] = type;
+    }
+    
+    func inferSymbol(name: String) -> GenericType? {
+        //iterate from top scope to parent scopes
+        for var i = symbolsIndex ; i >= 0; --i {
+            if let type = symbols[i][name] {
+                return type;
+            }
+        }
+        return nil;
     }
 }
 
 var ctx = ASTContext();
 
 
-@objc class ASTNode {
+class ASTNode: NSObject {
+    
+    var type: GenericType?;
+    
     func toJS() -> String {
         return "";
+    }
+    
+    func getType() -> GenericType
+    {
+        if let cached = type {
+            return cached;
+        }
+        type = inferType();
+        return type ? type! : GenericType(.UNKOWN);
+    }
+    
+    func inferType() -> GenericType? {
+        return nil;
+    }
+    
+    func setType(type:GenericType?) {
+        self.type = type;
+    }
+    
+    func setTypeIfEmpty(type:GenericType?) {
+        if (!self.type) {
+            self.type = type;
+        }
+        
     }
 }
 
@@ -79,6 +141,35 @@ var ctx = ASTContext();
     
     override func toJS() -> String {
         return value;
+    }
+    
+    override func inferType() -> GenericType? {
+        if value == "true" || value == "false" {
+            return GenericType(.BOOLEAN);
+        }
+        else if value.hasPrefix("\"") {
+            return GenericType(.STRING);
+        }
+        else {
+            return GenericType(.NUMBER);
+        }
+    }
+}
+
+@objc class IdentifierExpression: ASTNode {
+    
+    let name: String;
+    
+    init(_ identifier: String) {
+        self.name = identifier;
+    }
+    
+    override func toJS() -> String {
+        return name;
+    }
+    
+    override func inferType() -> GenericType? {
+        return ctx.inferSymbol(name);
     }
 }
 
@@ -104,6 +195,10 @@ var ctx = ASTContext();
             return " " + binaryOperator + " " + rightOperand.toJS();
         }
     }
+    
+    override func inferType() -> GenericType? {
+        return rightOperand.getType();
+    }
 }
 
 @objc class AssignmentOperator: ASTNode {
@@ -116,6 +211,10 @@ var ctx = ASTContext();
     
     override func toJS() -> String {
         return " = " + rightOperand.toJS();
+    }
+    
+    override func inferType() -> GenericType? {
+        return rightOperand.getType();
     }
 }
 
@@ -132,6 +231,10 @@ var ctx = ASTContext();
     override func toJS() -> String {
         return " ? " + trueOperand.toJS() + " : " + falseOperand.toJS();
     }
+    
+    override func inferType() -> GenericType? {
+        return trueOperand.getType();
+    }
 }
 
 @objc class PrefixOperator: ASTNode {
@@ -147,6 +250,10 @@ var ctx = ASTContext();
     override func toJS() -> String {
         return prefixOperator + operand.toJS();
     }
+    
+    override func inferType() -> GenericType? {
+        return operand.getType(); //TODO !
+    }
 }
 
 @objc class PostfixOperator: ASTNode {
@@ -161,6 +268,10 @@ var ctx = ASTContext();
     
     override func toJS() -> String {
         return operand.toJS() + postfixOperator;
+    }
+    
+    override func inferType() -> GenericType? {
+        return operand.getType(); //TODO !
     }
 }
 
@@ -188,7 +299,8 @@ var ctx = ASTContext();
             if i >= values.count {
                 break;
             }
-            result += "\(names[i]) = \(values[i]), ";
+            names[i].setTypeIfEmpty(values[i].getType()); //infere type from assignment if needed
+            result += "\(names[i].toJS()) = \(values[i].toJS()), ";
         }
         result = result.substringToIndex(result.utf16count - 2); //remove last ", "
         return result;
@@ -201,14 +313,35 @@ var ctx = ASTContext();
         if let literal = right as? LiteralExpression {
             tupleID = literal.toJS();
         }
+        else if let identifier = right as? IdentifierExpression {
+            tupleID = identifier.toJS();
+        }
         else {
             tupleID = ctx.generateID();
             ctx.exportVar(tupleID + " = " + right.toJS());
         }
+        
         let names = left.toExpressionArray();
         var result = "";
-        for var i = 0; i < names.count; ++i {
-            result += "\(names[i]) = \(tupleID)[Object.keys(\(tupleID))[\(i)]], ";
+        
+        if let tupleType = right.getType() as? TupleType {
+            //known tuple type
+            let tupleMembers = tupleType.names;
+            for var i = 0; i < names.count; ++i {
+                names[i].setTypeIfEmpty(tupleType.getTypeForIndex(i)); //infere type from assignment if needed
+                if let number = tupleMembers[i].toInt() {
+                    result += "\(names[i].toJS()) = \(tupleID)[\(number)], ";
+                }
+                else {
+                    result += "\(names[i].toJS()) = \(tupleID).\(tupleMembers[i]), ";
+                }
+            }
+        }
+        else {
+            //unkown tuple type
+            for var i = 0; i < names.count; ++i {
+                result += "\(names[i].toJS()) = \(tupleID)[Object.keys(\(tupleID))[\(i)]], ";
+            }
         }
         
         result = result.substringToIndex(result.utf16count - 2); //remove last ", "
@@ -219,8 +352,11 @@ var ctx = ASTContext();
     
     override func toJS() -> String {
         
+        
         //Check Tuple assignment binary expressions
+        
         if let assignment = next?.current as? AssignmentOperator {
+            current!.type = assignment.rightOperand.getType();
             //check left to right tuple assignment
             let leftTuple = current as? ParenthesizedExpression;
             let rightTuple = assignment.rightOperand as? ParenthesizedExpression;
@@ -229,6 +365,14 @@ var ctx = ASTContext();
             }
             else if leftTuple && leftTuple!.isList() {
                 return leftTupleAndRightExpressionToJS(leftTuple!, assignment.rightOperand);
+            }
+        }
+        
+        //check for custom operators. Example array +=
+        if let binaryOperator = next?.current as? BinaryOperator {
+            var soto = current!.getType();
+            if let customOperator = current!.getType().customBinaryOperator(current!, op: binaryOperator.binaryOperator, otherNode: binaryOperator.rightOperand) {
+                return customOperator;
             }
         }
         
@@ -241,6 +385,25 @@ var ctx = ASTContext();
             result += nextExpression.toJS();
         }
         return result;
+    }
+    
+    override func inferType() -> GenericType? {
+        if !self.current {
+            return nil;
+        }
+        
+        var leftType = current!.getType();
+        if let op = next?.current as? BinaryOperator {
+            return leftType.operate(op.binaryOperator, other: op.getType());
+        }
+        else if let op = next?.current as? AssignmentOperator {
+            current!.type = op.getType();
+            return op.getType();
+        }
+        else {
+            return leftType;
+        }
+
     }
 }
 
@@ -256,6 +419,28 @@ var ctx = ASTContext();
     
     override func toJS() -> String {
         return expr.toJS();
+    }
+    
+    override func inferType() -> GenericType? {
+        return expr.getType();
+    }
+}
+
+//Helper class to parse tuple type declarations
+@objc class TypeExpression: ASTNode {
+    
+    let linkedType:GenericType;
+    
+    init(linkedType: GenericType) {
+        self.linkedType = linkedType;
+    }
+    
+    override func toJS() -> String {
+        return "";
+    }
+    
+    override func inferType() -> GenericType? {
+        return linkedType;
     }
 }
 
@@ -279,6 +464,20 @@ var ctx = ASTContext();
             result += ", " + nextExpression.toJS();
         }
         return result;
+    }
+    
+    override func inferType() -> GenericType? {
+        var types:[GenericType] = [];
+        var item:ExpressionList? = self;
+        //infere al the types of the list
+        while let valid = item {
+            if let expr = valid.current {
+                types += expr.getType();
+            }
+            item = valid.next;
+        }
+        //TODO: get less restrictive type instead of the first one
+        return types.count > 0 ? types[0] : nil;
     }
 }
 
@@ -324,15 +523,26 @@ var ctx = ASTContext();
         return false;
     }
     
-    func toExpressionArray() -> String[] {
-        var result = String[]();
+    func toExpressionArray() -> [ASTNode] {
+        var result = [ASTNode]();
         
         var node = expression as? ExpressionList;
         while let item = node {
-            result.append(item.current!.toJS());
+            result.append(item.current!);
             node = item.next;
         }
         
+        return result;
+    }
+    
+    func toTypesArray() -> [GenericType] {
+        var result = [GenericType]();
+        
+        var node = expression as? ExpressionList;
+        while let item = node {
+            result.append(item.current!.getType());
+            node = item.next;
+        }
         return result;
     }
     
@@ -358,6 +568,25 @@ var ctx = ASTContext();
         }
         return "()";
     }
+    
+    override func inferType() -> GenericType? {
+        if allowInlineTuple {
+            if let list = expression as? ExpressionList {
+                if list.next {
+                    //mutiple elements = > tuple
+                    return TupleType(list:list);
+                }
+                else if let item = list.current {
+                    //single element => not a tuple
+                    return item.getType();
+                }
+            }
+        }
+        if let expr = expression {
+            return expr.getType();
+        }
+        return nil;
+    }
 }
 
 @objc class FunctionCallExpression: ASTNode {
@@ -373,6 +602,13 @@ var ctx = ASTContext();
         parenthesized.allowInlineTuple = false;
         return function.toJS() + parenthesized.toJS();
     }
+    
+    override func inferType() -> GenericType? {
+        if let funcType = function.getType() as? FunctionType {
+            return funcType.returnType;
+        }
+        return GenericType(.VOID);
+    }
 }
 
 @objc class VariableDeclaration: ASTNode {
@@ -383,34 +619,55 @@ var ctx = ASTContext();
         self.initializer = initializer;
     }
     
-    func exportVars(expression:BinaryExpression) {
-        
-        if let tuple = expression.current as? ParenthesizedExpression {
-            var names = tuple.toExpressionArray();
-            for name in names {
-                ctx.exportVar(name);
-            }
+    func exportSymbols(expression:ASTNode!) {
+        if (!expression) {
+            return;
         }
-        else if let expr = expression.current{
-            ctx.exportVar(expr.toJS())
+        
+        //multiple var initiliazation via tuples
+        if let tuple = expression as? ParenthesizedExpression {
+            var names = tuple.toExpressionArray();
+            var types = tuple.toTypesArray();
+            for var i = 0; i < names.count; ++i {
+                var name = names[i].toJS();
+                if (exportVariables) {
+                    ctx.exportVar(name);
+                }
+                ctx.addSymbol(name, type:types[i]);
+            }
+            
+        } //single var initialization
+        else {
+            var name = expression.toJS();
+            if exportVariables {
+                ctx.exportVar(name)
+            }
+            ctx.addSymbol(name, type: expression.getType());
         }
     }
     
     override func toJS() -> String {
-        if exportVariables {
-            var node:ExpressionList? = initializer;
-            while let item = node {
-                if let expression = item.current as? BinaryExpression {
-                    exportVars(expression);
-                }
-                node = item.next;
+        
+        var result = initializer.toJS();
+
+        //export symbols and vars
+        var node:ExpressionList? = initializer;
+        while let item = node {
+            if let binaryExpr = item.current as? BinaryExpression {
+                exportSymbols(binaryExpr.current);
             }
-            
-            var result = initializer.toJS();
+            else {
+                exportSymbols(item.current);
+            }
+            node = item.next;
+        }
+        
+        //avoid var if exporting variables
+        if exportVariables {
             return result;
         }
         else {
-            return "var " + initializer.toJS();
+            return "var " + result;
         }
     }
 }
@@ -430,6 +687,13 @@ var ctx = ASTContext();
         result+="]";
         return result;
     }
+    
+    override func inferType() -> GenericType? {
+        if let item = (items as? ExpressionList)?.current? {
+            return ArrayType(innerType: item.getType());
+        }
+        return ArrayType(innerType: GenericType(.UNKOWN));
+    }
 }
 
 @objc class DictionaryLiteral: ASTNode {
@@ -447,6 +711,13 @@ var ctx = ASTContext();
         result+="}";
         return result;
     }
+    
+    override func inferType() -> GenericType? {
+        if let item = (pairs as? ExpressionList)?.current {
+            return DictionaryType(innerType: item.getType());
+        }
+        return DictionaryType(innerType: GenericType(.UNKOWN));
+    }
 }
 
 @objc class DictionaryItem: ASTNode {
@@ -460,6 +731,10 @@ var ctx = ASTContext();
     
     override func toJS() -> String {
         return "\n" + key.toJS() + " : " + value.toJS();
+    }
+    
+    override func inferType() -> GenericType? {
+        return value.getType();
     }
 }
 
@@ -576,8 +851,16 @@ var ctx = ASTContext();
         if let expr = returnExpr {
             return "return " + expr.toJS() + ";";
         }
-        
         return "return;"
+    }
+    
+    override func inferType() -> GenericType? {
+        if let expr = returnExpr {
+            return expr.getType();
+        }
+        else {
+            return GenericType(.VOID);
+        }
     }
 }
 
@@ -630,6 +913,18 @@ var ctx = ASTContext();
     }
 }
 
+@objc class ImportStatement: ASTNode {
+    let path:String;
+    init(path:String) {
+        self.path = path;
+    }
+    
+    override func toJS() -> String {
+        //TODO: use require or similar for imports
+        return "//require(\"\(path)\")";
+    }
+}
+
 @objc class StatementNode: ASTNode {
     let statement:ASTNode;
     init(statement:ASTNode) {
@@ -659,6 +954,7 @@ var ctx = ASTContext();
     
     var current:ASTNode?;
     var next:StatementsNode?;
+    var firstStatement = true;
     
     init(current:ASTNode?) {
         self.current = current;
@@ -670,18 +966,36 @@ var ctx = ASTContext();
     }
     
     override func toJS() -> String {
+        if firstStatement {
+            ctx.saveSymbols();
+        }
         var result = "";
         if let currentStatement = current {
-            ctx.save();
+            ctx.saveExported();
             var tmp = currentStatement.toJS() + "\n";
             if let exported = ctx.getExportedVars() {
                 result += exported;
             }
             result += tmp;
-            ctx.restore();
+            ctx.restoreExported();
         }
         if let nextStatements = next {
+            nextStatements.firstStatement = false;
             result += nextStatements.toJS();
+        }
+        if firstStatement {
+            ctx.restoreSymbols();
+        }
+
+        return result;
+    }
+    
+    func getStatementsCount() -> Int {
+        var result = 1;
+        var item = next;
+        while let valid = item {
+            result++;
+            item = valid.next;
         }
         return result;
     }
