@@ -98,7 +98,7 @@ class ASTContext {
 var ctx = ASTContext();
 
 
-@objc class ASTNode {
+class ASTNode: NSObject {
     
     var type: GenericType?;
     
