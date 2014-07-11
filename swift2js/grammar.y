@@ -166,11 +166,11 @@
 %type <node> guard_clause
 %type <node> guard_expression
 %type <node> labeled_statement
-%type <node> statement_label
-%type <node> label_name
+%type <str> statement_label
+%type <str> label_name
 %type <node> control_transfer_statement
 %type <node> break_statement
-%type <node> label_name_opt
+%type <str> label_name_opt
 %type <node> continue_statement
 %type <node> fallthrough_statement
 %type <node> return_statement
@@ -449,7 +449,7 @@ for_in_statement :  "for" pattern "in" expression code_block		 { LOG("for_in_sta
 
 // GRAMMAR OF A WHILE STATEMENT
 
-while_statement :  "while" while_condition code_block		 { LOG("while_statement (0)\n"); }
+while_statement :  "while" while_condition code_block		 { $$ = [[WhileStatement alloc] initWithWhileCondition:$2 codeBlock:$3]; LOG("while_statement (0)\n"); }
 while_condition :  expression		 { LOG("while_condition (0)\n"); }
 | declaration		 { LOG("while_condition (1)\n"); }
 
@@ -490,8 +490,8 @@ guard_expression :  expression		 { LOG("guard_expression (0)\n"); }
 
 // GRAMMAR OF A LABELED STATEMENT
 
-labeled_statement :  statement_label loop_statement		 { LOG("labeled_statement (0)\n"); }
-| statement_label switch_statement		 { LOG("labeled_statement (1)\n"); }
+labeled_statement :  statement_label loop_statement		 { $$ = [[LabelStatement alloc] initWithLabelName:toSwift($1) loop:$2]; LOG("labeled_statement (0)\n"); }
+| statement_label switch_statement		 { $$ = NULL; LOG("labeled_statement (1)\n"); }
 statement_label :  label_name ":"		 { LOG("statement_label (0)\n"); }
 label_name :  identifier		 { LOG("label_name (0)\n"); }
 
@@ -504,8 +504,8 @@ control_transfer_statement :  return_statement		 { LOG("control_transfer_stateme
 
 // GRAMMAR OF A BREAK STATEMENT
 
-break_statement :  "break" label_name_opt		 { LOG("break_statement (0)\n"); }
-label_name_opt: {} | label_name		 { LOG("label_name_opt\n"); }
+break_statement :  "break" label_name_opt		 {$$ = [[BreakStatement alloc] initWithLabelId:toSwift($2)]; LOG("break_statement (0)\n"); }
+label_name_opt: {} | label_name		 {  LOG("label_name_opt\n"); }
 
 // GRAMMAR OF A CONTINUE STATEMENT
 
@@ -877,8 +877,8 @@ balanced_token : 		 { LOG("balanced_token (0)\n"); }
 
 // GRAMMAR OF AN EXPRESSION
 
-expression :  prefix_expression	%dprec 1 {LOG("expression (0)\n"); }
-| prefix_expression binary_expressions %dprec 2 {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:(BinaryExpression*)$2];}
+expression :  prefix_expression	%merge <statementsMerge> {LOG("expression (0)\n"); }
+| prefix_expression binary_expressions %merge <statementsMerge> {$$ = [[BinaryExpression alloc] initWithExpression:$1 next:(BinaryExpression*)$2];}
 expression_list :  expression		 { LOG("expression_list (0)\n"); }
 | expression "," expression_list		 { LOG("expression_list (1)\n"); }
 
@@ -1034,7 +1034,7 @@ forced_value_expression :  postfix_expression "!"		 { LOG("forced_value_expressi
 
 // GRAMMAR OF AN OPTIONAL_CHAINING EXPRESSION
 
-optional_chaining_expression :  postfix_expression "?"		 { LOG("optional_chaining_expression (0)\n"); }
+optional_chaining_expression :  postfix_expression "?"		 { $$ = [[OptionalChainExprStatement alloc] initWithOptChainExpr:$1]; LOG("optional_chaining_expression (0)\n"); }
 
 /******* LEXICAL STRUCTURE *******/
 
@@ -1065,7 +1065,6 @@ binary_operator :  "/" | "/="
 | "|" | "||"
 | "^" | "^="
 | "~" | "~="
-| "."
 prefix_operator : PREFIX_OPERATOR "++" {$$ = $2}
 | PREFIX_OPERATOR "--" {$$ = $2}
 | PREFIX_OPERATOR "!" {$$ = $2}

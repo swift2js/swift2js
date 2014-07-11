@@ -512,6 +512,59 @@ var ctx = ASTContext();
     }
 }
 
+
+@objc class WhileStatement: ASTNode {
+    let whileCondition: ASTNode;
+    let codeBlock: ASTNode?;
+    
+    init(whileCondition:ASTNode, codeBlock:ASTNode?) {
+        self.whileCondition = whileCondition;
+        self.codeBlock = codeBlock;
+    }
+    
+    override func toJS() -> String {
+        var result = "while";
+        result += "(" + whileCondition.toJS() + "){ \n";
+        if let statements = codeBlock {
+            result += tabulate(statements.toJS());
+        }
+        result += "}";
+        return result;
+    }
+
+}
+
+@objc class LabelStatement: ASTNode {
+    let labelName: String;
+    let loop: ASTNode;
+    
+    init(labelName:String, loop: ASTNode) {
+        self.labelName = labelName;
+        self.loop = loop;
+    }
+    
+    override func toJS() -> String {
+        return labelName + ":\n" + loop.toJS();
+    }
+}
+
+
+@objc class BreakStatement: ASTNode {
+    let labelName: String?;
+    
+    init(labelId: String?) {
+        self.labelName = labelId;
+    }
+    
+    override func toJS() -> String {
+        if let identifier = labelName{
+            return "break " + identifier + ";";
+        }
+        return "break;";
+    }
+}
+
+
 @objc class ReturnStatement: ASTNode {
     let returnExpr: ASTNode?;
     
@@ -525,6 +578,21 @@ var ctx = ASTContext();
         }
         
         return "return;"
+    }
+}
+
+@objc class OptionalChainExprStatement: ASTNode {
+    let optChainExpr: ASTNode?;
+    
+    init(optChainExpr: ASTNode?) {
+        self.optChainExpr = optChainExpr;
+    }
+    
+    override func toJS() -> String {
+        if let expr = optChainExpr {
+            return expr.toJS();
+        }
+        return "";
     }
 }
 
