@@ -118,6 +118,17 @@ class ASTNode: NSObject {
     func inferType() -> GenericType? {
         return nil;
     }
+    
+    func setType(type:GenericType?) {
+        self.type = type;
+    }
+    
+    func setTypeIfEmpty(type:GenericType?) {
+        if (!self.type) {
+            self.type = type;
+        }
+        
+    }
 }
 
 @objc class LiteralExpression: ASTNode {
@@ -288,7 +299,8 @@ class ASTNode: NSObject {
             if i >= values.count {
                 break;
             }
-            result += "\(names[i]) = \(values[i]), ";
+            names[i].setTypeIfEmpty(values[i].getType()); //infere type from assignment if needed
+            result += "\(names[i].toJS()) = \(values[i].toJS()), ";
         }
         result = result.substringToIndex(result.utf16count - 2); //remove last ", "
         return result;
@@ -316,18 +328,19 @@ class ASTNode: NSObject {
             //known tuple type
             let tupleMembers = tupleType.names;
             for var i = 0; i < names.count; ++i {
+                names[i].setTypeIfEmpty(tupleType.getTypeForIndex(i)); //infere type from assignment if needed
                 if let number = tupleMembers[i].toInt() {
-                    result += "\(names[i]) = \(tupleID)[\(number)], ";
+                    result += "\(names[i].toJS()) = \(tupleID)[\(number)], ";
                 }
                 else {
-                    result += "\(names[i]) = \(tupleID).\(tupleMembers[i]), ";
+                    result += "\(names[i].toJS()) = \(tupleID).\(tupleMembers[i]), ";
                 }
             }
         }
         else {
             //unkown tuple type
             for var i = 0; i < names.count; ++i {
-                result += "\(names[i]) = \(tupleID)[Object.keys(\(tupleID))[\(i)]], ";
+                result += "\(names[i].toJS()) = \(tupleID)[Object.keys(\(tupleID))[\(i)]], ";
             }
         }
         
@@ -492,20 +505,20 @@ class ASTNode: NSObject {
         return false;
     }
     
-    func toExpressionArray() -> String[] {
-        var result = String[]();
+    func toExpressionArray() -> [ASTNode] {
+        var result = [ASTNode]();
         
         var node = expression as? ExpressionList;
         while let item = node {
-            result.append(item.current!.toJS());
+            result.append(item.current!);
             node = item.next;
         }
         
         return result;
     }
     
-    func toTypesArray() -> GenericType[] {
-        var result = GenericType[]();
+    func toTypesArray() -> [GenericType] {
+        var result = [GenericType]();
         
         var node = expression as? ExpressionList;
         while let item = node {
