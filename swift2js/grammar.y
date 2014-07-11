@@ -198,8 +198,8 @@
 %type <node> attributes_opt
 %type <node> import_kind_opt
 %type <node> import_kind
-%type <node> import_path
-%type <node> import_path_identifier
+%type <str> import_path
+%type <str> import_path_identifier
 %type <node> constant_declaration
 %type <node> pattern_initializer_list
 %type <node> pattern_initializer
@@ -588,7 +588,7 @@ code_block :  "{" statements "}"		 {$$ = $2; LOG("code_block (0)\n"); }
 
 // GRAMMAR OF AN IMPORT DECLARATION
 
-import_declaration :  attributes_opt "import" import_kind_opt import_path		 { LOG("import_declaration (0)\n"); }
+import_declaration :  attributes_opt "import" import_kind_opt import_path		 { $$ = [[ImportStatement alloc] initWithPath:toSwift($4)]; LOG("import_declaration (0)\n"); }
 attributes_opt: {} | attributes		 { LOG("attributes_opt\n"); }
 import_kind_opt: {} | import_kind		 { LOG("import_kind_opt\n"); }
 import_kind :  "typealias"		 { LOG("import_kind (0)\n"); }

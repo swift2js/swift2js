@@ -913,6 +913,18 @@ class ASTNode: NSObject {
     }
 }
 
+@objc class ImportStatement: ASTNode {
+    let path:String;
+    init(path:String) {
+        self.path = path;
+    }
+    
+    override func toJS() -> String {
+        //TODO: use require or similar for imports
+        return "//require(\"\(path)\")";
+    }
+}
+
 @objc class StatementNode: ASTNode {
     let statement:ASTNode;
     init(statement:ASTNode) {
