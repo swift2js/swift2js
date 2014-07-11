@@ -26,6 +26,7 @@
 %union {
     ASTNode * node;
     char *    str;
+    GenericType * type;
 }
 
 %token <str> identifier 1 "ID"
@@ -255,7 +256,7 @@
 %type <node> union_style_enum_case_clause
 %type <node> union_style_enum_case_list
 %type <node> union_style_enum_case
-%type <node> tuple_type_opt
+%type <type> tuple_type_opt
 %type <node> enum_name
 %type <node> enum_case_name
 %type <node> raw_value_style_enum
@@ -309,7 +310,7 @@
 %type <node> associativity_clause
 %type <node> associativity
 %type <node> pattern
-%type <node> type_annotation_opt
+%type <type> type_annotation_opt
 %type <node> wildcard_pattern
 %type <str> identifier_pattern
 %type <node> value_binding_pattern
@@ -318,7 +319,7 @@
 %type <node> tuple_pattern_element_list
 %type <node> tuple_pattern_element
 %type <node> enum_case_pattern
-%type <node> type_identifier_opt
+%type <type> type_identifier_opt
 %type <node> tuple_pattern_opt
 %type <node> type_casting_pattern
 %type <node> is_pattern
@@ -384,25 +385,25 @@
 %type <str> binary_operator
 %type <str> prefix_operator
 %type <str> postfix_operator
-%type <node> type
-%type <node> type_annotation
-%type <node> type_identifier
-%type <node> type_name
-%type <node> tuple_type
+%type <type> type
+%type <type> type_annotation
+%type <type> type_identifier
+%type <str> type_name
+%type <type> tuple_type
 %type <node> tuple_type_body_opt
 %type <node> tuple_type_body
 %type <node> tuple_type_element_list
 %type <node> tuple_type_element
-%type <node> element_name
-%type <node> function_type
-%type <node> array_type
-%type <node> optional_type
-%type <node> implicitly_unwrapped_optional_type
-%type <node> protocol_composition_type
+%type <str> element_name
+%type <type> function_type
+%type <type> array_type
+%type <type> optional_type
+%type <type> implicitly_unwrapped_optional_type
+%type <type> protocol_composition_type
 %type <node> protocol_identifier_list_opt
 %type <node> protocol_identifier_list
 %type <node> protocol_identifier
-%type <node> metatype_type
+%type <type> metatype_type
 %type <node> type_inheritance_clause
 %type <node> type_inheritance_list
 
@@ -668,7 +669,7 @@ tripledot_opt: {} | "..."		 { LOG("tripledot_opt\n"); }
 parameter_list :  parameter		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; LOG("parameter_list (0)\n"); }
 | parameter "," parameter_list		 { $$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3];LOG("parameter_list (1)\n"); }
 parameter :  inout_opt let_opt hash_opt parameter_name local_parameter_name_opt type_annotation default_argument_clause_opt		 {
-    $$ = [[FunctionParameter alloc] initWithInoutVal:!!$1 letVal:!!$2 hashVal:!!$3 external:toSwift($4) local:toSwift($5) defVal:$6];
+    $$ = [[FunctionParameter alloc] initWithInoutVal:!!$1 letVal:!!$2 hashVal:!!$3 external:toSwift($4) local:toSwift($5) defVal:$7];
     LOG("parameter (0)\n");
 }
 inout_opt: {} | "inout"		 { LOG("inout_opt\n"); }
@@ -809,7 +810,7 @@ associativity :  "left"		 { LOG("associativity (0)\n"); }
 
 pattern :  wildcard_pattern type_annotation_opt		 { LOG("pattern (0)\n"); }
 type_annotation_opt: {} | type_annotation		 { LOG("type_annotation_opt\n"); }
-pattern :  identifier_pattern type_annotation_opt %dprec 1		 {$$ = [[LiteralExpression alloc] init:toSwift($1)]; LOG("pattern (1)\n"); }
+pattern :  identifier_pattern type_annotation_opt %dprec 1  {$$ = [[LiteralExpression alloc] init:toSwift($1)]; $$.type=$2; LOG("pattern (1)\n"); }
 pattern :  value_binding_pattern		 { LOG("pattern (3)\n"); }
 pattern :  tuple_pattern type_annotation_opt		 { LOG("pattern (4)\n"); }
 pattern :  enum_case_pattern		 { LOG("pattern (5)\n"); }
@@ -1090,37 +1091,37 @@ type :  array_type		 { LOG("type (0)\n"); }
 
 // GRAMMAR OF A TYPE ANNOTATION
 
-type_annotation :  ":" attributes_opt type		 { LOG("type_annotation (0)\n"); }
+type_annotation :  ":" attributes_opt type		 {$$ = $3; LOG("type_annotation (0)\n"); }
 
 // GRAMMAR OF A TYPE IDENTIFIER
 
-type_identifier :  type_name generic_argument_clause_opt		 { LOG("type_identifier (0)\n"); }
-| type_name generic_argument_clause_opt "." type_identifier		 { LOG("type_identifier (1)\n"); }
+type_identifier :  type_name generic_argument_clause_opt		 {$$ = [GenericType fromTypeIdentifier:toSwift($1)]; LOG("type_identifier (0)\n"); }
+| type_name generic_argument_clause_opt "." type_identifier		 {$$ = [GenericType fromTypeIdentifier:toSwift($1)]; LOG("type_identifier (1)\n"); }
 type_name :  identifier		 { LOG("type_name (0)\n"); }
 
 // GRAMMAR OF A TUPLE TYPE
 
-tuple_type :  "(" tuple_type_body_opt ")"		 { LOG("tuple_type (0)\n"); }
+tuple_type :  "(" tuple_type_body_opt ")"		 { $$ = [[TupleType alloc] initWithList:$2]; LOG("tuple_type (0)\n"); }
 tuple_type_body_opt: {} | tuple_type_body		 { LOG("tuple_type_body_opt\n"); }
 tuple_type_body :  tuple_type_element_list tripledot_opt		 { LOG("tuple_type_body (0)\n"); }
-tuple_type_element_list :  tuple_type_element		 { LOG("tuple_type_element_list (0)\n"); }
-| tuple_type_element "," tuple_type_element_list		 { LOG("tuple_type_element_list (1)\n"); }
-tuple_type_element :  attributes_opt inout_opt type		 { LOG("tuple_type_element (0)\n"); }
-| inout_opt element_name type_annotation		 { LOG("tuple_type_element (1)\n"); }
+tuple_type_element_list :  tuple_type_element		 {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; LOG("tuple_type_element_list (0)\n"); }
+| tuple_type_element "," tuple_type_element_list		 { $$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; LOG("tuple_type_element_list (1)\n"); }
+tuple_type_element :  attributes_opt inout_opt type		 {$$ = [[TypeExpression alloc] initWithLinkedType:$3]; LOG("tuple_type_element (0)\n"); }
+| inout_opt element_name type_annotation		 {$$ = [[NamedExpression alloc] initWithName:toSwift($2) expr:[[TypeExpression alloc] initWithLinkedType:$3]]; LOG("tuple_type_element (1)\n"); }
 element_name :  identifier		 { LOG("element_name (0)\n"); }
 
 // GRAMMAR OF A FUNCTION TYPE
 
-function_type :  type "->" type		 { LOG("function_type (0)\n"); }
+function_type :  type "->" type		 {$$ = [[FunctionType alloc] initWithArgsType:$1 returnType:$3]; LOG("function_type (0)\n"); }
 
 // GRAMMAR OF AN ARRAY TYPE
 
-array_type :  type "[" "]"		 { LOG("array_type (0)\n"); }
-| array_type "[" "]"		 { LOG("array_type (1)\n"); }
+array_type :  type "[" "]"		 {$$ = [[ArrayType alloc] initWithInnerType:$1]; LOG("array_type (0)\n"); }
+| array_type "[" "]"		 { $$ = [[ArrayType alloc] initWithInnerType:$1]; LOG("array_type (1)\n"); }
 
 // GRAMMAR OF AN OPTIONAL TYPE
 
-optional_type :  type "?"		 { LOG("optional_type (0)\n"); }
+optional_type :  type "?"		 {$1.optional = true; $$ = $1; LOG("optional_type (0)\n"); }
 
 // GRAMMAR OF AN IMPLICITLY UNWRAPPED OPTIONAL TYPE
 
