@@ -371,7 +371,7 @@ class ASTNode: NSObject {
         //check for custom operators. Example array +=
         if let binaryOperator = next?.current as? BinaryOperator {
             var soto = current!.getType();
-            if let customOperator = current!.getType().customBinaryOperator(current!, operator: binaryOperator.binaryOperator, otherNode: binaryOperator.rightOperand) {
+            if let customOperator = current!.getType().customBinaryOperator(current!, op: binaryOperator.binaryOperator, otherNode: binaryOperator.rightOperand) {
                 return customOperator;
             }
         }
@@ -423,6 +423,24 @@ class ASTNode: NSObject {
     
     override func inferType() -> GenericType? {
         return expr.getType();
+    }
+}
+
+//Helper class to parse tuple type declarations
+@objc class TypeExpression: ASTNode {
+    
+    let linkedType:GenericType;
+    
+    init(linkedType: GenericType) {
+        self.linkedType = linkedType;
+    }
+    
+    override func toJS() -> String {
+        return "";
+    }
+    
+    override func inferType() -> GenericType? {
+        return linkedType;
     }
 }
 
