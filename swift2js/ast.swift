@@ -11,7 +11,7 @@ import Foundation
 func tabulate(code: String) -> String {
     var result = code.stringByReplacingOccurrencesOfString("\n", withString: "\n\t", options: nil, range: nil);
     if result.hasSuffix("\t") {
-        result = result.substringToIndex(result.utf16count - 1);
+        result = result.substringToIndex(result.utf16Count - 1);
     }
     result = "\t" + result;
     return result;
@@ -47,7 +47,7 @@ class ASTContext {
             for variable in exportedVars[exportedIndex] {
                 result += variable + ",";
             }
-            result = result.substringToIndex(result.utf16count - 1) + ";\n";
+            result = result.substringToIndex(result.utf16Count - 1) + ";\n";
             return result;
         }
         
@@ -302,7 +302,7 @@ class ASTNode: NSObject {
             names[i].setTypeIfEmpty(values[i].getType()); //infere type from assignment if needed
             result += "\(names[i].toJS()) = \(values[i].toJS()), ";
         }
-        result = result.substringToIndex(result.utf16count - 2); //remove last ", "
+        result = result.substringToIndex(result.utf16Count - 2); //remove last ", "
         return result;
     }
     
@@ -344,7 +344,7 @@ class ASTNode: NSObject {
             }
         }
         
-        result = result.substringToIndex(result.utf16count - 2); //remove last ", "
+        result = result.substringToIndex(result.utf16Count - 2); //remove last ", "
         
         return result;
     }
@@ -508,7 +508,7 @@ class ASTNode: NSObject {
             item = validItem.next;
         }
         
-        result = result.substringToIndex(result.utf16count - 2); //remove last ', '
+        result = result.substringToIndex(result.utf16Count - 2); //remove last ', '
         result += "}";
         
         return result;

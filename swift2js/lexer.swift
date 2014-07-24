@@ -177,7 +177,7 @@ class TokenData {
     
     func cleanCode() {
         if let match = cleanRegex.firstMatch(code) {
-            code = code.substringFromIndex(match.utf16count);
+            code = code.substringFromIndex(match.utf16Count);
             lastParsed = match;
         }
     }
@@ -227,7 +227,7 @@ class TokenData {
         }
         else {
             
-            if (code.utf16count > 0) {
+            if (code.utf16Count > 0) {
                 println("Lexer Error, unknown token: " + code);
             }
             
@@ -262,7 +262,7 @@ class TokenData {
             return;
         }
         var identifier = match!
-        consumed+=identifier.utf16count;
+        consumed+=identifier.utf16Count;
         
         if let declarationToken = declarationKeywords[identifier] {
             tokenStack.append(TokenData(declarationToken, identifier));
@@ -290,7 +290,7 @@ class TokenData {
     func checkNumberLiteral(){
         for regex in [binaryNumberRegex, octalNumberRegex, hexNumberRegex, decimalNumberRegex] {
             if let match = regex.firstMatch(code) {
-                consumed+=match.utf16count;
+                consumed+=match.utf16Count;
                 tokenStack.append(TokenData(TOKEN.NUMBER_LITERAL, match));
                 return;
             }
@@ -299,7 +299,7 @@ class TokenData {
     
     func checkStringLiteral() {
         if let match = stringRegex.firstMatch(code) {
-            consumed+=match.utf16count;
+            consumed+=match.utf16Count;
             tokenStack.append(TokenData(TOKEN.STRING_LITERAL, match));
         }
     }
@@ -307,11 +307,11 @@ class TokenData {
     func checkComment() {
         
         if let match = lineCommentRegex.firstMatch(code) {
-            consumed+=match.utf16count;
+            consumed+=match.utf16Count;
             tokenStack.append(TokenData(TOKEN.COMMENT, match));
         }
         else if let match = blockCommentRegex.firstMatch(code) {
-            consumed+=match.utf16count;
+            consumed+=match.utf16Count;
             tokenStack.append(TokenData(TOKEN.COMMENT, match));
         }
     }
@@ -322,7 +322,7 @@ class TokenData {
         var value = "";
         //check operators by precedence (test combined operators first)
         for var i = 3; i > 0; --i {
-            if code.utf16count < i {
+            if code.utf16Count < i {
                 continue;
             }
             value = code.substringToIndex(i);
@@ -333,9 +333,9 @@ class TokenData {
         }
         
         if let token = found {
-            consumed+=value.utf16count;
+            consumed+=value.utf16Count;
             //check if the operator is prefix, postfix or binary
-            var prefix = prefixOperatorRegex.test(code.substringFromIndex(value.utf16count));
+            var prefix = prefixOperatorRegex.test(code.substringFromIndex(value.utf16Count));
             var postfix = postfixOperatorRegex.test(lastParsed);
             
             if (prefix == postfix) {
@@ -357,14 +357,14 @@ class TokenData {
     }
     
     func checkGrammarSymbol(){
-        if (code.utf16count <= 0) {
+        if (code.utf16Count <= 0) {
             return;
         }
         
         let firstChar = code.substringToIndex(1);
         
         if let match = grammarSymbols[firstChar] {
-            consumed+=firstChar.utf16count;
+            consumed+=firstChar.utf16Count;
             tokenStack.append(TokenData(match, firstChar));
         }
     }
