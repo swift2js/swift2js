@@ -240,7 +240,7 @@ class TokenData {
     func yylex()-> CInt {
         lastyylexToken = nextToken();
         if let data = lastyylexToken {
-            let number = data.token.toRaw() as NSNumber;
+            let number = data.token.rawValue as NSNumber;
             if debugYYLex {
                 println("yylex: \(tokenToString(data.token))")
             }
@@ -258,7 +258,7 @@ class TokenData {
     
     func checkIdentifier() {
         var match = identifierRegex.firstMatch(code);
-        if !match {
+        if match == nil {
             return;
         }
         var identifier = match!
@@ -403,7 +403,7 @@ class TokenData {
         
         while let data = nextToken() {
             let tokenType = tokenToString(data.token);
-            println("TOKEN code: \(String(data.token.toRaw())) type:\(tokenType) value:\(data.value)");
+            println("TOKEN code: \(String(data.token.rawValue)) type:\(tokenType) value:\(data.value)");
         }
         
         code = codeCopy;
@@ -430,7 +430,7 @@ class TokenData {
         var index = 1;
         for value in values {
             
-            let token = TOKEN.fromRaw(index)!;
+            let token = TOKEN(rawValue:index)!;
             let str = tokenToString(token);
             
             println("%token <val> \(values[index-1]) \(String(index)) \"\(str)\"");

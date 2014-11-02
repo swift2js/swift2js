@@ -32,7 +32,7 @@ func swift2js(sourceCode: String, debug:Bool) -> (js:String?, error:String?) {
         return (program.toJS(),nil);
     }
     
-    var error = NSString.stringWithUTF8String(bridge_yyerror());
+    var error = NSString(UTF8String: bridge_yyerror());
     
     return ("", error);
 }
@@ -42,9 +42,9 @@ let debug = true;
 //TODO: read files from args, from input stream, etc.
 let testFile = "test4.swift";
 
-var sourceCode: AnyObject? = NSString.stringWithContentsOfFile("/tmp/" + testFile, encoding: NSUTF8StringEncoding, error: nil);
+var sourceCode: AnyObject? = NSString(contentsOfFile: "/tmp/" + testFile, encoding: NSUTF8StringEncoding, error: nil);
 
-if sourceCode {
+if sourceCode != nil {
     
     let (js,error) = swift2js(sourceCode as NSString, debug);
     

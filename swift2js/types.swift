@@ -172,7 +172,7 @@ class GenericType: NSObject
             argumentTypes += tuple.types;
         }
         else {
-            argumentTypes += argsType;
+            argumentTypes.append(argsType)
         }
         
         self.returnType = returnType;

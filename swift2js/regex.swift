@@ -15,7 +15,7 @@ class Regex {
     
     init(_ pattern:String) {
         self.pattern = pattern
-        regex = NSRegularExpression(pattern: pattern, options: nil, error: nil)
+        regex = NSRegularExpression(pattern: pattern, options: nil, error: nil)!
     }
     
     func test(data:String) -> Bool {

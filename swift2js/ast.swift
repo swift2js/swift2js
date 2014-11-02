@@ -35,7 +35,7 @@ class ASTContext {
     }
     
     func exportVar(name:String) {
-        if !find(exportedVars[exportedIndex], name) {
+        if find(exportedVars[exportedIndex], name) == nil {
             exportedVars[exportedIndex].append(name);
         }
     }
@@ -112,7 +112,7 @@ class ASTNode: NSObject {
             return cached;
         }
         type = inferType();
-        return type ? type! : GenericType(.UNKOWN);
+        return type != nil ? type! : GenericType(.UNKOWN);
     }
     
     func inferType() -> GenericType? {
@@ -124,7 +124,7 @@ class ASTNode: NSObject {
     }
     
     func setTypeIfEmpty(type:GenericType?) {
-        if (!self.type) {
+        if (self.type == nil) {
             self.type = type;
         }
         
@@ -360,10 +360,10 @@ class ASTNode: NSObject {
             //check left to right tuple assignment
             let leftTuple = current as? ParenthesizedExpression;
             let rightTuple = assignment.rightOperand as? ParenthesizedExpression;
-            if leftTuple && leftTuple!.isList() && rightTuple && rightTuple!.isList() {
+            if leftTuple != nil && leftTuple!.isList() && rightTuple != nil && rightTuple!.isList() {
                 return leftAndRightTupleToJS(leftTuple!, rightTuple!);
             }
-            else if leftTuple && leftTuple!.isList() {
+            else if leftTuple != nil && leftTuple!.isList() {
                 return leftTupleAndRightExpressionToJS(leftTuple!, assignment.rightOperand);
             }
         }
@@ -388,7 +388,7 @@ class ASTNode: NSObject {
     }
     
     override func inferType() -> GenericType? {
-        if !self.current {
+        if self.current == nil {
             return nil;
         }
         
@@ -472,7 +472,7 @@ class ASTNode: NSObject {
         //infere al the types of the list
         while let valid = item {
             if let expr = valid.current {
-                types += expr.getType();
+                types.append(expr.getType());
             }
             item = valid.next;
         }
@@ -516,7 +516,7 @@ class ASTNode: NSObject {
     
     func isList() ->Bool {
         if let list = expression as? ExpressionList {
-            if list.next {
+            if list.next != nil {
                 return true;
             }
         }
@@ -557,7 +557,7 @@ class ASTNode: NSObject {
 
         if allowInlineTuple {
             if let list = expression as? ExpressionList {
-                if list.next {
+                if list.next != nil {
                     return self.toInlineTuple(list);
                 }
             }
@@ -572,7 +572,7 @@ class ASTNode: NSObject {
     override func inferType() -> GenericType? {
         if allowInlineTuple {
             if let list = expression as? ExpressionList {
-                if list.next {
+                if list.next != nil {
                     //mutiple elements = > tuple
                     return TupleType(list:list);
                 }
@@ -620,7 +620,7 @@ class ASTNode: NSObject {
     }
     
     func exportSymbols(expression:ASTNode!) {
-        if (!expression) {
+        if (expression == nil) {
             return;
         }
         
@@ -757,7 +757,7 @@ class ASTNode: NSObject {
     
     override func toJS() -> String {
         //TODO: default value, inout, etc...
-        return local ? local! : external;
+        return local != nil ? local! : external;
     }
     
 }
