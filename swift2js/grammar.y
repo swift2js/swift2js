@@ -1035,7 +1035,7 @@ forced_value_expression :  postfix_expression "!"		 { LOG("forced_value_expressi
 
 // GRAMMAR OF AN OPTIONAL_CHAINING EXPRESSION
 
-optional_chaining_expression :  postfix_expression "?"		 { $$ = [[OptionalChainExprStatement alloc] initWithOptChainExpr:$1]; LOG("optional_chaining_expression (0)\n"); }
+optional_chaining_expression :  postfix_expression "?"		 { $$ = [[OptionalChainingExpression alloc] initWithExpression:$1]; LOG("optional_chaining_expression (0)\n"); }
 
 /******* LEXICAL STRUCTURE *******/
 

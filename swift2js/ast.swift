@@ -887,15 +887,15 @@ class ASTNode: NSObject {
     }
 }
 
-@objc class OptionalChainExprStatement: ASTNode {
-    let optChainExpr: ASTNode?;
+@objc class OptionalChainingExpression: ASTNode {
+    let expression: ASTNode?;
     
-    init(optChainExpr: ASTNode?) {
-        self.optChainExpr = optChainExpr;
+    init(expression: ASTNode?) {
+        self.expression = expression;
     }
     
     override func toJS() -> String {
-        if let expr = optChainExpr {
+        if let expr = expression {
             return expr.toJS();
         }
         return "";
