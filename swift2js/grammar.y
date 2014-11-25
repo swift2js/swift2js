@@ -886,7 +886,7 @@ expression_list :  expression		 { LOG("expression_list (0)\n"); }
 // GRAMMAR OF A PREFIX EXPRESSION
 
 prefix_expression :  prefix_operator_opt postfix_expression	{$$ = $1 ? [[PrefixOperator alloc] init:$2:toSwift($1)] : $2;  LOG("prefix_expression\n"); }
-prefix_operator_opt: {$$ = NULL}  | prefix_operator		 { LOG("prefix_operator_opt\n"); }
+prefix_operator_opt: {$$ = NULL;}  | prefix_operator		 { LOG("prefix_operator_opt\n"); }
 prefix_expression :  in_out_expression		 { LOG("prefix_expression (0)\n"); }
 in_out_expression :  "&" identifier		 { LOG("in_out_expression (0)\n"); }
 
@@ -978,7 +978,7 @@ implicit_member_expression :  "." identifier { $$ = [[LiteralExpression alloc] i
 // GRAMMAR OF A PARENTHESIZED EXPRESSION
 
 parenthesized_expression :  "(" expression_element_list_opt ")"		 { $$ = [[ParenthesizedExpression alloc] initWithExpression:$2]; LOG("parenthesized_expression (0)\n"); }
-expression_element_list_opt: {$$ = NULL}  | expression_element_list		 { $$ = $1; LOG("expression_element_list_opt\n"); }
+expression_element_list_opt: {$$ = NULL;}  | expression_element_list		 { $$ = $1; LOG("expression_element_list_opt\n"); }
 expression_element_list :  expression_element   {$$=[[ExpressionList alloc] initWithExpr:$1 next:nil]; LOG("expression_element_list (0)\n"); }
 | expression_element "," expression_element_list   {$$=[[ExpressionList alloc] initWithExpr:$1 next:(ExpressionList*)$3]; LOG("expression_element_list (1)\n"); }
 expression_element :  expression		 { LOG("expression_element (0)\n"); }
@@ -1066,14 +1066,14 @@ binary_operator :  "/" | "/="
 | "|" | "||"
 | "^" | "^="
 | "~" | "~="
-prefix_operator : PREFIX_OPERATOR "++" {$$ = $2}
-| PREFIX_OPERATOR "--" {$$ = $2}
-| PREFIX_OPERATOR "!" {$$ = $2}
-| PREFIX_OPERATOR "~" {$$ = $2}
-| PREFIX_OPERATOR "+" {$$ = $2}
-| PREFIX_OPERATOR "-" {$$ = $2}
-postfix_operator : POSTFIX_OPERATOR "++" {$$ = $2}
-| POSTFIX_OPERATOR "--" {$$ = $2}
+prefix_operator : PREFIX_OPERATOR "++" {$$ = $2;}
+| PREFIX_OPERATOR "--" {$$ = $2;}
+| PREFIX_OPERATOR "!" {$$ = $2;}
+| PREFIX_OPERATOR "~" {$$ = $2;}
+| PREFIX_OPERATOR "+" {$$ = $2;}
+| PREFIX_OPERATOR "-" {$$ = $2;}
+postfix_operator : POSTFIX_OPERATOR "++" {$$ = $2;}
+| POSTFIX_OPERATOR "--" {$$ = $2;}
 
 /******* TYPES *******/
 
