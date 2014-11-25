@@ -173,6 +173,29 @@ class ASTNode: NSObject {
     }
 }
 
+@objc class ExplicitMemberExpression: ASTNode {
+    
+    let expression: ASTNode;
+    let literal: String;
+    
+    init(expression: ASTNode, literal: String) {
+        self.expression = expression;
+        self.literal = literal;
+    }
+    
+    override func toJS() -> String {
+        
+        if let number = literal.toInt() {
+            return "\(expression.toJS())[\(literal)]";
+        }
+        return expression.toJS() + "." + literal;
+    }
+    
+    override func inferType() -> GenericType? {
+        return expression.getType(); //TODO
+    }
+}
+
 @objc class BinaryOperator: ASTNode {
     
     let rightOperand: ASTNode;

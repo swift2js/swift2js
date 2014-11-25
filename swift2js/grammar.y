@@ -1014,8 +1014,8 @@ initializer_expression :  postfix_expression "." "init"		 { LOG("initializer_exp
 
 // GRAMMAR OF AN EXPLICIT MEMBER EXPRESSION
 
-explicit_member_expression :  postfix_expression "." NUMBER_LITERAL		 { LOG("explicit_member_expression (0)\n"); }
-explicit_member_expression :  postfix_expression "." identifier generic_argument_clause_opt		 { LOG("explicit_member_expression (0)\n"); }
+explicit_member_expression :  postfix_expression "." NUMBER_LITERAL		 { $$ = [[ExplicitMemberExpression alloc] initWithExpression:$1 literal:toSwift($3)]; LOG("explicit_member_expression (0)\n"); }
+explicit_member_expression :  postfix_expression "." identifier generic_argument_clause_opt		 {$$ = [[ExplicitMemberExpression alloc] initWithExpression:$1 literal:toSwift($3)]; LOG("explicit_member_expression (0)\n"); }
 
 // GRAMMAR OF A SELF EXPRESSION
 
