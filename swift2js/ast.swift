@@ -832,6 +832,45 @@ class ASTNode: NSObject {
 
 }
 
+@objc class ForStatement: ASTNode {
+    let expr1: ASTNode?;
+    let expr2: ASTNode?;
+    let expr3: ASTNode?;
+    let block: ASTNode?;
+    
+    init(expr1:ASTNode?,expr2:ASTNode?,expr3:ASTNode?,block:ASTNode? ) {
+        self.expr1 = expr1;
+        self.expr2 = expr2;
+        self.expr3 = expr3;
+        self.block = block;
+    }
+    
+    override func toJS() -> String {
+        if let declaration = expr1 as? VariableDeclaration {
+            declaration.exportVariables = false;
+        }
+        
+        var result = "for (";
+        result += expr1 != nil ? expr1!.toJS() + ";" : ";";
+        result += expr2 != nil ? expr2!.toJS() + ";" : ";";
+        result += expr3 != nil ? expr3!.toJS() + ")" : ")";
+        
+        if let statements = block {
+            result += "{\n";
+            result += tabulate(statements.toJS());
+            result += "}";
+        }
+        else {
+            result += ";";
+        }
+        
+        return result;
+        
+        
+        
+    }
+}
+
 @objc class LabelStatement: ASTNode {
     let labelName: String;
     let loop: ASTNode;

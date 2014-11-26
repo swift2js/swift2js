@@ -437,7 +437,7 @@ loop_statement :  do_while_statement		 { LOG("loop_statement (0)\n"); }
 
 // GRAMMAR OF A FOR STATEMENT
 
-for_statement :  "for" for_init_opt ";" expression_opt ";" expression_opt code_block		 { LOG("for_statement (0)\n"); }
+for_statement :  "for" for_init_opt ";" expression_opt ";" expression_opt code_block		 {$$ = [[ForStatement alloc] initWithExpr1:$2 expr2:$4 expr3:$6 block:$7]; LOG("for_statement (0)\n"); }
 for_init_opt: {} | for_init		 { LOG("for_init_opt\n"); }
 expression_opt: {} | expression		 { LOG("expression_opt\n"); }
 for_statement :  "for" "(" for_init_opt ";" expression_opt ";" expression_opt ")" code_block		 { LOG("for_statement (0)\n"); }

@@ -2289,7 +2289,7 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 
   case 17:
 #line 440 "grammar.y" /* glr.c:783  */
-    { LOG("for_statement (0)\n"); }
+    {((*yyvalp).node) = [[ForStatement alloc] initWithExpr1:(((yyGLRStackItem const *)yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.node) expr2:(((yyGLRStackItem const *)yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.node) expr3:(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.node) block:(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.node)]; LOG("for_statement (0)\n"); }
 #line 2294 "grammar.mm" /* glr.c:783  */
     break;
 
