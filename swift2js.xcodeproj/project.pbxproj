@@ -11,6 +11,7 @@
 		11076F8B194C70A200358DB3 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11076F8A194C70A200358DB3 /* main.swift */; };
 		11076F94194C729D00358DB3 /* lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11076F93194C729D00358DB3 /* lexer.swift */; };
 		11076F96194C72D300358DB3 /* regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11076F95194C72D300358DB3 /* regex.swift */; };
+		11103A1E1A266575005CBF99 /* test5.swift in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11103A1B1A2664DF005CBF99 /* test5.swift */; };
 		1148C6AF196A88FC00DF22BC /* types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1148C6AE196A88FC00DF22BC /* types.swift */; };
 		117FDF5A195E0B83006EF142 /* test3.swift in CopyFiles */ = {isa = PBXBuildFile; fileRef = 117FDF58195E0B6F006EF142 /* test3.swift */; };
 		11BD222A197070B30017749B /* test4.swift in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11BD2228197070A40017749B /* test4.swift */; };
@@ -27,6 +28,7 @@
 			dstPath = /tmp;
 			dstSubfolderSpec = 0;
 			files = (
+				11103A1E1A266575005CBF99 /* test5.swift in CopyFiles */,
 				11BD222A197070B30017749B /* test4.swift in CopyFiles */,
 				117FDF5A195E0B83006EF142 /* test3.swift in CopyFiles */,
 				1103C8021954494000DF0977 /* test1.swift in CopyFiles */,
@@ -42,6 +44,7 @@
 		11076F91194C70B100358DB3 /* test1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test1.swift; sourceTree = "<group>"; };
 		11076F93194C729D00358DB3 /* lexer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = lexer.swift; sourceTree = "<group>"; };
 		11076F95194C72D300358DB3 /* regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = regex.swift; sourceTree = "<group>"; };
+		11103A1B1A2664DF005CBF99 /* test5.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test5.swift; sourceTree = "<group>"; };
 		1148C6AE196A88FC00DF22BC /* types.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = types.swift; sourceTree = "<group>"; };
 		117FDF58195E0B6F006EF142 /* test3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test3.swift; sourceTree = "<group>"; };
 		11BD2228197070A40017749B /* test4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test4.swift; sourceTree = "<group>"; };
@@ -102,6 +105,7 @@
 				11CFDAF3194F6A930076EE9A /* test2.swift */,
 				117FDF58195E0B6F006EF142 /* test3.swift */,
 				11BD2228197070A40017749B /* test4.swift */,
+				11103A1B1A2664DF005CBF99 /* test5.swift */,
 			);
 			name = tests;
 			sourceTree = "<group>";

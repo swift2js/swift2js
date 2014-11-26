@@ -183,12 +183,26 @@ class ASTNode: NSObject {
         self.literal = literal;
     }
     
+    func literalToJS() -> String {
+        if let number = literal.toInt() {
+            return "[\(literal)]";
+        }
+        return ".\(literal)";
+    }
+    
     override func toJS() -> String {
         
-        if let number = literal.toInt() {
-            return "\(expression.toJS())[\(literal)]";
+        if let optional = expression as? OptionalChainingExpression {
+            
+            var str = expression.toJS();
+            var id = ctx.generateID();
+            ctx.exportVar(id);
+            
+            return "(\(id) = \(str)) ? \(id)\(self.literalToJS()) : null";
+            
         }
-        return expression.toJS() + "." + literal;
+
+        return expression.toJS() + self.literalToJS();
     }
     
     override func inferType() -> GenericType? {
