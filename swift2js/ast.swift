@@ -9,123 +9,123 @@
 import Foundation
 
 func tabulate(code: String) -> String {
-    var result = code.stringByReplacingOccurrencesOfString("\n", withString: "\n\t", options: nil, range: nil);
+    var result = code.stringByReplacingOccurrencesOfString("\n", withString: "\n\t", options: nil, range: nil)
     if result.hasSuffix("\t") {
-        result = result.substringToIndex(result.utf16Count - 1);
+        result = result.substringToIndex(count(result.utf16) - 1)
     }
-    result = "\t" + result;
-    return result;
+    result = "\t" + result
+    return result
 }
 
-typealias ASTSymbolTable = Dictionary<String, GenericType>;
+typealias ASTSymbolTable = Dictionary<String, GenericType>
 
 class ASTContext {
     
     //exported variable declarations
-    var exportedVars:[[String]] = [[]];
-    var exportedIndex = 0;
+    var exportedVars:[[String]] = [[]]
+    var exportedIndex = 0
     //scoped symbols for type inference
-    var symbols: [ASTSymbolTable] = [];
-    var symbolsIndex = -1;
+    var symbols: [ASTSymbolTable] = []
+    var symbolsIndex = -1
     //index for IDS
-    var generateIDIndex = 0;
+    var generateIDIndex = 0
     
     func generateID() -> String {
-        return "_ref\(generateIDIndex++)";
+        return "_ref\(generateIDIndex++)"
     }
     
     func exportVar(name:String) {
         if find(exportedVars[exportedIndex], name) == nil {
-            exportedVars[exportedIndex].append(name);
+            exportedVars[exportedIndex].append(name)
         }
     }
     
     func getExportedVars() ->String? {
         if exportedVars[exportedIndex].count > 0 {
-            var result = "";
-            result += "var ";
+            var result = ""
+            result += "var "
             for variable in exportedVars[exportedIndex] {
-                result += variable + ",";
+                result += variable + ","
             }
-            result = result.substringToIndex(result.utf16Count - 1) + ";\n";
-            return result;
+            result = result.substringToIndex(count(result.utf16) - 1) + "\n"
+            return result
         }
         
-        return nil;
+        return nil
     }
     
     //exported variable declarations
     func saveExported() {
-        exportedIndex++;
-        exportedVars.append([]);
+        exportedIndex++
+        exportedVars.append([])
     }
     
     func restoreExported() {
         if exportedIndex > 0 {
-            exportedVars.removeLast();
-            exportedIndex--;
+            exportedVars.removeLast()
+            exportedIndex--
         }
     }
     
     //scoped symbols for type inference
     func saveSymbols() {
-        symbolsIndex++;
-        symbols.append(ASTSymbolTable());
+        symbolsIndex++
+        symbols.append(ASTSymbolTable())
     }
     
     func restoreSymbols() {
         if (symbolsIndex > 0) {
-            symbols.removeLast();
-            symbolsIndex--;
+            symbols.removeLast()
+            symbolsIndex--
         }
     }
     
     func addSymbol(name:String, type:GenericType) {
-        symbols[symbolsIndex][name] = type;
+        symbols[symbolsIndex][name] = type
     }
     
     func inferSymbol(name: String) -> GenericType? {
         //iterate from top scope to parent scopes
-        for var i = symbolsIndex ; i >= 0; --i {
+        for var i = symbolsIndex;  i >= 0; --i {
             if let type = symbols[i][name] {
-                return type;
+                return type
             }
         }
-        return nil;
+        return nil
     }
 }
 
-var ctx = ASTContext();
+var ctx = ASTContext()
 
 
 class ASTNode: NSObject {
     
-    var type: GenericType?;
+    var type: GenericType?
     
     func toJS() -> String {
-        return "";
+        return ""
     }
     
     func getType() -> GenericType
     {
         if let cached = type {
-            return cached;
+            return cached
         }
-        type = inferType();
-        return type != nil ? type! : GenericType(.UNKOWN);
+        type = inferType()
+        return type != nil ? type! : GenericType(.UNKOWN)
     }
     
     func inferType() -> GenericType? {
-        return nil;
+        return nil
     }
     
-    func setType(type:GenericType?) {
-        self.type = type;
+    func swift_setType(type:GenericType?) {
+        self.type = type
     }
     
     func setTypeIfEmpty(type:GenericType?) {
         if (self.type == nil) {
-            self.type = type;
+            self.type = type
         }
         
     }
@@ -133,257 +133,257 @@ class ASTNode: NSObject {
 
 @objc class LiteralExpression: ASTNode {
     
-    let value: String;
+    let value: String
     
     init(_ literal: String) {
-        self.value = literal;
+        self.value = literal
     }
     
     override func toJS() -> String {
-        return value;
+        return value
     }
     
     override func inferType() -> GenericType? {
         if value == "true" || value == "false" {
-            return GenericType(.BOOLEAN);
+            return GenericType(.BOOLEAN)
         }
         else if value.hasPrefix("\"") {
-            return GenericType(.STRING);
+            return GenericType(.STRING)
         }
         else {
-            return GenericType(.NUMBER);
+            return GenericType(.NUMBER)
         }
     }
 }
 
 @objc class IdentifierExpression: ASTNode {
     
-    let name: String;
+    let name: String
     
     init(_ identifier: String) {
-        self.name = identifier;
+        self.name = identifier
     }
     
     override func toJS() -> String {
-        return name;
+        return name
     }
     
     override func inferType() -> GenericType? {
-        return ctx.inferSymbol(name);
+        return ctx.inferSymbol(name)
     }
 }
 
 @objc class ExplicitMemberExpression: ASTNode {
     
-    let expression: ASTNode;
-    let literal: String;
+    let expression: ASTNode
+    let literal: String
     
     init(expression: ASTNode, literal: String) {
-        self.expression = expression;
-        self.literal = literal;
+        self.expression = expression
+        self.literal = literal
     }
     
     func literalToJS() -> String {
         if let number = literal.toInt() {
-            return "[\(literal)]";
+            return "[\(literal)]"
         }
-        return ".\(literal)";
+        return ".\(literal)"
     }
     
     override func toJS() -> String {
         
         if let optional = expression as? OptionalChainingExpression {
             
-            var str = expression.toJS();
-            var id = ctx.generateID();
-            ctx.exportVar(id);
+            var str = expression.toJS()
+            var id = ctx.generateID()
+            ctx.exportVar(id)
             
-            return "(\(id) = \(str)) ? \(id)\(self.literalToJS()) : null";
+            return "(\(id) = \(str)) ? \(id)\(self.literalToJS()) : null"
             
         }
 
-        return expression.toJS() + self.literalToJS();
+        return expression.toJS() + self.literalToJS()
     }
     
     override func inferType() -> GenericType? {
-        return expression.getType(); //TODO
+        return expression.getType() //TODO
     }
 }
 
 @objc class BinaryOperator: ASTNode {
     
-    let rightOperand: ASTNode;
-    let binaryOperator: String;
+    let rightOperand: ASTNode
+    let binaryOperator: String
     
     init(rightOperand: ASTNode, binaryOperator:String ) {
-        self.binaryOperator = binaryOperator;
-        self.rightOperand = rightOperand;
+        self.binaryOperator = binaryOperator
+        self.rightOperand = rightOperand
     }
     
     override func toJS() -> String {
         if binaryOperator == "." {
-            var right = rightOperand.toJS();
+            var right = rightOperand.toJS()
             if let index = right.toInt() {
-                return "[\(index)]";
+                return "[\(index)]"
             }
-            return binaryOperator + right;
+            return binaryOperator + right
         }
         else {
-            return " " + binaryOperator + " " + rightOperand.toJS();
+            return " " + binaryOperator + " " + rightOperand.toJS()
         }
     }
     
     override func inferType() -> GenericType? {
-        return rightOperand.getType();
+        return rightOperand.getType()
     }
 }
 
 @objc class AssignmentOperator: ASTNode {
     
-    let rightOperand: ASTNode;
+    let rightOperand: ASTNode
     
     init(rightOperand: ASTNode) {
-        self.rightOperand = rightOperand;
+        self.rightOperand = rightOperand
     }
     
     override func toJS() -> String {
-        return " = " + rightOperand.toJS();
+        return " = " + rightOperand.toJS()
     }
     
     override func inferType() -> GenericType? {
-        return rightOperand.getType();
+        return rightOperand.getType()
     }
 }
 
 @objc class TernaryOperator: ASTNode {
     
-    let trueOperand: ASTNode;
-    let falseOperand: ASTNode;
+    let trueOperand: ASTNode
+    let falseOperand: ASTNode
     
     init(trueOperand: ASTNode, falseOperand: ASTNode) {
-        self.trueOperand = trueOperand;
-        self.falseOperand = falseOperand;
+        self.trueOperand = trueOperand
+        self.falseOperand = falseOperand
     }
     
     override func toJS() -> String {
-        return " ? " + trueOperand.toJS() + " : " + falseOperand.toJS();
+        return " ? " + trueOperand.toJS() + " : " + falseOperand.toJS()
     }
     
     override func inferType() -> GenericType? {
-        return trueOperand.getType();
+        return trueOperand.getType()
     }
 }
 
 @objc class PrefixOperator: ASTNode {
     
-    let operand: ASTNode;
-    let prefixOperator: String;
+    let operand: ASTNode
+    let prefixOperator: String
     
     init(_ operand: ASTNode, _ prefixOperator:String ) {
-        self.operand = operand;
-        self.prefixOperator = prefixOperator;
+        self.operand = operand
+        self.prefixOperator = prefixOperator
     }
     
     override func toJS() -> String {
-        return prefixOperator + operand.toJS();
+        return prefixOperator + operand.toJS()
     }
     
     override func inferType() -> GenericType? {
-        return operand.getType(); //TODO !
+        return operand.getType() //TODO !
     }
 }
 
 @objc class PostfixOperator: ASTNode {
     
-    let operand: ASTNode;
-    let postfixOperator: String;
+    let operand: ASTNode
+    let postfixOperator: String
     
     init(_ operand: ASTNode, _ postfixOperator:String ) {
-        self.operand = operand;
-        self.postfixOperator = postfixOperator;
+        self.operand = operand
+        self.postfixOperator = postfixOperator
     }
     
     override func toJS() -> String {
-        return operand.toJS() + postfixOperator;
+        return operand.toJS() + postfixOperator
     }
     
     override func inferType() -> GenericType? {
-        return operand.getType(); //TODO !
+        return operand.getType() //TODO !
     }
 }
 
 @objc class BinaryExpression: ASTNode {
     
-    var current:ASTNode?;
-    var next:BinaryExpression?;
+    var current:ASTNode?
+    var next:BinaryExpression?
     
     init(expression:ASTNode?) {
-        self.current = expression;
+        self.current = expression
     }
     
     init(expression:ASTNode, next:BinaryExpression?) {
-        self.current = expression;
-        self.next = next;
+        self.current = expression
+        self.next = next
     }
     
     //multiple assignmens from a tuple literal. Example: let (a,b) = (1,2)
     func leftAndRightTupleToJS(left: ParenthesizedExpression,_ right: ParenthesizedExpression) -> String {
-        var result = "";
-        let names = left.toExpressionArray();
-        let values = right.toExpressionArray();
+        var result = ""
+        let names = left.toExpressionArray()
+        let values = right.toExpressionArray()
         
         for var i = 0; i < names.count; ++i {
             if i >= values.count {
-                break;
+                break
             }
-            names[i].setTypeIfEmpty(values[i].getType()); //infere type from assignment if needed
-            result += "\(names[i].toJS()) = \(values[i].toJS()), ";
+            names[i].setTypeIfEmpty(values[i].getType()) //infere type from assignment if needed
+            result += "\(names[i].toJS()) = \(values[i].toJS()), "
         }
-        result = result.substringToIndex(result.utf16Count - 2); //remove last ", "
-        return result;
+        result = result.substringToIndex(count(result.utf16) - 2) //remove last ", "
+        return result
     }
     
     //multiple assignmens from a expression supposed tu be a tuple. Example: let (a,b) = instance
     func leftTupleAndRightExpressionToJS(left: ParenthesizedExpression,_ right: ASTNode) -> String {
         
-        var tupleID = "";
+        var tupleID = ""
         if let literal = right as? LiteralExpression {
-            tupleID = literal.toJS();
+            tupleID = literal.toJS()
         }
         else if let identifier = right as? IdentifierExpression {
-            tupleID = identifier.toJS();
+            tupleID = identifier.toJS()
         }
         else {
-            tupleID = ctx.generateID();
-            ctx.exportVar(tupleID + " = " + right.toJS());
+            tupleID = ctx.generateID()
+            ctx.exportVar(tupleID + " = " + right.toJS())
         }
         
-        let names = left.toExpressionArray();
-        var result = "";
+        let names = left.toExpressionArray()
+        var result = ""
         
         if let tupleType = right.getType() as? TupleType {
             //known tuple type
-            let tupleMembers = tupleType.names;
+            let tupleMembers = tupleType.names
             for var i = 0; i < names.count; ++i {
-                names[i].setTypeIfEmpty(tupleType.getTypeForIndex(i)); //infere type from assignment if needed
+                names[i].setTypeIfEmpty(tupleType.getTypeForIndex(i)) //infere type from assignment if needed
                 if let number = tupleMembers[i].toInt() {
-                    result += "\(names[i].toJS()) = \(tupleID)[\(number)], ";
+                    result += "\(names[i].toJS()) = \(tupleID)[\(number)], "
                 }
                 else {
-                    result += "\(names[i].toJS()) = \(tupleID).\(tupleMembers[i]), ";
+                    result += "\(names[i].toJS()) = \(tupleID).\(tupleMembers[i]), "
                 }
             }
         }
         else {
             //unkown tuple type
             for var i = 0; i < names.count; ++i {
-                result += "\(names[i].toJS()) = \(tupleID)[Object.keys(\(tupleID))[\(i)]], ";
+                result += "\(names[i].toJS()) = \(tupleID)[Object.keys(\(tupleID))[\(i)]], "
             }
         }
         
-        result = result.substringToIndex(result.utf16Count - 2); //remove last ", "
+        result = result.substringToIndex(count(result.utf16) - 2) //remove last ", "
         
-        return result;
+        return result
     }
     
     
@@ -393,52 +393,52 @@ class ASTNode: NSObject {
         //Check Tuple assignment binary expressions
         
         if let assignment = next?.current as? AssignmentOperator {
-            current!.type = assignment.rightOperand.getType();
+            current!.type = assignment.rightOperand.getType()
             //check left to right tuple assignment
-            let leftTuple = current as? ParenthesizedExpression;
-            let rightTuple = assignment.rightOperand as? ParenthesizedExpression;
+            let leftTuple = current as? ParenthesizedExpression
+            let rightTuple = assignment.rightOperand as? ParenthesizedExpression
             if leftTuple != nil && leftTuple!.isList() && rightTuple != nil && rightTuple!.isList() {
-                return leftAndRightTupleToJS(leftTuple!, rightTuple!);
+                return leftAndRightTupleToJS(leftTuple!, rightTuple!)
             }
             else if leftTuple != nil && leftTuple!.isList() {
-                return leftTupleAndRightExpressionToJS(leftTuple!, assignment.rightOperand);
+                return leftTupleAndRightExpressionToJS(leftTuple!, assignment.rightOperand)
             }
         }
         
         //check for custom operators. Example array +=
         if let binaryOperator = next?.current as? BinaryOperator {
-            var soto = current!.getType();
+            var soto = current!.getType()
             if let customOperator = current!.getType().customBinaryOperator(current!, op: binaryOperator.binaryOperator, otherNode: binaryOperator.rightOperand) {
-                return customOperator;
+                return customOperator
             }
         }
         
         //Generic binary expression
-        var result = "";
+        var result = ""
         if let currentExpression = current {
-            result+=currentExpression.toJS();
+            result+=currentExpression.toJS()
         }
         if let nextExpression = next {
-            result += nextExpression.toJS();
+            result += nextExpression.toJS()
         }
-        return result;
+        return result
     }
     
     override func inferType() -> GenericType? {
         if self.current == nil {
-            return nil;
+            return nil
         }
         
-        var leftType = current!.getType();
+        var leftType = current!.getType()
         if let op = next?.current as? BinaryOperator {
-            return leftType.operate(op.binaryOperator, other: op.getType());
+            return leftType.operate(op.binaryOperator, other: op.getType())
         }
         else if let op = next?.current as? AssignmentOperator {
-            current!.type = op.getType();
-            return op.getType();
+            current!.type = op.getType()
+            return op.getType()
         }
         else {
-            return leftType;
+            return leftType
         }
 
     }
@@ -446,148 +446,148 @@ class ASTNode: NSObject {
 
 @objc class NamedExpression: ASTNode {
     
-    let name:String;
-    let expr:ASTNode;
+    let name:String
+    let expr:ASTNode
     
     init(name:String, expr: ASTNode) {
-        self.name = name;
-        self.expr = expr;
+        self.name = name
+        self.expr = expr
     }
     
     override func toJS() -> String {
-        return expr.toJS();
+        return expr.toJS()
     }
     
     override func inferType() -> GenericType? {
-        return expr.getType();
+        return expr.getType()
     }
 }
 
 //Helper class to parse tuple type declarations
 @objc class TypeExpression: ASTNode {
     
-    let linkedType:GenericType;
+    let linkedType:GenericType
     
     init(linkedType: GenericType) {
-        self.linkedType = linkedType;
+        self.linkedType = linkedType
     }
     
     override func toJS() -> String {
-        return "";
+        return ""
     }
     
     override func inferType() -> GenericType? {
-        return linkedType;
+        return linkedType
     }
 }
 
 
 @objc class ExpressionList: ASTNode {
-    var current:ASTNode?;
-    var next:ExpressionList?;
+    var current:ASTNode?
+    var next:ExpressionList?
     
     init(expr:ASTNode?, next:ExpressionList?) {
-        self.current = expr;
-        self.next = next;
+        self.current = expr
+        self.next = next
     }
     
     
     override func toJS() -> String {
-        var result = "";
+        var result = ""
         if let currentExpression = current {
-            result+=currentExpression.toJS();
+            result+=currentExpression.toJS()
         }
         if let nextExpression = next {
-            result += ", " + nextExpression.toJS();
+            result += ", " + nextExpression.toJS()
         }
-        return result;
+        return result
     }
     
     override func inferType() -> GenericType? {
-        var types:[GenericType] = [];
-        var item:ExpressionList? = self;
+        var types:[GenericType] = []
+        var item:ExpressionList? = self
         //infere al the types of the list
         while let valid = item {
             if let expr = valid.current {
-                types.append(expr.getType());
+                types.append(expr.getType())
             }
-            item = valid.next;
+            item = valid.next
         }
         //TODO: get less restrictive type instead of the first one
-        return types.count > 0 ? types[0] : nil;
+        return types.count > 0 ? types[0] : nil
     }
 }
 
 @objc class ParenthesizedExpression: ASTNode {
     
-    let expression: ASTNode?;
-    var allowInlineTuple = true;
+    let expression: ASTNode?
+    var allowInlineTuple = true
     
     
     init(expression: ASTNode?) {
-        self.expression = expression;
+        self.expression = expression
     }
     
     func toInlineTuple(list: ExpressionList) -> String {
-        var result = "{";
+        var result = "{"
         
-        var item:ExpressionList? = list;
-        var index = 0;
+        var item:ExpressionList? = list
+        var index = 0
         while let validItem = item {
             
             if let namedExpression = validItem.current as? NamedExpression {
-                result += "\(namedExpression.name): \(namedExpression.expr.toJS()), ";
+                result += "\(namedExpression.name): \(namedExpression.expr.toJS()), "
             }
             else if let expression = validItem.current {
-                result += "\(index): \(expression.toJS()), ";
+                result += "\(index): \(expression.toJS()), "
             }
-            ++index;
-            item = validItem.next;
+            ++index
+            item = validItem.next
         }
         
-        result = result.substringToIndex(result.utf16Count - 2); //remove last ', '
-        result += "}";
+        result = result.substringToIndex(count(result.utf16) - 2) //remove last ', '
+        result += "}"
         
-        return result;
+        return result
     }
     
     func isList() ->Bool {
         if let list = expression as? ExpressionList {
             if list.next != nil {
-                return true;
+                return true
             }
         }
-        return false;
+        return false
     }
     
     func toExpressionArray() -> [ASTNode] {
-        var result = [ASTNode]();
+        var result = [ASTNode]()
         
-        var node = expression as? ExpressionList;
+        var node = expression as? ExpressionList
         while let item = node {
-            result.append(item.current!);
-            node = item.next;
+            result.append(item.current!)
+            node = item.next
         }
         
-        return result;
+        return result
     }
     
     func toTypesArray() -> [GenericType] {
-        var result = [GenericType]();
+        var result = [GenericType]()
         
-        var node = expression as? ExpressionList;
+        var node = expression as? ExpressionList
         while let item = node {
-            result.append(item.current!.getType());
-            node = item.next;
+            result.append(item.current!.getType())
+            node = item.next
         }
-        return result;
+        return result
     }
     
     func toTupleInitializer(variableName: String) -> String {
-        let list = expression as ExpressionList;
-        var result = variableName + " = ";
-        result += variableName + " = " + toInlineTuple(list);
-        return result;
+        let list = expression as! ExpressionList
+        var result = variableName + " = "
+        result += variableName + " = " + toInlineTuple(list)
+        return result
     }
     
     override func toJS() -> String {
@@ -595,15 +595,15 @@ class ASTNode: NSObject {
         if allowInlineTuple {
             if let list = expression as? ExpressionList {
                 if list.next != nil {
-                    return self.toInlineTuple(list);
+                    return self.toInlineTuple(list)
                 }
             }
         }
         
         if let expr = expression {
-            return "(" + expr.toJS() + ")";
+            return "(" + expr.toJS() + ")"
         }
-        return "()";
+        return "()"
     }
     
     override func inferType() -> GenericType? {
@@ -611,274 +611,274 @@ class ASTNode: NSObject {
             if let list = expression as? ExpressionList {
                 if list.next != nil {
                     //mutiple elements = > tuple
-                    return TupleType(list:list);
+                    return TupleType(list:list)
                 }
                 else if let item = list.current {
                     //single element => not a tuple
-                    return item.getType();
+                    return item.getType()
                 }
             }
         }
         if let expr = expression {
-            return expr.getType();
+            return expr.getType()
         }
-        return nil;
+        return nil
     }
 }
 
 @objc class FunctionCallExpression: ASTNode {
-    let function: ASTNode;
-    let parenthesized: ParenthesizedExpression;
+    let function: ASTNode
+    let parenthesized: ParenthesizedExpression
     
     init(function: ASTNode, parenthesized: ParenthesizedExpression) {
-        self.function = function;
-        self.parenthesized = parenthesized;
+        self.function = function
+        self.parenthesized = parenthesized
     }
     
     override func toJS() -> String {
-        parenthesized.allowInlineTuple = false;
-        return function.toJS() + parenthesized.toJS();
+        parenthesized.allowInlineTuple = false
+        return function.toJS() + parenthesized.toJS()
     }
     
     override func inferType() -> GenericType? {
         if let funcType = function.getType() as? FunctionType {
-            return funcType.returnType;
+            return funcType.returnType
         }
-        return GenericType(.VOID);
+        return GenericType(.VOID)
     }
 }
 
 @objc class VariableDeclaration: ASTNode {
-    let initializer: ExpressionList;
-    var exportVariables = true;
+    let initializer: ExpressionList
+    var exportVariables = true
     
     init(initializer:ExpressionList) {
-        self.initializer = initializer;
+        self.initializer = initializer
     }
     
     func exportSymbols(expression:ASTNode!) {
         if (expression == nil) {
-            return;
+            return
         }
         
         //multiple var initiliazation via tuples
         if let tuple = expression as? ParenthesizedExpression {
-            var names = tuple.toExpressionArray();
-            var types = tuple.toTypesArray();
+            var names = tuple.toExpressionArray()
+            var types = tuple.toTypesArray()
             for var i = 0; i < names.count; ++i {
-                var name = names[i].toJS();
+                var name = names[i].toJS()
                 if (exportVariables) {
-                    ctx.exportVar(name);
+                    ctx.exportVar(name)
                 }
-                ctx.addSymbol(name, type:types[i]);
+                ctx.addSymbol(name, type:types[i])
             }
             
         } //single var initialization
         else {
-            var name = expression.toJS();
+            var name = expression.toJS()
             if exportVariables {
                 ctx.exportVar(name)
             }
-            ctx.addSymbol(name, type: expression.getType());
+            ctx.addSymbol(name, type: expression.getType())
         }
     }
     
     override func toJS() -> String {
         
-        var result = initializer.toJS();
+        var result = initializer.toJS()
 
         //export symbols and vars
-        var node:ExpressionList? = initializer;
+        var node:ExpressionList? = initializer
         while let item = node {
             if let binaryExpr = item.current as? BinaryExpression {
-                exportSymbols(binaryExpr.current);
+                exportSymbols(binaryExpr.current)
             }
             else {
-                exportSymbols(item.current);
+                exportSymbols(item.current)
             }
-            node = item.next;
+            node = item.next
         }
         
         //avoid var if exporting variables
         if exportVariables {
-            return result;
+            return result
         }
         else {
-            return "var " + result;
+            return "var " + result
         }
     }
 }
 
 @objc class ArrayLiteral: ASTNode {
-    let items: ASTNode?;
+    let items: ASTNode?
     
     init(items:ASTNode?){
-        self.items = items;
+        self.items = items
     }
     
     override func toJS() -> String {
-        var result = "[";
+        var result = "["
         if let data = items {
-            result+=data.toJS();
+            result+=data.toJS()
         }
-        result+="]";
-        return result;
+        result+="]"
+        return result
     }
     
     override func inferType() -> GenericType? {
-        if let item = (items as? ExpressionList)?.current? {
-            return ArrayType(innerType: item.getType());
+        if let item = (items as? ExpressionList)?.current {
+            return ArrayType(innerType: item.getType())
         }
-        return ArrayType(innerType: GenericType(.UNKOWN));
+        return ArrayType(innerType: GenericType(.UNKOWN))
     }
 }
 
 @objc class DictionaryLiteral: ASTNode {
-    let pairs: ASTNode?;
+    let pairs: ASTNode?
     
     init(pairs:ASTNode?){
-        self.pairs = pairs;
+        self.pairs = pairs
     }
     
     override func toJS() -> String {
-        var result = "{";
+        var result = "{"
         if let data = pairs {
-            result += tabulate(data.toJS()) + "\n";
+            result += tabulate(data.toJS()) + "\n"
         }
-        result+="}";
-        return result;
+        result+="}"
+        return result
     }
     
     override func inferType() -> GenericType? {
         if let item = (pairs as? ExpressionList)?.current {
-            return DictionaryType(innerType: item.getType());
+            return DictionaryType(innerType: item.getType())
         }
-        return DictionaryType(innerType: GenericType(.UNKOWN));
+        return DictionaryType(innerType: GenericType(.UNKOWN))
     }
 }
 
 @objc class DictionaryItem: ASTNode {
-    let key: ASTNode;
-    let value: ASTNode;
+    let key: ASTNode
+    let value: ASTNode
     
     init(key:ASTNode, value:ASTNode){
-        self.key = key;
-        self.value = value;
+        self.key = key
+        self.value = value
     }
     
     override func toJS() -> String {
-        return "\n" + key.toJS() + " : " + value.toJS();
+        return "\n" + key.toJS() + " : " + value.toJS()
     }
     
     override func inferType() -> GenericType? {
-        return value.getType();
+        return value.getType()
     }
 }
 
 @objc class FunctionParameter: ASTNode {
-    let inoutVal:Boolean;
-    let letVal:Boolean;
-    let hashVal:Boolean;
-    let external:String;
-    let local:String?;
-    let defVal:ASTNode?;
+    let inoutVal:Boolean
+    let letVal:Boolean
+    let hashVal:Boolean
+    let external:String
+    let local:String?
+    let defVal:ASTNode?
     
     init(inoutVal:Boolean, letVal:Boolean, hashVal:Boolean, external:String, local:String?, defVal:ASTNode?) {
-        self.inoutVal = inoutVal;
-        self.letVal = letVal;
-        self.hashVal = hashVal;
-        self.external = external;
-        self.local = local;
-        self.defVal = defVal;
+        self.inoutVal = inoutVal
+        self.letVal = letVal
+        self.hashVal = hashVal
+        self.external = external
+        self.local = local
+        self.defVal = defVal
     }
     
     override func toJS() -> String {
         //TODO: default value, inout, etc...
-        return local != nil ? local! : external;
+        return local != nil ? local! : external
     }
     
 }
 
 @objc class FunctionDeclaration: ASTNode {
-    let name:String;
-    let signature:ASTNode?;
-    let body:ASTNode?;
+    let name:String
+    let signature:ASTNode?
+    let body:ASTNode?
     
     init(name:String, signature:ASTNode?, body:ASTNode?) {
-        self.name = name;
-        self.signature = signature;
-        self.body = body;
+        self.name = name
+        self.signature = signature
+        self.body = body
     }
     
     override func toJS() -> String {
-        var result = "function " + name + "(";
+        var result = "function " + name + "("
         if let parameters = signature {
-            result += parameters.toJS();
+            result += parameters.toJS()
         }
-        result += ") {\n";
+        result += ") {\n"
         if let statements = body {
-            result += tabulate(statements.toJS());
+            result += tabulate(statements.toJS())
         }
-        result += "}";
-        return result;
+        result += "}"
+        return result
     }
 }
 
 
 @objc class WhileStatement: ASTNode {
-    let whileCondition: ASTNode;
-    let codeBlock: ASTNode?;
+    let whileCondition: ASTNode
+    let codeBlock: ASTNode?
     
     init(whileCondition:ASTNode, codeBlock:ASTNode?) {
-        self.whileCondition = whileCondition;
-        self.codeBlock = codeBlock;
+        self.whileCondition = whileCondition
+        self.codeBlock = codeBlock
     }
     
     override func toJS() -> String {
-        var result = "while";
-        result += "(" + whileCondition.toJS() + "){ \n";
+        var result = "while"
+        result += "(" + whileCondition.toJS() + "){ \n"
         if let statements = codeBlock {
-            result += tabulate(statements.toJS());
+            result += tabulate(statements.toJS())
         }
-        result += "}";
-        return result;
+        result += "}"
+        return result
     }
 
 }
 
 @objc class ForStatement: ASTNode {
-    let expr1: ASTNode?;
-    let expr2: ASTNode?;
-    let expr3: ASTNode?;
-    let block: ASTNode?;
+    let expr1: ASTNode?
+    let expr2: ASTNode?
+    let expr3: ASTNode?
+    let block: ASTNode?
     
     init(expr1:ASTNode?,expr2:ASTNode?,expr3:ASTNode?,block:ASTNode? ) {
-        self.expr1 = expr1;
-        self.expr2 = expr2;
-        self.expr3 = expr3;
-        self.block = block;
+        self.expr1 = expr1
+        self.expr2 = expr2
+        self.expr3 = expr3
+        self.block = block
     }
     
     override func toJS() -> String {
         if let declaration = expr1 as? VariableDeclaration {
-            declaration.exportVariables = false;
+            declaration.exportVariables = false
         }
         
-        var result = "for (";
-        result += expr1 != nil ? expr1!.toJS() + ";" : ";";
-        result += expr2 != nil ? expr2!.toJS() + ";" : ";";
-        result += expr3 != nil ? expr3!.toJS() + ")" : ")";
+        var result = "for ("
+        result += expr1 != nil ? expr1!.toJS() + "" : ""
+        result += expr2 != nil ? expr2!.toJS() + "" : ""
+        result += expr3 != nil ? expr3!.toJS() + ")" : ")"
         
         if let statements = block {
-            result += "{\n";
-            result += tabulate(statements.toJS());
-            result += "}";
+            result += "{\n"
+            result += tabulate(statements.toJS())
+            result += "}"
         }
         else {
-            result += ";";
+            result += ""
         }
         
-        return result;
+        return result
         
         
         
@@ -886,194 +886,194 @@ class ASTNode: NSObject {
 }
 
 @objc class LabelStatement: ASTNode {
-    let labelName: String;
-    let loop: ASTNode;
+    let labelName: String
+    let loop: ASTNode
     
     init(labelName:String, loop: ASTNode) {
-        self.labelName = labelName;
-        self.loop = loop;
+        self.labelName = labelName
+        self.loop = loop
     }
     
     override func toJS() -> String {
-        return labelName + ":\n" + loop.toJS();
+        return labelName + ":\n" + loop.toJS()
     }
 }
 
 
 @objc class BreakStatement: ASTNode {
-    let labelName: String?;
+    let labelName: String?
     
     init(labelId: String?) {
-        self.labelName = labelId;
+        self.labelName = labelId
     }
     
     override func toJS() -> String {
         if let identifier = labelName{
-            return "break " + identifier + ";";
+            return "break " + identifier + ""
         }
-        return "break;";
+        return "break"
     }
 }
 
 
 @objc class ReturnStatement: ASTNode {
-    let returnExpr: ASTNode?;
+    let returnExpr: ASTNode?
     
     init(returnExpr: ASTNode?) {
-        self.returnExpr = returnExpr;
+        self.returnExpr = returnExpr
     }
     
     override func toJS() -> String {
         if let expr = returnExpr {
-            return "return " + expr.toJS() + ";";
+            return "return " + expr.toJS() + ""
         }
-        return "return;"
+        return "return"
     }
     
     override func inferType() -> GenericType? {
         if let expr = returnExpr {
-            return expr.getType();
+            return expr.getType()
         }
         else {
-            return GenericType(.VOID);
+            return GenericType(.VOID)
         }
     }
 }
 
 @objc class OptionalChainingExpression: ASTNode {
-    let expression: ASTNode?;
+    let expression: ASTNode?
     
     init(expression: ASTNode?) {
-        self.expression = expression;
+        self.expression = expression
     }
     
     override func toJS() -> String {
         if let expr = expression {
-            return expr.toJS();
+            return expr.toJS()
         }
-        return "";
+        return ""
     }
 }
 
 @objc class IfStatement: ASTNode {
-    let ifCondition:ASTNode;
-    let body:ASTNode?;
-    let elseClause:ASTNode?;
-    var mustCheckDeclarations = true;
+    let ifCondition:ASTNode
+    let body:ASTNode?
+    let elseClause:ASTNode?
+    var mustCheckDeclarations = true
     
     init(ifCondition:ASTNode, body:ASTNode?, elseClause:ASTNode?) {
-        self.ifCondition = ifCondition;
-        self.body = body;
-        self.elseClause = elseClause;
+        self.ifCondition = ifCondition
+        self.body = body
+        self.elseClause = elseClause
     }
     
     override func toJS() -> String {
-        var result = "if (";
-        result += ifCondition.toJS();
-        result += ") {\n";
+        var result = "if ("
+        result += ifCondition.toJS()
+        result += ") {\n"
         if let statements = body {
-            result += tabulate(statements.toJS());
+            result += tabulate(statements.toJS())
         }
-        result += "}";
+        result += "}"
         if let next = elseClause {
             result += "\nelse "
             if next is IfStatement { //nested if
-                 result += next.toJS();
+                 result += next.toJS()
             }
             else {
-                result += "{\n" + tabulate(next.toJS()) + "}";
+                result += "{\n" + tabulate(next.toJS()) + "}"
             }
         }
-        return result;
+        return result
         
     }
 }
 
 @objc class ImportStatement: ASTNode {
-    let path:String;
+    let path:String
     init(path:String) {
-        self.path = path;
+        self.path = path
     }
     
     override func toJS() -> String {
         //TODO: use require or similar for imports
-        return "//require(\"\(path)\")";
+        return "//require(\"\(path)\")"
     }
 }
 
 @objc class StatementNode: ASTNode {
-    let statement:ASTNode;
+    let statement:ASTNode
     init(statement:ASTNode) {
-        self.statement = statement;
+        self.statement = statement
     }
     
     override func toJS() -> String {
-        return statement.toJS() + ";";
+        return statement.toJS() + ""
     }
 }
 
 @objc class DeclarationStatement: ASTNode {
-    let declaration:ASTNode;
+    let declaration:ASTNode
     init(declaration:ASTNode) {
-        self.declaration = declaration;
+        self.declaration = declaration
     }
     
     override func toJS() -> String {
         if let varDeclaration = declaration as? VariableDeclaration {
-            varDeclaration.exportVariables = false;
+            varDeclaration.exportVariables = false
         }
-        return declaration.toJS() + ";";
+        return declaration.toJS() + ""
     }
 }
 
 @objc class StatementsNode: ASTNode {
     
-    var current:ASTNode?;
-    var next:StatementsNode?;
-    var firstStatement = true;
+    var current:ASTNode?
+    var next:StatementsNode?
+    var firstStatement = true
     
     init(current:ASTNode?) {
-        self.current = current;
+        self.current = current
     }
     
     init(current:ASTNode, next:StatementsNode) {
-        self.current = current;
-        self.next = next;
+        self.current = current
+        self.next = next
     }
     
     override func toJS() -> String {
         if firstStatement {
-            ctx.saveSymbols();
+            ctx.saveSymbols()
         }
-        var result = "";
+        var result = ""
         if let currentStatement = current {
-            ctx.saveExported();
-            var tmp = currentStatement.toJS() + "\n";
+            ctx.saveExported()
+            var tmp = currentStatement.toJS() + "\n"
             if let exported = ctx.getExportedVars() {
-                result += exported;
+                result += exported
             }
-            result += tmp;
-            ctx.restoreExported();
+            result += tmp
+            ctx.restoreExported()
         }
         if let nextStatements = next {
-            nextStatements.firstStatement = false;
-            result += nextStatements.toJS();
+            nextStatements.firstStatement = false
+            result += nextStatements.toJS()
         }
         if firstStatement {
-            ctx.restoreSymbols();
+            ctx.restoreSymbols()
         }
 
-        return result;
+        return result
     }
     
     func getStatementsCount() -> Int {
-        var result = 1;
-        var item = next;
+        var result = 1
+        var item = next
         while let valid = item {
-            result++;
-            item = valid.next;
+            result++
+            item = valid.next
         }
-        return result;
+        return result
     }
 }
 

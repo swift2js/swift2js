@@ -19,18 +19,18 @@ class Regex {
     }
     
     func test(data:String) -> Bool {
-        var match = regex.firstMatchInString(data, options: nil, range: NSMakeRange(0, data.utf16Count));
-        return match != nil;
+        var match = regex.firstMatchInString(data, options: nil, range: NSMakeRange(0, count(data.utf16)))
+        return match != nil
     }
     
     func firstMatch(data:String) -> String? {
         
-        var range = regex.rangeOfFirstMatchInString(data, options: nil, range: NSMakeRange(0, data.utf16Count));
+        var range = regex.rangeOfFirstMatchInString(data, options: nil, range: NSMakeRange(0, count(data.utf16)))
         if range.location != NSNotFound {
-            return data.substringFromIndex(range.location).substringToIndex(range.length);
+            return data.substringFromIndex(range.location).substringToIndex(range.length)
         }
         else {
-            return nil;
+            return nil
         }
     }
     

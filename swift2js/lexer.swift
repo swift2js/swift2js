@@ -177,7 +177,7 @@ class TokenData {
     
     func cleanCode() {
         if let match = cleanRegex.firstMatch(code) {
-            code = code.substringFromIndex(match.utf16Count);
+            code = code.substringFromIndex(count(match.utf16));
             lastParsed = match;
         }
     }
@@ -227,7 +227,7 @@ class TokenData {
         }
         else {
             
-            if (code.utf16Count > 0) {
+            if (count(code.utf16) > 0) {
                 println("Lexer Error, unknown token: " + code);
             }
             
@@ -262,36 +262,36 @@ class TokenData {
             return;
         }
         var identifier = match!
-        consumed+=identifier.utf16Count;
+        consumed += count(identifier.utf16)
         
         if let declarationToken = declarationKeywords[identifier] {
-            tokenStack.append(TokenData(declarationToken, identifier));
+            tokenStack.append(TokenData(declarationToken, identifier))
         }
         else if let statementToken = statementKeywords[identifier] {
-            tokenStack.append(TokenData(statementToken, identifier));
+            tokenStack.append(TokenData(statementToken, identifier))
         }
         else if let expressionToken = expressionKeywords[identifier] {
-            tokenStack.append(TokenData(expressionToken, identifier));
+            tokenStack.append(TokenData(expressionToken, identifier))
         }
         else if let particularToken = particularKeywords[identifier] {
             //TODO: These keywords are only reserved in particular contexts
             //but outside the context in which they appear in the grammar, they can be used as identifiers.
-            tokenStack.append(TokenData(particularToken, identifier));
+            tokenStack.append(TokenData(particularToken, identifier))
         }
         else if booleanRegex.test(identifier) {
-            tokenStack.append(TokenData(TOKEN.BOOLEAN_LITERAL, identifier));
+            tokenStack.append(TokenData(TOKEN.BOOLEAN_LITERAL, identifier))
         }
         else {
             //user defined identifier
-            tokenStack.append(TokenData(TOKEN.IDENTIFIER, identifier));
+            tokenStack.append(TokenData(TOKEN.IDENTIFIER, identifier))
         }
     }
     
     func checkNumberLiteral(){
         for regex in [binaryNumberRegex, octalNumberRegex, hexNumberRegex, decimalNumberRegex] {
             if let match = regex.firstMatch(code) {
-                consumed+=match.utf16Count;
-                tokenStack.append(TokenData(TOKEN.NUMBER_LITERAL, match));
+                consumed += count(match.utf16)
+                tokenStack.append(TokenData(TOKEN.NUMBER_LITERAL, match))
                 return;
             }
         }
@@ -299,19 +299,19 @@ class TokenData {
     
     func checkStringLiteral() {
         if let match = stringRegex.firstMatch(code) {
-            consumed+=match.utf16Count;
-            tokenStack.append(TokenData(TOKEN.STRING_LITERAL, match));
+            consumed += count(match.utf16)
+            tokenStack.append(TokenData(TOKEN.STRING_LITERAL, match))
         }
     }
     
     func checkComment() {
         
         if let match = lineCommentRegex.firstMatch(code) {
-            consumed+=match.utf16Count;
+            consumed += count(match.utf16)
             tokenStack.append(TokenData(TOKEN.COMMENT, match));
         }
         else if let match = blockCommentRegex.firstMatch(code) {
-            consumed+=match.utf16Count;
+            consumed += count(match.utf16)
             tokenStack.append(TokenData(TOKEN.COMMENT, match));
         }
     }
@@ -322,21 +322,21 @@ class TokenData {
         var value = "";
         //check operators by precedence (test combined operators first)
         for var i = 3; i > 0; --i {
-            if code.utf16Count < i {
-                continue;
+            if count(code.utf16) < i {
+                continue
             }
-            value = code.substringToIndex(i);
+            value = code.substringToIndex(i)
             if let match = operatorSymbols[value] {
-                found = match;
-                break;
+                found = match
+                break
             }
         }
         
         if let token = found {
-            consumed+=value.utf16Count;
+            consumed += count(value.utf16)
             //check if the operator is prefix, postfix or binary
-            var prefix = prefixOperatorRegex.test(code.substringFromIndex(value.utf16Count));
-            var postfix = postfixOperatorRegex.test(lastParsed);
+            var prefix = prefixOperatorRegex.test(code.substringFromIndex(count(value.utf16)))
+            var postfix = postfixOperatorRegex.test(lastParsed)
             
             if (prefix == postfix) {
                 //If an operator has whitespace around both sides or around neither side, 
@@ -357,15 +357,15 @@ class TokenData {
     }
     
     func checkGrammarSymbol(){
-        if (code.utf16Count <= 0) {
-            return;
+        if (count(code.utf16) <= 0) {
+            return
         }
         
         let firstChar = code.substringToIndex(1);
         
         if let match = grammarSymbols[firstChar] {
-            consumed+=firstChar.utf16Count;
-            tokenStack.append(TokenData(match, firstChar));
+            consumed += count(firstChar.utf16)
+            tokenStack.append(TokenData(match, firstChar))
         }
     }
     
@@ -413,29 +413,128 @@ class TokenData {
     func bisonTokens() {
         
         //autogenerated values from text editor
-        let values = ["IDENTIFIER",
-            "CLASS","DEINIT","ENUM","EXTENSION","FUNC","IMPORT","INIT","LET","PROTOCOL","STATIC","STRUCT","SUBSCRIPT","TYPEALIAS","VAR",
-            "BREAK","CASE","CONTINUE","DEFAULT","DO","ELSE","FALLTHROUGH","IF","IN","FOR","RETURN","SWITCH","WHERE","WHILE",
-            "AS","DYNAMICTYPE","IS","NEW","SUPER","SELF","SELF_CLASS","TYPE",
-            "ASSOCIATIVITY","DIDSET","GET","INFIX","INOUT","LEFT","MUTATING","NONE","NONMUTATING","OPERATOR","OVERRIDE",
-            "POSTFIX","PRECEDENCE","PREFIX","RIGHT","SET","UNOWNED","UNOWNED_SAFE","UNOWNED_UNSAFE","WEAK","WILLSET",
-            "NUMBER_LITERAL","STRING_LITERAL","BOOLEAN_LITERAL",
-            "SLASH","EQUAL","MINUS","PLUS","EXCLAMATION","ASTERISK","PERCENT","LT","GT","AMPERSAND","OR","CARET","TILDE","DOT",
-            "EQUAL2","EQUAL3","PLUSPLUS","MINUSMINUS","DOT3","LT2","GT2","AMPERSAND2","OR2","ARROW",
-            "PLUS_EQ","MINUS_EQ","ASTERISK_EQ","SLASH_EQ","PERCENT_EQ","AMPERSAND_EQ","CARET_EQ","TILDE_EQ","OR_EQ",
-            "LPAR","RPAR","LBRACKET","RBRACKET","LBRACE","RBRACE","COMMA","COLON","SEMICOLON","AT","UNDERSCORE","HASH","DOLLAR","QUESTION",
-            "PREFIX_OPERATOR","POSTFIX_OPERATOR",
-            "COMMENT"];
+        let values = [
+                "IDENTIFIER",
+                "CLASS",
+                "DEINIT",
+                "ENUM",
+                "EXTENSION",
+                "FUNC",
+                "IMPORT",
+                "INIT",
+                "LET",
+                "PROTOCOL",
+                "STATIC",
+                "STRUCT",
+                "SUBSCRIPT",
+                "TYPEALIAS",
+                "VAR",
+                "BREAK",
+                "CASE",
+                "CONTINUE",
+                "DEFAULT",
+                "DO",
+                "ELSE",
+                "FALLTHROUGH",
+                "IF",
+                "IN",
+                "FOR",
+                "RETURN",
+                "SWITCH",
+                "WHERE",
+                "WHILE",
+                "AS",
+                "DYNAMICTYPE",
+                "IS",
+                "NEW",
+                "SUPER",
+                "SELF",
+                "SELF_CLASS",
+                "TYPE",
+                "ASSOCIATIVITY",
+                "DIDSET",
+                "GET",
+                "INFIX",
+                "INOUT",
+                "LEFT",
+                "MUTATING",
+                "NONE",
+                "NONMUTATING",
+                "OPERATOR",
+                "OVERRIDE",
+                "POSTFIX",
+                "PRECEDENCE",
+                "PREFIX",
+                "RIGHT",
+                "SET",
+                "UNOWNED",
+                "UNOWNED_SAFE",
+                "UNOWNED_UNSAFE",
+                "WEAK","WILLSET",
+                "NUMBER_LITERAL",
+                "STRING_LITERAL",
+                "BOOLEAN_LITERAL",
+                "SLASH",
+                "EQUAL",
+                "MINUS",
+                "PLUS",
+                "EXCLAMATION",
+                "ASTERISK",
+                "PERCENT",
+                "LT",
+                "GT",
+                "AMPERSAND",
+                "OR",
+                "CARET",
+                "TILDE",
+                "DOT",
+                "EQUAL2",
+                "EQUAL3",
+                "PLUSPLUS",
+                "MINUSMINUS",
+                "DOT3",
+                "LT2",
+                "GT2",
+                "AMPERSAND2",
+                "OR2",
+                "ARROW",
+                "PLUS_EQ",
+                "MINUS_EQ",
+                "ASTERISK_EQ",
+                "SLASH_EQ",
+                "PERCENT_EQ",
+                "AMPERSAND_EQ",
+                "CARET_EQ",
+                "TILDE_EQ",
+                "OR_EQ",
+                "LPAR",
+                "RPAR",
+                "LBRACKET",
+                "RBRACKET",
+                "LBRACE",
+                "RBRACE",
+                "COMMA",
+                "COLON",
+                "SEMICOLON",
+                "AT",
+                "UNDERSCORE",
+                "HASH",
+                "DOLLAR",
+                "QUESTION",
+                "PREFIX_OPERATOR",
+                "POSTFIX_OPERATOR",
+                "COMMENT"
+            ];
         
         var index = 1;
         for value in values {
             
-            let token = TOKEN(rawValue:index)!;
-            let str = tokenToString(token);
+            let token = TOKEN(rawValue:index)!
+            let str = tokenToString(token)
             
-            println("%token <val> \(values[index-1]) \(String(index)) \"\(str)\"");
-            
-            index++;
+            println("%token <val> \(values[index-1]) \(String(index)) \"\(str)\"")
+
+            index++
         }
     }
 
