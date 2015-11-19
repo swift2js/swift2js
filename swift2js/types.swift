@@ -19,46 +19,46 @@ enum SwiftType: Int {
     case UNKOWN
 }
 
-class GenericType: NSObject
+@objc class GenericType: NSObject
 {
-    var type: SwiftType;
-    var optional = false;
+    var type: SwiftType
+    var optional = false
     
     init(_ type: SwiftType) {
-        self.type = type;
+        self.type = type
     }
     
     func operate(op:String, other: GenericType) -> GenericType
     {
         if op == "===" || op == "==" || op == "&&" || op == "||" {
-            return GenericType(SwiftType.BOOLEAN);
+            return GenericType(SwiftType.BOOLEAN)
         }
         else if op == "=" {
-            return other;
+            return other
         }
         else if type == .STRING || other.type == .STRING {
-            return GenericType(SwiftType.STRING);
+            return GenericType(SwiftType.STRING)
         }
         else {
-            return self;
+            return self
         }
     }
     
     func customBinaryOperator(myNode: ASTNode, op:String, otherNode: ASTNode) -> String?
     {
-        return nil;
+        return nil
     }
     
     class func fromTypeIdentifier(name:String) -> GenericType
     {
         if (name == "String") {
-            return GenericType(.STRING);
+            return GenericType(.STRING)
         }
         else if (name == "Int") {
-            return GenericType(.NUMBER);
+            return GenericType(.NUMBER)
         }
         else {
-            return GenericType(.UNKOWN);
+            return GenericType(.UNKOWN)
         }
         
     }
@@ -66,40 +66,40 @@ class GenericType: NSObject
 
 @objc class IndirectionType: GenericType
 {
-    var pointer:GenericType;
+    var pointer:GenericType
     
     init(pointer:GenericType) {
-        self.pointer = pointer;
-        super.init(pointer.type);
+        self.pointer = pointer
+        super.init(pointer.type)
     }
     
     func update(pointer:GenericType) {
-        self.pointer = pointer;
-        type = pointer.type;
+        self.pointer = pointer
+        type = pointer.type
     }
     
 }
 
 @objc class TupleType: GenericType
 {
-    var names:[String] = [];
-    var types:[GenericType] = [];
+    var names:[String] = []
+    var types:[GenericType] = []
     
     init(list:ExpressionList?)
     {
-        super.init(.TUPLE);
+        super.init(.TUPLE)
         
-        var item:ExpressionList? = list;
-        var index = 0;
+        var item:ExpressionList? = list
+        var index = 0
         while let validItem = item {
             if let namedExpression = validItem.current as? NamedExpression {
-                addType(namedExpression.name, type: namedExpression.getType());
+                addType(namedExpression.name, type: namedExpression.getType())
             }
             else if let expression = validItem.current {
-                addType(String(index), type: expression.getType());
+                addType(String(index), type: expression.getType())
             }
-            ++index;
-            item = validItem.next;
+            ++index
+            item = validItem.next
         }
 
         
@@ -107,26 +107,26 @@ class GenericType: NSObject
     
     func addType(name:String, type:GenericType)
     {
-        names.append(name);
-        types.append(type);
+        names.append(name)
+        types.append(type)
     }
     
     func getTypeForIndex(index:Int) -> GenericType?
     {
         if index>=0 && index < types.count {
-            return types[index];
+            return types[index]
         }
-        return nil;
+        return nil
     }
 }
 
 @objc class ArrayType: GenericType
 {
-    let innerType: GenericType;
+    let innerType: GenericType
     
     init(innerType: GenericType) {
-        self.innerType = innerType;
-        super.init(.ARRAY);
+        self.innerType = innerType
+        super.init(.ARRAY)
     }
     
     override func customBinaryOperator(myNode: ASTNode, op:String, otherNode: ASTNode) -> String?
@@ -134,48 +134,48 @@ class GenericType: NSObject
         if op == "+=" {
             
             if otherNode.getType().type == SwiftType.ARRAY {
-                return "Array.prototype.push.apply(\(myNode.toJS()),\(otherNode.toJS()))";
+                return "Array.prototype.push.apply(\(myNode.toJS()),\(otherNode.toJS()))"
             }
             else {
-                return myNode.toJS() + ".push(" + otherNode.toJS() + ")";
+                return myNode.toJS() + ".push(" + otherNode.toJS() + ")"
             }
         }
         
-        return super.customBinaryOperator(myNode, op: op, otherNode: otherNode);
+        return super.customBinaryOperator(myNode, op: op, otherNode: otherNode)
     }
 }
 
 @objc class DictionaryType: GenericType
 {
-    let innerType: GenericType;
+    let innerType: GenericType
     
     init(innerType: GenericType) {
-        self.innerType = innerType;
-        super.init(.DICTIONARY);
+        self.innerType = innerType
+        super.init(.DICTIONARY)
     }
 }
 
 @objc class FunctionType: GenericType
 {
-    let returnType: GenericType;
-    var argumentTypes: [GenericType] = [];
+    let returnType: GenericType
+    var argumentTypes: [GenericType] = []
     
     init(argumentTypes: [GenericType], returnType: GenericType) {
-        self.argumentTypes = argumentTypes;
-        self.returnType = returnType;
-        super.init(.DICTIONARY);
+        self.argumentTypes = argumentTypes
+        self.returnType = returnType
+        super.init(.DICTIONARY)
     }
     
     init(argsType: GenericType, returnType: GenericType) {
         
         if let tuple = argsType as? TupleType {
-            argumentTypes += tuple.types;
+            argumentTypes += tuple.types
         }
         else {
             argumentTypes.append(argsType)
         }
         
-        self.returnType = returnType;
-        super.init(.DICTIONARY);
+        self.returnType = returnType
+        super.init(.DICTIONARY)
     }
 }

@@ -9,63 +9,63 @@
 import Foundation
 
 func swift2js(sourceCode: String, debug:Bool) -> (js:String?, error:String?) {
-    var lexer = Lexer(sourceCode);
+    let lexer = Lexer(sourceCode);
     lexer.debugYYLex = debug;
     if debug {
-        println()
-        println("---------------------")
-        println("Lexer Tokens Debug")
-        println("---------------------")
-        println()
+        print("")
+        print("---------------------")
+        print("Lexer Tokens Debug")
+        print("---------------------")
+        print("")
         lexer.debugTokens();
         
-        println()
-        println("---------------------")
-        println("AST Parser")
-        println("---------------------")
-        println()
+        print("")
+        print("---------------------")
+        print("AST Parser")
+        print("---------------------")
+        print("")
     }
     
-    var ast:ASTNode? = bridge_yyparse(lexer, debug ? 1 : 0);
+    let ast:ASTNode? = bridge_yyparse(lexer, debug ? 1 : 0);
     
     if let program = ast {
         return (program.toJS(),nil);
     }
     
-    var error = NSString(UTF8String: bridge_yyerror());
+    let error = NSString(UTF8String: bridge_yyerror());
     
-    return ("", error);
+    return ("", error as? String);
 }
 
 let debug = true;
 //Test files are copied automatically to tmp using xcode build phase
 //TODO: read files from args, from input stream, etc.
-let testFile = "test5.swift";
+let testFile = "test1.swift";
 
-var sourceCode: AnyObject? = NSString(contentsOfFile: "/tmp/" + testFile, encoding: NSUTF8StringEncoding, error: nil);
+var sourceCode: AnyObject? = try? NSString(contentsOfFile: "/tmp/" + testFile, encoding: NSUTF8StringEncoding);
 
 if sourceCode != nil {
     
-    let (js,error) = swift2js(sourceCode as NSString, debug);
+    let (js,error) = swift2js(sourceCode as! String, debug: debug);
     
     if let translation = js {
         if debug {
-            println();
-            println("---------------------")
-            println("Transpiled JavaScript")
-            println("---------------------")
-            println();
+            print("");
+            print("---------------------")
+            print("Transpiled JavaScript")
+            print("---------------------")
+            print("");
         }
-        println(translation);
+        print(translation);
     }
     
     if let parseError = error {
-        println("Error: \(parseError)");
+        print("Error: \(parseError)");
     }
 
 }
 else {
-    println("File not found: \(testFile)");
+    print("File not found: \(testFile)");
 }
 
 
