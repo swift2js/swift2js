@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Regex {
+@objc class Regex : NSObject {
     let pattern: String
     let regex: NSRegularExpression
     

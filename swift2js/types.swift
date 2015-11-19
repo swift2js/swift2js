@@ -19,7 +19,7 @@ enum SwiftType: Int {
     case UNKOWN
 }
 
-class GenericType: NSObject
+@objc class GenericType: NSObject
 {
     var type: SwiftType
     var optional = false

@@ -35,7 +35,7 @@ enum TOKEN:Int {
     case COMMENT
 }
 
-class TokenData {
+@objc class TokenData : NSObject {
     var token: TOKEN;
     var value: String;
     
@@ -45,7 +45,7 @@ class TokenData {
     }
 }
 
-class Lexer {
+@objc class Lexer : NSObject {
     
     var code: String;
     var lastParsed = "";
@@ -198,7 +198,7 @@ class Lexer {
             ];
             
             
-            var parsedToken: (consumed:Int, token:TokenData)?;
+            //var parsedToken: (consumed:Int, token:TokenData)?;
             
             //call parser functions until a token is found
             for checkFunc in checkFunctions {
@@ -375,7 +375,6 @@ class Lexer {
             case .IDENTIFIER: return "ID";
             case .BOOLEAN_LITERAL: return "bool";
             case .STRING_LITERAL: return "string";
-            case .BOOLEAN_LITERAL: return "bool";
             case .NUMBER_LITERAL: return "number";
             case .PREFIX_OPERATOR: return "prefix_op";
             case .POSTFIX_OPERATOR: return "postfix_op";
@@ -527,7 +526,7 @@ class Lexer {
             ];
         
         var index = 1;
-        for value in values {
+        for _ in values {
             
             let token = TOKEN(rawValue:index)!
             let str = tokenToString(token)

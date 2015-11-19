@@ -185,7 +185,7 @@ class ASTNode: NSObject {
     
     func literalToJS() -> String {
         if let number = Int(literal) {
-            return "[\(literal)]"
+            return "[\(number)]"
         }
         return ".\(literal)"
     }
@@ -194,7 +194,7 @@ class ASTNode: NSObject {
         
         if let optional = expression as? OptionalChainingExpression {
             
-            let str = expression.toJS()
+            let str = optional.toJS()
             let id = ctx.generateID()
             ctx.exportVar(id)
             
@@ -407,7 +407,7 @@ class ASTNode: NSObject {
         
         //check for custom operators. Example array +=
         if let binaryOperator = next?.current as? BinaryOperator {
-            var soto = current!.getType()
+            let _ = current!.getType()
             if let customOperator = current!.getType().customBinaryOperator(current!, op: binaryOperator.binaryOperator, otherNode: binaryOperator.rightOperand) {
                 return customOperator
             }
