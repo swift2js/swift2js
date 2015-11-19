@@ -15,17 +15,17 @@ class Regex {
     
     init(_ pattern:String) {
         self.pattern = pattern
-        regex = NSRegularExpression(pattern: pattern, options: nil, error: nil)!
+        regex = try! NSRegularExpression(pattern: pattern, options: [])
     }
     
     func test(data:String) -> Bool {
-        var match = regex.firstMatchInString(data, options: nil, range: NSMakeRange(0, count(data.utf16)))
+        let match = regex.firstMatchInString(data, options: [], range: NSMakeRange(0, data.utf16.count))
         return match != nil
     }
     
     func firstMatch(data:String) -> String? {
         
-        var range = regex.rangeOfFirstMatchInString(data, options: nil, range: NSMakeRange(0, count(data.utf16)))
+        let range = regex.rangeOfFirstMatchInString(data, options: [], range: NSMakeRange(0, data.utf16.count))
         if range.location != NSNotFound {
             return data.substringFromIndex(range.location).substringToIndex(range.length)
         }

@@ -9,9 +9,9 @@
 import Foundation
 
 func tabulate(code: String) -> String {
-    var result = code.stringByReplacingOccurrencesOfString("\n", withString: "\n\t", options: nil, range: nil)
+    var result = code.stringByReplacingOccurrencesOfString("\n", withString: "\n\t", options: [], range: nil)
     if result.hasSuffix("\t") {
-        result = result.substringToIndex(count(result.utf16) - 1)
+        result = result.substringToIndex(result.utf16.count - 1)
     }
     result = "\t" + result
     return result
@@ -35,7 +35,7 @@ class ASTContext {
     }
     
     func exportVar(name:String) {
-        if find(exportedVars[exportedIndex], name) == nil {
+        if exportedVars[exportedIndex].indexOf(name) == nil {
             exportedVars[exportedIndex].append(name)
         }
     }
@@ -47,7 +47,7 @@ class ASTContext {
             for variable in exportedVars[exportedIndex] {
                 result += variable + ","
             }
-            result = result.substringToIndex(count(result.utf16) - 1) + "\n"
+            result = result.substringToIndex(result.utf16.count - 1) + "\n"
             return result
         }
         
@@ -184,7 +184,7 @@ class ASTNode: NSObject {
     }
     
     func literalToJS() -> String {
-        if let number = literal.toInt() {
+        if let number = Int(literal) {
             return "[\(literal)]"
         }
         return ".\(literal)"
@@ -194,8 +194,8 @@ class ASTNode: NSObject {
         
         if let optional = expression as? OptionalChainingExpression {
             
-            var str = expression.toJS()
-            var id = ctx.generateID()
+            let str = expression.toJS()
+            let id = ctx.generateID()
             ctx.exportVar(id)
             
             return "(\(id) = \(str)) ? \(id)\(self.literalToJS()) : null"
@@ -222,8 +222,8 @@ class ASTNode: NSObject {
     
     override func toJS() -> String {
         if binaryOperator == "." {
-            var right = rightOperand.toJS()
-            if let index = right.toInt() {
+            let right = rightOperand.toJS()
+            if let index = Int(right) {
                 return "[\(index)]"
             }
             return binaryOperator + right
@@ -339,7 +339,7 @@ class ASTNode: NSObject {
             names[i].setTypeIfEmpty(values[i].getType()) //infere type from assignment if needed
             result += "\(names[i].toJS()) = \(values[i].toJS()), "
         }
-        result = result.substringToIndex(count(result.utf16) - 2) //remove last ", "
+        result = result.substringToIndex(result.utf16.count - 2) //remove last ", "
         return result
     }
     
@@ -366,7 +366,7 @@ class ASTNode: NSObject {
             let tupleMembers = tupleType.names
             for var i = 0; i < names.count; ++i {
                 names[i].setTypeIfEmpty(tupleType.getTypeForIndex(i)) //infere type from assignment if needed
-                if let number = tupleMembers[i].toInt() {
+                if let number = Int(tupleMembers[i]) {
                     result += "\(names[i].toJS()) = \(tupleID)[\(number)], "
                 }
                 else {
@@ -381,7 +381,7 @@ class ASTNode: NSObject {
             }
         }
         
-        result = result.substringToIndex(count(result.utf16) - 2) //remove last ", "
+        result = result.substringToIndex(result.utf16.count - 2) //remove last ", "
         
         return result
     }
@@ -429,7 +429,7 @@ class ASTNode: NSObject {
             return nil
         }
         
-        var leftType = current!.getType()
+        let leftType = current!.getType()
         if let op = next?.current as? BinaryOperator {
             return leftType.operate(op.binaryOperator, other: op.getType())
         }
@@ -545,7 +545,7 @@ class ASTNode: NSObject {
             item = validItem.next
         }
         
-        result = result.substringToIndex(count(result.utf16) - 2) //remove last ', '
+        result = result.substringToIndex(result.utf16.count - 2) //remove last ', '
         result += "}"
         
         return result
@@ -666,7 +666,7 @@ class ASTNode: NSObject {
             var names = tuple.toExpressionArray()
             var types = tuple.toTypesArray()
             for var i = 0; i < names.count; ++i {
-                var name = names[i].toJS()
+                let name = names[i].toJS()
                 if (exportVariables) {
                     ctx.exportVar(name)
                 }
@@ -675,7 +675,7 @@ class ASTNode: NSObject {
             
         } //single var initialization
         else {
-            var name = expression.toJS()
+            let name = expression.toJS()
             if exportVariables {
                 ctx.exportVar(name)
             }
@@ -685,7 +685,7 @@ class ASTNode: NSObject {
     
     override func toJS() -> String {
         
-        var result = initializer.toJS()
+        let result = initializer.toJS()
 
         //export symbols and vars
         var node:ExpressionList? = initializer
@@ -776,14 +776,14 @@ class ASTNode: NSObject {
 }
 
 @objc class FunctionParameter: ASTNode {
-    let inoutVal:Boolean
-    let letVal:Boolean
-    let hashVal:Boolean
+    let inoutVal:DarwinBoolean
+    let letVal:DarwinBoolean
+    let hashVal:DarwinBoolean
     let external:String
     let local:String?
     let defVal:ASTNode?
     
-    init(inoutVal:Boolean, letVal:Boolean, hashVal:Boolean, external:String, local:String?, defVal:ASTNode?) {
+    init(inoutVal:DarwinBoolean, letVal:DarwinBoolean, hashVal:DarwinBoolean, external:String, local:String?, defVal:ASTNode?) {
         self.inoutVal = inoutVal
         self.letVal = letVal
         self.hashVal = hashVal
@@ -1048,7 +1048,7 @@ class ASTNode: NSObject {
         var result = ""
         if let currentStatement = current {
             ctx.saveExported()
-            var tmp = currentStatement.toJS() + "\n"
+            let tmp = currentStatement.toJS() + "\n"
             if let exported = ctx.getExportedVars() {
                 result += exported
             }

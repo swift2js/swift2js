@@ -11,11 +11,11 @@ import Foundation
 extension String {
     
     func substringFromIndex(index: Int) -> String {
-        return self.substringFromIndex(advance(self.startIndex, index))
+        return self.substringFromIndex(self.startIndex.advancedBy(index))
     }
     
     func substringToIndex(index: Int) -> String {
-        return self.substringToIndex(advance(self.startIndex, index))
+        return self.substringToIndex(self.startIndex.advancedBy(index))
     }
 
     

@@ -45,7 +45,7 @@ class TokenData {
     }
 }
 
-@objc class Lexer {
+class Lexer {
     
     var code: String;
     var lastParsed = "";
@@ -177,7 +177,7 @@ class TokenData {
     
     func cleanCode() {
         if let match = cleanRegex.firstMatch(code) {
-            code = code.substringFromIndex(count(match.utf16));
+            code = code.substringFromIndex(match.utf16.count);
             lastParsed = match;
         }
     }
@@ -188,7 +188,7 @@ class TokenData {
             cleanCode(); //clean whitespaces
             
             //sorted token parser functions by precedence
-            var checkFunctions = [
+            let checkFunctions = [
                 checkIdentifier,
                 checkNumberLiteral,
                 checkStringLiteral,
@@ -227,8 +227,8 @@ class TokenData {
         }
         else {
             
-            if (count(code.utf16) > 0) {
-                println("Lexer Error, unknown token: " + code);
+            if (code.utf16.count > 0) {
+                print("Lexer Error, unknown token: " + code);
             }
             
             return nil;
@@ -242,7 +242,7 @@ class TokenData {
         if let data = lastyylexToken {
             let number = data.token.rawValue as NSNumber;
             if debugYYLex {
-                println("yylex: \(tokenToString(data.token))")
+                print("yylex: \(tokenToString(data.token))")
             }
             return number.intValue;
         }
@@ -257,12 +257,12 @@ class TokenData {
     }
     
     func checkIdentifier() {
-        var match = identifierRegex.firstMatch(code);
+        let match = identifierRegex.firstMatch(code);
         if match == nil {
             return;
         }
-        var identifier = match!
-        consumed += count(identifier.utf16)
+        let identifier = match!
+        consumed += identifier.utf16.count
         
         if let declarationToken = declarationKeywords[identifier] {
             tokenStack.append(TokenData(declarationToken, identifier))
@@ -290,7 +290,7 @@ class TokenData {
     func checkNumberLiteral(){
         for regex in [binaryNumberRegex, octalNumberRegex, hexNumberRegex, decimalNumberRegex] {
             if let match = regex.firstMatch(code) {
-                consumed += count(match.utf16)
+                consumed += match.utf16.count
                 tokenStack.append(TokenData(TOKEN.NUMBER_LITERAL, match))
                 return;
             }
@@ -299,7 +299,7 @@ class TokenData {
     
     func checkStringLiteral() {
         if let match = stringRegex.firstMatch(code) {
-            consumed += count(match.utf16)
+            consumed += match.utf16.count
             tokenStack.append(TokenData(TOKEN.STRING_LITERAL, match))
         }
     }
@@ -307,11 +307,11 @@ class TokenData {
     func checkComment() {
         
         if let match = lineCommentRegex.firstMatch(code) {
-            consumed += count(match.utf16)
+            consumed += match.utf16.count
             tokenStack.append(TokenData(TOKEN.COMMENT, match));
         }
         else if let match = blockCommentRegex.firstMatch(code) {
-            consumed += count(match.utf16)
+            consumed += match.utf16.count
             tokenStack.append(TokenData(TOKEN.COMMENT, match));
         }
     }
@@ -322,7 +322,7 @@ class TokenData {
         var value = "";
         //check operators by precedence (test combined operators first)
         for var i = 3; i > 0; --i {
-            if count(code.utf16) < i {
+            if code.utf16.count < i {
                 continue
             }
             value = code.substringToIndex(i)
@@ -333,10 +333,10 @@ class TokenData {
         }
         
         if let token = found {
-            consumed += count(value.utf16)
+            consumed += value.utf16.count
             //check if the operator is prefix, postfix or binary
-            var prefix = prefixOperatorRegex.test(code.substringFromIndex(count(value.utf16)))
-            var postfix = postfixOperatorRegex.test(lastParsed)
+            let prefix = prefixOperatorRegex.test(code.substringFromIndex(value.utf16.count))
+            let postfix = postfixOperatorRegex.test(lastParsed)
             
             if (prefix == postfix) {
                 //If an operator has whitespace around both sides or around neither side, 
@@ -357,14 +357,14 @@ class TokenData {
     }
     
     func checkGrammarSymbol(){
-        if (count(code.utf16) <= 0) {
+        if (code.utf16.count <= 0) {
             return
         }
         
         let firstChar = code.substringToIndex(1);
         
         if let match = grammarSymbols[firstChar] {
-            consumed += count(firstChar.utf16)
+            consumed += firstChar.utf16.count
             tokenStack.append(TokenData(match, firstChar))
         }
     }
@@ -403,7 +403,7 @@ class TokenData {
         
         while let data = nextToken() {
             let tokenType = tokenToString(data.token);
-            println("TOKEN code: \(String(data.token.rawValue)) type:\(tokenType) value:\(data.value)");
+            print("TOKEN code: \(String(data.token.rawValue)) type:\(tokenType) value:\(data.value)");
         }
         
         code = codeCopy;
@@ -532,7 +532,7 @@ class TokenData {
             let token = TOKEN(rawValue:index)!
             let str = tokenToString(token)
             
-            println("%token <val> \(values[index-1]) \(String(index)) \"\(str)\"")
+            print("%token <val> \(values[index-1]) \(String(index)) \"\(str)\"")
 
             index++
         }
